@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Github } from 'lucide-react';
 
 function Login() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +11,8 @@ function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Login attempt:', { email, password });
+        // Redirect to home page
+        navigate('/');
     };
 
     return (
