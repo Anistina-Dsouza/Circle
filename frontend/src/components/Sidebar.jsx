@@ -39,7 +39,7 @@ const Sidebar = () => {
             </div>
 
             <nav className="flex-grow space-y-4">
-                <NavItem icon={<HomeIcon size={24} />} label="Home" to="/" />
+                <NavItem icon={<HomeIcon size={24} />} label="Home" to="/home" />
                 <NavItem icon={<Users size={24} />} label="Circles" to="/circles" />
                 <NavItem icon={<Video size={24} />} label="Meetings" to="/meetings" />
                 <NavItem icon={<MessageSquare size={24} />} label="Messages" to="/chat" />
