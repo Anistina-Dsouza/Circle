@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Video as VideoIcon } from 'lucide-react';
 
 const MeetingCard = ({ meeting }) => {
+    const [isJoined, setIsJoined] = useState(meeting.status === 'NOW');
+    const [action, setAction] = useState(meeting.action);
+
+    const handleAction = () => {
+        if (action === 'Join') {
+            // Logic for joining
+            alert('Joining meeting...');
+        } else if (action === 'RSVP') {
+            setAction('Going');
+        } else if (action === 'Going') {
+            setAction('RSVP');
+        }
+    };
+
     return (
         <div className="bg-[#130c2d] p-5 rounded-[2rem] border border-white/5">
             <div className="flex justify-between items-start mb-2">
@@ -27,11 +41,13 @@ const MeetingCard = ({ meeting }) => {
                         </div>
                     )}
                 </div>
-                <button className={`px-5 py-1.5 rounded-xl text-xs font-bold transition-all ${meeting.action === 'Join'
+                <button
+                    onClick={handleAction}
+                    className={`px-5 py-1.5 rounded-xl text-xs font-bold transition-all ${action === 'Join' || action === 'Going'
                         ? 'bg-[#8b31ff] hover:bg-[#7c28eb] text-white'
                         : 'border border-white/10 hover:bg-white/5 text-gray-300'
-                    }`}>
-                    {meeting.action}
+                        }`}>
+                    {action}
                 </button>
             </div>
         </div>

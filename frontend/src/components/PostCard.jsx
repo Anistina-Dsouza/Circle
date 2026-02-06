@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Heart, MessageCircle } from 'lucide-react';
 
 const PostCard = ({ post }) => {
+    const [liked, setLiked] = useState(false);
+    const [likes, setLikes] = useState(Math.floor(Math.random() * 100));
+
+    const handleLike = (e) => {
+        e.stopPropagation();
+        setLiked(!liked);
+        setLikes(prev => liked ? prev - 1 : prev + 1);
+    };
+
     return (
         <div className="group relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-[#130c2d] border border-white/5 cursor-pointer shadow-2xl">
             <img
@@ -19,9 +29,25 @@ const PostCard = ({ post }) => {
                         {post.timeLeft}
                     </span>
                 </div>
-                <p className="text-base text-gray-100 font-medium leading-relaxed mb-2 opacity-90 group-hover:opacity-100 transition-opacity">
-                    {post.caption}
-                </p>
+
+                <div className="mt-auto">
+                    <p className="text-base text-gray-100 font-medium leading-relaxed mb-4 opacity-90 group-hover:opacity-100 transition-opacity">
+                        {post.caption}
+                    </p>
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={handleLike}
+                            className={`flex items-center gap-2 group/btn transition-colors ${liked ? 'text-red-500' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            <Heart size={20} className={`${liked ? 'fill-current scale-110' : ''} transition-transform duration-300`} />
+                            <span className="text-xs font-bold">{likes}</span>
+                        </button>
+                        <button className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                            <MessageCircle size={20} />
+                            <span className="text-xs font-bold">{Math.floor(Math.random() * 20)}</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
