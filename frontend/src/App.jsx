@@ -4,6 +4,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
+import Chat from './pages/Chat';
+import Landing from './pages/Landing';
 
 function App() {
   return (
@@ -11,15 +13,17 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/chat" element={<Chat />} />
           </Routes>
         </main>
       </div>
     </Router>
-  )
+  );
 }
 
 export default App;

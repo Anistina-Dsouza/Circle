@@ -20,20 +20,20 @@ export default function Navbar() {
 
       {/* Actions */}
       <div className="hidden md:flex gap-8 items-center text-sm text-[#E0D7FF]">
-        <span className="cursor-not-allowed opacity-70 hover:opacity-100 transition">
+        <Link to="/login" className="opacity-70 hover:opacity-100 transition font-medium">
           Login
-        </span>
+        </Link>
 
-        <span
-          className="cursor-not-allowed
-                     px-5 py-2 rounded-full
+        <Link
+          to="/signup"
+          className="px-5 py-2 rounded-full
                      bg-[#7C3AED]/80 text-white
                      font-semibold
                      hover:bg-[#6D28D9]
                      transition shadow-sm"
         >
           Register
-        </span>
+        </Link>
       </div>
     </nav>
   );

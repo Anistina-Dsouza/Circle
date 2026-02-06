@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import {
     Home as HomeIcon,
     Users,
@@ -8,15 +9,20 @@ import {
     Settings
 } from 'lucide-react';
 
-const NavItem = ({ icon, label, active, dot }) => (
-    <div className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${active ? 'bg-[#8b31ff] text-white shadow-lg' : 'text-gray-400 hover:bg-white/5 hover:text-white'
-        }`}>
+const NavItem = ({ icon, label, to, dot }) => (
+    <NavLink
+        to={to}
+        className={({ isActive }) =>
+            `flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${isActive ? 'bg-[#8b31ff] text-white shadow-lg shadow-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+            }`
+        }
+    >
         <div className="flex items-center gap-4">
             {icon}
             <span className="text-sm font-medium">{label}</span>
         </div>
         {dot && <div className="w-1.5 h-1.5 bg-[#8b31ff] rounded-full"></div>}
-    </div>
+    </NavLink>
 );
 
 const Sidebar = () => {
@@ -33,11 +39,11 @@ const Sidebar = () => {
             </div>
 
             <nav className="flex-grow space-y-4">
-                <NavItem icon={<HomeIcon size={24} />} label="Home" active />
-                <NavItem icon={<Users size={24} />} label="Circles" />
-                <NavItem icon={<Video size={24} />} label="Meetings" />
-                <NavItem icon={<MessageSquare size={24} />} label="Messages" />
-                <NavItem icon={<Bell size={24} />} label="Notifications" dot />
+                <NavItem icon={<HomeIcon size={24} />} label="Home" to="/home" />
+                <NavItem icon={<Users size={24} />} label="Circles" to="/circles" />
+                <NavItem icon={<Video size={24} />} label="Meetings" to="/meetings" />
+                <NavItem icon={<MessageSquare size={24} />} label="Messages" to="/chat" />
+                <NavItem icon={<Bell size={24} />} label="Notifications" to="/notifications" dot />
             </nav>
 
             <div className="mt-auto">
@@ -52,8 +58,8 @@ const Sidebar = () => {
                             <span className="text-[11px] text-gray-400">Active Now</span>
                         </div>
                     </div>
-                    <div className="p-2 hover:bg-white/5 rounded-xl transition-colors cursor-pointer">
-                        <Settings size={20} className="text-gray-400" />
+                    <div className="p-2 hover:bg-white/5 rounded-xl transition-colors cursor-pointer text-gray-400">
+                        <Settings size={20} />
                     </div>
                 </div>
             </div>
@@ -62,3 +68,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+

@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Plus,
     Image as ImageIcon,
@@ -9,15 +8,18 @@ import {
 import Sidebar from '../components/Sidebar';
 import PostCard from '../components/PostCard';
 import RightSidebar from '../components/RightSidebar';
+import CreatePost from '../components/CreatePost';
+import StoryList from '../components/StoryList';
+import FeedHeader from '../components/FeedHeader';
 
 const Home = () => {
-    const stories = [
+    const initialStories = [
         { id: 1, name: 'Sarah', avatar: 'https://i.pravatar.cc/150?u=sarah' },
         { id: 2, name: 'Jordan', avatar: 'https://i.pravatar.cc/150?u=jordan' },
         { id: 3, name: 'Mila', avatar: 'https://i.pravatar.cc/150?u=mila' },
     ];
 
-    const posts = [
+    const initialPosts = [
         {
             id: 1,
             user: 'Sarah',
@@ -65,54 +67,24 @@ const Home = () => {
         { id: 3, title: 'Weekly Growth Check', time: 'Tomorrow, 10:00', status: '', attendees: ['https://i.pravatar.cc/150?u=e'], extraAttendees: 2, action: 'RSVP' },
     ];
 
+    const [posts, setPosts] = useState(initialPosts);
+    const [stories] = useState(initialStories);
+
+    const handleNewPost = (newPost) => {
+        setPosts([newPost, ...posts]);
+    };
+
     return (
         <div className="flex h-screen bg-[#050214] text-white font-sans overflow-hidden">
             <Sidebar />
 
             {/* Main Content */}
             <main className="flex-grow flex flex-col h-screen overflow-y-auto no-scrollbar">
-                <header className="px-10 py-8 flex items-center justify-between sticky top-0 bg-[#050214]/80 backdrop-blur-xl z-20">
-                    <h1 className="text-3xl font-bold">Feed</h1>
-                    <div className="flex bg-[#130c2d] p-1.5 rounded-2xl border border-white/5">
-                        <button className="px-8 py-2 rounded-xl bg-[#8b31ff] text-sm font-bold shadow-lg shadow-purple-500/20">Live</button>
-                        <button className="px-8 py-2 rounded-xl text-gray-400 text-sm font-bold hover:text-white transition-colors">Upcoming</button>
-                    </div>
-                </header>
+                <FeedHeader />
 
-                {/* Create Post */}
-                <div className="px-10 mb-10">
-                    <div className="bg-[#130c2d] p-5 rounded-[2.5rem] flex items-center gap-5 border border-white/5">
-                        <img src="https://i.pravatar.cc/150?u=alex" alt="" className="w-12 h-12 rounded-full" />
-                        <input
-                            type="text"
-                            placeholder="Share a moment with your circles..."
-                            className="bg-transparent flex-grow outline-none text-base text-gray-300 placeholder:text-gray-500"
-                        />
-                        <div className="flex items-center gap-4">
-                            <ImageIcon size={22} className="text-gray-400 cursor-pointer hover:text-white transition-colors" />
-                            <VideoIcon size={22} className="text-gray-400 cursor-pointer hover:text-white transition-colors" />
-                            <button className="bg-[#8b31ff] px-8 py-3 rounded-2xl text-sm font-black tracking-widest hover:bg-[#7c28eb] transition-all transform active:scale-95 shadow-lg shadow-purple-500/20">POST</button>
-                        </div>
-                    </div>
-                </div>
+                <CreatePost onPost={handleNewPost} />
 
-                {/* Stories */}
-                <div className="px-10 flex gap-8 mb-10 overflow-x-auto no-scrollbar">
-                    <div className="flex flex-col items-center gap-3 shrink-0">
-                        <div className="w-20 h-20 rounded-full border-2 border-dashed border-[#8b31ff]/40 flex items-center justify-center cursor-pointer hover:border-[#8b31ff] transition-all group">
-                            <Plus size={28} className="text-[#8b31ff] group-hover:scale-110 transition-transform" />
-                        </div>
-                        <span className="text-[13px] font-medium text-gray-400">Add Story</span>
-                    </div>
-                    {stories.map(story => (
-                        <div key={story.id} className="flex flex-col items-center gap-3 shrink-0 cursor-pointer group">
-                            <div className="w-20 h-20 rounded-full p-[3px] border-2 border-[#8b31ff] transition-transform group-hover:scale-105">
-                                <img src={story.avatar} alt={story.name} className="w-full h-full rounded-full object-cover border-2 border-[#050214]" />
-                            </div>
-                            <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">{story.name}</span>
-                        </div>
-                    ))}
-                </div>
+                <StoryList stories={stories} />
 
                 {/* Post Grid */}
                 <div className="px-10 grid grid-cols-2 gap-8 pb-12">
@@ -128,22 +100,3 @@ const Home = () => {
 };
 
 export default Home;
-=======
-import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
-import Stats from "../components/Stats";
-import Features from "../components/Features";
-import Footer from "../components/Footer";
-
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#10002B] via-[#240046] to-[#3C096C] text-white">
-      <Navbar />
-      <Hero />
-      <Stats />
-      <Features />
-      <Footer />
-    </div>
-  );
-}
->>>>>>> maryam
