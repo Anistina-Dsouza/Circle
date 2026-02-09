@@ -24,6 +24,16 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'Circle API is running!',
+    endpoints: {
+      auth: '/api/auth',
+      health: '/health'
+    }
+  });
+});
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -33,6 +43,9 @@ app.get('/health', (req, res) => {
     service: 'Circle Backend API'
   });
 });
+
+
+
 
 // API Routes
 app.use('/api/auth', authRoutes);

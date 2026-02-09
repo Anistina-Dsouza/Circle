@@ -11,7 +11,7 @@ const startServer = async () => {
     await connectDB();
 
     // Start HTTP server
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, (req,res) => {
       console.log(`
       🚀 Circle Backend Server Started
       📍 Port: ${PORT}
