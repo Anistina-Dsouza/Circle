@@ -1,16 +1,17 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
+
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, name } = req.body;
+
+    // Use name as username if username is not provided
+    const finalUsername = username || name || email.split('@')[0];
 
     // Check if user exists
-    const userExists = await User.findOne({ 
-      $or: [{ email }, { username }] 
+    const userExists = await User.findOne({
+      $or: [{ email }, { username: finalUsername }]
     });
 
     if (userExists) {
@@ -22,9 +23,10 @@ const register = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      username,
+      username: finalUsername,
       email,
-      password
+      password,
+      displayName: name || finalUsername
     });
 
     // Generate token
@@ -34,14 +36,7 @@ const register = async (req, res) => {
     res.status(201).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName,
-        profilePic: user.profilePic,
-        createdAt: user.createdAt
-      }
+      user
     });
   } catch (error) {
     res.status(500).json({
@@ -51,23 +46,24 @@ const register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
+    const identifier = email || username;
 
-    // Check if email and password provided
-    if (!email || !password) {
+    // Check if identifier and password provided
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: 'Please provide email/username and password'
       });
     }
 
-    // Find user by email and include password
-    const user = await User.findOne({ email }).select('+password');
+    // Find user by email or username and include password
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }]
+    }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -86,7 +82,7 @@ const login = async (req, res) => {
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -101,14 +97,7 @@ const login = async (req, res) => {
     res.json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName,
-        profilePic: user.profilePic,
-        createdAt: user.createdAt
-      }
+      user
     });
   } catch (error) {
     res.status(500).json({
@@ -123,11 +112,10 @@ const login = async (req, res) => {
 // @access  Private
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    
+    // req.user is already attached by auth middleware
     res.json({
       success: true,
-      user
+      user: req.user
     });
   } catch (error) {
     res.status(500).json({
@@ -142,15 +130,18 @@ const getMe = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { displayName, profilePic } = req.body;
-    
-    const user = await User.findById(req.user.id);
-    
+    const { displayName, profilePic, bio, preferences, privacy } = req.body;
+
+    const user = req.user; // Attached by auth middleware
+
     if (displayName) user.displayName = displayName;
     if (profilePic) user.profilePic = profilePic;
-    
+    if (bio !== undefined) user.bio = bio;
+    if (preferences) user.preferences = { ...user.preferences, ...preferences };
+    if (privacy) user.privacy = { ...user.privacy, ...privacy };
+
     await user.save();
-    
+
     res.json({
       success: true,
       user
