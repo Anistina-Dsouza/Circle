@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
+import Login from './features/auth/Login/LoginPage';
+import Signup from './features/auth/Signup/SignupPage';
+import ForgotPassword from './features/auth/ForgotPassword/ForgotPasswordPage';
 import Home from './pages/Home';
 import Chat from './pages/Chat';
 import Landing from './pages/Landing';

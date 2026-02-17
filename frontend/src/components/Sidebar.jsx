@@ -27,7 +27,7 @@ const NavItem = ({ icon, label, to, dot }) => (
 
 const Sidebar = () => {
     return (
-        <aside className="w-72 flex flex-col bg-[#050214] border-r border-white/5 p-8 shrink-0 h-full">
+        <aside className="hidden lg:flex w-72 flex-col bg-[#050214] border-r border-white/5 p-8 shrink-0 h-full">
             <div className="flex items-center gap-3 mb-10 px-2">
                 <div className="w-10 h-10 bg-gradient-to-br from-[#8b31ff] to-[#4f18a3] rounded-2xl flex items-center justify-center">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

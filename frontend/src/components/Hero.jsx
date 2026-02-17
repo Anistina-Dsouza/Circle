@@ -43,19 +43,20 @@ export default function Hero() {
       </div>
 
       {/* CENTER SAFE ZONE */}
-      <div className="relative z-20 text-center px-14 py-16
-                      max-w-3xl rounded-3xl
+      <div className="relative z-20 text-center px-6 md:px-14 py-12 md:py-16
+                      mx-6 md:mx-0
+                      max-w-[90%] md:max-w-3xl rounded-3xl
                       bg-[#120B2F]/45 backdrop-blur-xl">
-        <h1 className="text-[56px] leading-[1.05] font-extrabold tracking-[-0.03em] text-white">
+        <h1 className="text-4xl md:text-[56px] leading-[1.1] md:leading-[1.05] font-extrabold tracking-[-0.03em] text-white">
           Find your people.
           <span className="block text-[#D6CCFF]">Build your Circle.</span>
         </h1>
 
-        <p className="mt-6 text-lg text-[#EDE9FE]/75">
+        <p className="mt-4 md:mt-6 text-base md:text-lg text-[#EDE9FE]/75">
           A calm, flowing social space designed for meaningful communities.
         </p>
 
-        <button className="mt-10 px-8 py-4 rounded-xl font-semibold
+        <button className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold
                            bg-[#7C3AED]/90 hover:bg-[#6D28D9]
                            transition shadow-md hover:shadow-lg">
           Join Circle
