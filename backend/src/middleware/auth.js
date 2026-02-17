@@ -54,4 +54,34 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth;
+const protect = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'Not authorized. No token provided.'
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token'
+      });
+    }
+    res.status(401).json({
+      success: false,
+      error: 'Not authorized'
+    });
+  }
+};
+
+module.exports = { protect, auth };
