@@ -4,7 +4,7 @@ import MeetingCard from './MeetingCard';
 
 const RightSidebar = ({ circles, meetings }) => {
     return (
-        <aside className="w-80 flex flex-col border-l border-white/5 bg-[#050214] p-8 shrink-0 overflow-y-auto no-scrollbar h-full">
+        <aside className="hidden xl:flex w-80 flex-col border-l border-white/5 bg-[#050214] p-8 shrink-0 overflow-y-auto no-scrollbar h-full">
             <div className="mb-10">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">My Circles</h2>

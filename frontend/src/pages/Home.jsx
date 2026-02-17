@@ -11,6 +11,7 @@ import RightSidebar from '../components/RightSidebar';
 import CreatePost from '../components/CreatePost';
 import StoryList from '../components/StoryList';
 import FeedHeader from '../components/FeedHeader';
+import BottomNav from '../components/BottomNav';
 
 const Home = () => {
     const initialStories = [
@@ -79,7 +80,7 @@ const Home = () => {
             <Sidebar />
 
             {/* Main Content */}
-            <main className="flex-grow flex flex-col h-screen overflow-y-auto no-scrollbar">
+            <main className="flex-grow flex flex-col h-screen overflow-y-auto no-scrollbar pb-24 lg:pb-0">
                 <FeedHeader />
 
                 <CreatePost onPost={handleNewPost} />
@@ -87,7 +88,7 @@ const Home = () => {
                 <StoryList stories={stories} />
 
                 {/* Post Grid */}
-                <div className="px-10 grid grid-cols-2 gap-8 pb-12">
+                <div className="px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-12">
                     {posts.map(post => (
                         <PostCard key={post.id} post={post} />
                     ))}
@@ -95,6 +96,8 @@ const Home = () => {
             </main>
 
             <RightSidebar circles={circles} meetings={meetings} />
+
+            <BottomNav />
         </div>
     );
 };
