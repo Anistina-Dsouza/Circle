@@ -42,7 +42,7 @@ const LoginForm = () => {
         e.preventDefault();
         if (validate()) {
             console.log('Login attempt:', formData);
-            navigate('/home');
+            navigate('/feed');
         }
     };
 

@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './features/auth/Login/LoginPage';
 import Signup from './features/auth/Signup/SignupPage';
 import ForgotPassword from './features/auth/ForgotPassword/ForgotPasswordPage';
-import Home from './pages/Home';
-import Chat from './pages/Chat';
-import Landing from './pages/Landing';
+import Landing from './features/landingPage/pages/Landing';
+import Feed from './features/feed/FeedPage';
+import Messages from './features/messages/MessagesPage';
 
 function App() {
   return (
@@ -14,11 +14,11 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/chat" element={<Chat />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/messages" element={<Messages />} />
           </Routes>
         </main>
       </div>
