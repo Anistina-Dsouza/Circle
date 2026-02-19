@@ -67,7 +67,8 @@ const protect = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
+    // console.log("protect - user - ",decoded);
+    req.userId = decoded.id;
     next();
 
   } catch (error) {
