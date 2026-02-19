@@ -41,14 +41,15 @@ const userSchema = new mongoose.Schema({
   },
 
   // Following system
-  followers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  following: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
+  // followers: [{
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User'
+  // }],
+  
+  // following: [{
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User'
+  // }],
 
   // Stats (cached)
   stats: {
@@ -126,12 +127,12 @@ userSchema.pre('save', async function () {
   }
 
   // Update follower/following counts
-  if (this.isModified('followers')) {
-    this.stats.followerCount = this.followers.length;
-  }
-  if (this.isModified('following')) {
-    this.stats.followingCount = this.following.length;
-  }
+  // if (this.isModified('followers')) {
+  //   this.stats.followerCount = this.followers.length;
+  // }
+  // if (this.isModified('following')) {
+  //   this.stats.followingCount = this.following.length;
+  // }
   // next();
 });
 
