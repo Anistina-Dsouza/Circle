@@ -10,8 +10,7 @@ const circleSchema = new mongoose.Schema({
   slug: {
     type: String,
     unique: true,
-    lowercase: true,
-    index: true
+    lowercase: true
   },
   description: {
     type: String,
@@ -31,16 +30,14 @@ const circleSchema = new mongoose.Schema({
   inviteCode: {
     type: String,
     unique: true,
-    sparse: true,
-    index: true
+    sparse: true
   },
 
   // Ownership
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    index: true
+    required: true
   },
   moderators: [{
     user: {
@@ -112,7 +109,6 @@ const circleSchema = new mongoose.Schema({
 circleSchema.index({ name: 'text', description: 'text' });
 circleSchema.index({ type: 1, 'stats.memberCount': -1 });
 circleSchema.index({ creator: 1 });
-circleSchema.index({ slug: 1 });
 circleSchema.index({ 'members.user': 1 }); // Added for member lookup
 
 // =========== MIDDLEWARE ===========
