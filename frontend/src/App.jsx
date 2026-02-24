@@ -8,6 +8,8 @@ import Feed from './features/feed/FeedPage';
 import Messages from './features/messages/MessagesPage';
 import AdminDashboard from './features/admin/pages/AdminDashboard';
 
+import Communities from './features/communities/pages/CommunitiesPage';
+
 function App() {
   return (
     <Router>
@@ -20,6 +22,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/communities" element={<Communities />} />
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
