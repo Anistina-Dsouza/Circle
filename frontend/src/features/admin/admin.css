@@ -1,0 +1,42 @@
+.glass {
+    background: radial-gradient(circle at top left,#2a0049,#12001f);
+    backdrop-filter: blur(10px);
+  }
+  
+  .card {
+    background: linear-gradient(180deg,#2b004f,#1a002d);
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,.04);
+  }
+  
+  .glow:hover {
+    box-shadow: 0 0 30px #a855f7;
+  }
+  
+  .badge-green {
+    background:#1a4433;
+    color:#4ade80;
+  }
+  
+  .badge-yellow {
+    background:#3a2f00;
+    color:#facc15;
+  }
+  
+  .badge-red {
+    background:#3a0a1c;
+    color:#f87171;
+  }
+
+  .card {
+    background: radial-gradient(circle at top,#2a004a,#13001f);
+    border-radius: 28px;
+  }
+  
+  .sidebar {
+    background: linear-gradient(#10001d,#06000c);
+  }
+  
+  .badge-green{background:#123c2a;color:#4ade80}
+  .badge-yellow{background:#3a2f00;color:#facc15}
+  .badge-red{background:#3a0a1c;color:#f87171}

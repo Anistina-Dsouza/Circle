@@ -6,6 +6,7 @@ import ForgotPassword from './features/auth/ForgotPassword/ForgotPasswordPage';
 import Landing from './features/landingPage/pages/Landing';
 import Feed from './features/feed/FeedPage';
 import Messages from './features/messages/MessagesPage';
+import AdminDashboard from './features/admin/pages/AdminDashboard';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
       </div>
