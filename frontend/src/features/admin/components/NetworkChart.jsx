@@ -16,11 +16,9 @@
 //     </div>
 //     )
 //     }
-
 import { useState } from "react";
 
 export default function NetworkChart() {
-
   const data = [
     { day: "MON", value: 20 },
     { day: "TUE", value: 50 },
@@ -34,10 +32,10 @@ export default function NetworkChart() {
   const [active, setActive] = useState("WED");
 
   return (
-    <div className="card p-10 mt-10">
+    <div className="mt-10 p-10 rounded-[28px] bg-[#140021] border border-white/5">
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-10">
         <div>
           <h2 className="text-lg font-semibold">Network Interactions</h2>
           <p className="text-sm text-gray-400">
@@ -46,59 +44,58 @@ export default function NetworkChart() {
         </div>
 
         <div className="flex gap-3">
-          <button className="px-4 py-2 rounded-full bg-purple-700 text-sm">
+          <button className="px-4 py-2 rounded-full bg-purple-800/40 text-sm text-purple-300">
             Live View
           </button>
-          <button className="px-4 py-2 rounded-full bg-purple-900 text-sm text-gray-400">
+          <button className="px-4 py-2 rounded-full bg-purple-900/30 text-sm text-gray-400">
             7 Days
           </button>
         </div>
       </div>
 
       {/* Chart */}
-      <div className="flex items-end justify-between gap-6 h-[220px]">
+      <div className="flex items-end justify-between gap-8 h-[200px]">
 
         {data.map((item, i) => (
           <div
             key={i}
             onClick={() => setActive(item.day)}
-            className="flex flex-col items-center flex-1 cursor-pointer group"
+            className="flex flex-col items-center flex-1 cursor-pointer"
           >
-
             <div className="relative w-full h-full flex justify-center">
 
-              {/* Background shadow capsule */}
-              <div className="absolute bottom-0 w-25 h-full bg-purple-900/40 rounded-full" />
+              {/* Background Track */}
+              <div className="absolute bottom-0 w-22 h-full bg-white/5 rounded-full" />
 
-              {/* Foreground bar (same style preserved) */}
+              {/* Foreground Bar */}
               <div
-                className={`absolute bottom-0 w-25 rounded-full transition-all duration-500
-                  ${active === item.day
-                    ? "bg-purple-400 shadow-lg shadow-purple-600"
-                    : "bg-purple-500 group-hover:bg-purple-400"}
+                className={`absolute bottom-0 w-22 rounded-full transition-all duration-500
+                  ${
+                    active === item.day
+                      ? "bg-purple-400"
+                      : "bg-purple-600/70 hover:bg-purple-500/80"
+                  }
                 `}
                 style={{ height: `${item.value * 2}px` }}
               />
 
-              {/* Tooltip */}
-              <div className="absolute -top-8 opacity-0 group-hover:opacity-100 text-xs bg-purple-700 px-2 py-1 rounded-full transition">
-                {item.value}
-              </div>
-
             </div>
 
-            {/* Day label */}
-            <span className={`mt-4 text-xs tracking-widest ${
-              active === item.day ? "text-purple-400" : "text-gray-500"
-            }`}>
+            {/* Day Label */}
+            <span
+              className={`mt-5 text-xs tracking-widest transition
+                ${
+                  active === item.day
+                    ? "text-purple-400"
+                    : "text-gray-500"
+                }`}
+            >
               {item.day}
             </span>
-
           </div>
         ))}
 
       </div>
-
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function AdminLayout({ children }) {
 
       <Sidebar />
 
-      <div className="flex-1">
+      <div className="flex-1 ml-64">
         <AdminHeader />
         <div className="p-10">{children}</div>
       </div>
