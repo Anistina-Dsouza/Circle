@@ -1,35 +1,56 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import PasswordStrength from './PasswordStrength';
 import InterestSelector from './InterestSelector';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const SignupForm = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: ''
     });
+    const [selectedInterests, setSelectedInterests] = useState([]);
     const [errors, setErrors] = useState({});
+    const [serverError, setServerError] = useState('');
+
+    useEffect(() => {
+        axios.defaults.baseURL = API_URL;
+    }, []);
+
+    // Load interests from localStorage on component mount
+    useEffect(() => {
+        const savedInterests = localStorage.getItem('userInterests');
+        if (savedInterests) {
+            setSelectedInterests(JSON.parse(savedInterests));
+        }
+    }, []);
 
     const validate = () => {
         const newErrors = {};
 
-        // Username validation: No spaces, allow underscores and special characters
-        if (!formData.username) {
-            newErrors.username = 'Username is required';
-        } else if (/\s/.test(formData.username)) {
-            newErrors.username = 'Username cannot contain spaces';
-        } else if (!/^[a-zA-Z0-9_!@#$%^&*()\-+=<>?]+$/.test(formData.username)) {
-            newErrors.username = 'Username contains invalid characters';
+        // Username validation (optional)
+        if (formData.username) {
+            if (formData.username.length < 3) {
+                newErrors.username = 'Username must be at least 3 characters';
+            } else if (formData.username.length > 25) {
+                newErrors.username = 'Username must be less than 25 characters';
+            } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+                newErrors.username = 'Username can only contain letters, numbers, and underscores';
+            }
         }
 
         // Email validation
         if (!formData.email) {
             newErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
+            newErrors.email = 'Please enter a valid email';
         }
 
         // Password validation
@@ -46,17 +67,80 @@ const SignupForm = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
+        setServerError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleInterestsChange = (interests) => {
+        setSelectedInterests(interests);
+        if (errors.interests) {
+            setErrors(prev => ({ ...prev, interests: '' }));
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validate()) {
-            console.log('Form submitted successfully:', formData);
-            // Handle successful signup logic here
+
+        if (!validate()) {
+            return;
+        }
+
+        setIsLoading(true);
+        setServerError('');
+
+        try {
+            // Send ONLY the fields your backend expects
+            const requestData = {
+                email: formData.email,
+                password: formData.password
+            };
+
+            // Only include username if provided
+            if (formData.username) {
+                requestData.username = formData.username;
+            }
+
+            console.log('Sending to backend:', requestData);
+
+            // ✅ Use relative path - baseURL is set from env
+            const response = await axios.post('/api/auth/register', requestData);
+
+            if (response.data.success) {
+                // Store auth data
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                // Store interests separately in localStorage
+                localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+
+                // Set default Authorization header
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+                // Show success message
+                alert('🎉 Registration successful!');
+
+                // Redirect to dashboard
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+
+            if (error.response) {
+                const { field, message } = error.response.data;
+                if (field) {
+                    setErrors(prev => ({ ...prev, [field]: message }));
+                } else {
+                    setServerError(message || 'Registration failed. Please try again.');
+                }
+            } else if (error.request) {
+                setServerError('Cannot connect to server. Please check your internet connection.');
+            } else {
+                setServerError('An unexpected error occurred.');
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -67,6 +151,13 @@ const SignupForm = () => {
                     <h2 className="text-4xl font-bold mb-2 text-white font-sans">Join the Circle</h2>
                     <p className="text-white/40">Step away from the noise. Start your journey.</p>
                 </div>
+
+                {serverError && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3 text-red-500">
+                        <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{serverError}</span>
+                    </div>
+                )}
 
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     {/* Google Auth Button */}
@@ -89,8 +180,11 @@ const SignupForm = () => {
                         <div className="flex-grow border-t border-white/10"></div>
                     </div>
 
+                    {/* Username (Optional) */}
                     <div className="space-y-1">
-                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">Username</label>
+                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">
+                            Username <span className="text-white/30">(optional)</span>
+                        </label>
                         <input
                             type="text"
                             name="username"
@@ -105,10 +199,14 @@ const SignupForm = () => {
                                 <span>{errors.username}</span>
                             </div>
                         )}
+                        <p className="text-xs text-white/30 mt-1">
+                            If left empty, we'll create one from your email
+                        </p>
                     </div>
 
+                    {/* Email */}
                     <div className="space-y-1">
-                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">Email Address</label>
+                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">Email Address *</label>
                         <input
                             type="email"
                             name="email"
@@ -125,8 +223,9 @@ const SignupForm = () => {
                         )}
                     </div>
 
+                    {/* Password */}
                     <div className="space-y-1">
-                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">Password</label>
+                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">Password *</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
@@ -153,10 +252,37 @@ const SignupForm = () => {
                         <PasswordStrength password={formData.password} />
                     </div>
 
-                    <InterestSelector />
+                    {/* Interests - Only stored in localStorage */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest">
+                            Select Your Interests <span className="text-white/30">(for personalized stories)</span>
+                        </label>
+                        <InterestSelector
+                            selectedInterests={selectedInterests}
+                            onChange={handleInterestsChange}
+                        />
+                        {errors.interests && (
+                            <div className="flex items-center mt-1 text-red-500 text-xs gap-1">
+                                <AlertCircle size={12} />
+                                <span>{errors.interests}</span>
+                            </div>
+                        )}
+                    </div>
 
-                    <button type="submit" className="btn-primary mt-8">
-                        Create Account
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-4 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 size={20} className="animate-spin" />
+                                Creating Account...
+                            </>
+                        ) : (
+                            'Create Account'
+                        )}
                     </button>
 
                     <p className="text-center text-sm text-white/40 mt-8 font-sans">
