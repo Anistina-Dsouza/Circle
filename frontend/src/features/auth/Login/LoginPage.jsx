@@ -6,7 +6,7 @@ const LoginPage = () => {
         <div className="flex min-h-screen bg-[#10002B]">
             <AuthHero
                 title={<>Welcome back to<br />your Circle.</>}
-                description="Pick up where you left off. Connect, share, and grow with your community."
+                description="Pick up where you left off. Connect, share, and grow with your circle."
             />
             <LoginForm />
         </div>

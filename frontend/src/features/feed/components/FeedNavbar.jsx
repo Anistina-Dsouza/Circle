@@ -17,13 +17,13 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
         try {
             const token = localStorage.getItem('token');
             const userData = localStorage.getItem('user');
-            
+
             if (token && userData) {
                 const parsedUser = JSON.parse(userData);
                 setUser(parsedUser);
-                
+
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                
+
                 console.log("User loaded in navbar:", parsedUser);
             } else {
                 navigate('/login');
@@ -40,18 +40,17 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        
+
         delete axios.defaults.headers.common['Authorization'];
-        
+
         navigate('/login');
     };
 
     const NavItem = ({ icon: Icon, label, to, active }) => (
-        <Link 
-            to={to} 
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full cursor-pointer transition-colors ${
-                active ? 'bg-[#7C3AED] text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+        <Link
+            to={to}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full cursor-pointer transition-colors ${active ? 'bg-[#7C3AED] text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
         >
             <Icon size={20} />
             <span className="font-medium hidden lg:block">{label}</span>
@@ -90,7 +89,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
 
                     <div className="hidden md:flex items-center space-x-2">
                         <NavItem icon={Home} label="Home" to="/feed" active={activePage === 'Home'} />
-                        <NavItem icon={Users} label="Communities" to="/communities" active={activePage === 'Communities'} />
+                        <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} />
                         <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} />
                         <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} />
                     </div>
@@ -128,7 +127,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                                     alt={user.username}
                                     className="w-10 h-10 rounded-full border-2 border-purple-500/30 object-cover group-hover:border-purple-500 transition-colors"
                                 />
-                                
+
                             </Link>
 
                             <button
@@ -140,8 +139,8 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                             </button>
                         </>
                     ) : (
-                        <Link 
-                            to="/login" 
+                        <Link
+                            to="/login"
                             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors"
                         >
                             Login
@@ -158,13 +157,13 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
             {isOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full bg-[#0F0529] border-b border-white/5 py-4 px-6 flex flex-col space-y-4">
                     <NavItem icon={Home} label="Home" to="/feed" active={activePage === 'Home'} />
-                    <NavItem icon={Users} label="Communities" to="/communities" active={activePage === 'Communities'} />
+                    <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} />
                     <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} />
                     <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} />
-                    
+
                     {user && (
                         <div className="pt-4 border-t border-white/10">
-                            <Link 
+                            <Link
                                 to={`/profile/${user.username}`}
                                 className="flex items-center space-x-3 py-2"
                             >
