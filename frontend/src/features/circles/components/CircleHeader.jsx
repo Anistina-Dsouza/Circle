@@ -1,11 +1,11 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
-const CommunityHeader = () => {
+const CircleHeader = () => {
     return (
         <div className="text-center pt-16 pb-12">
             <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
-                Find <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Your Community</span>
+                Find <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Your Circle</span>
             </h1>
 
             <div className="max-w-2xl mx-auto relative group mb-12">
@@ -16,7 +16,7 @@ const CommunityHeader = () => {
                     <Search className="text-gray-400 group-focus-within:text-purple-400 transition-colors mr-3" size={20} />
                     <input
                         type="text"
-                        placeholder="Search for communities or topics..."
+                        placeholder="Search for circles or topics..."
                         className="bg-transparent border-none outline-none text-white w-full placeholder-gray-500 text-lg"
                     />
                 </div>
@@ -25,4 +25,4 @@ const CommunityHeader = () => {
     );
 };
 
-export default CommunityHeader;
+export default CircleHeader;

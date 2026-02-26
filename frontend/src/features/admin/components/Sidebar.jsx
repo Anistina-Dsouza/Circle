@@ -54,7 +54,7 @@ export default function Sidebar() {
 
         <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active />
         <Item icon={<Users size={18} />} label="Users" />
-        <Item icon={<Users size={18} />} label="Communities" />
+        <Item icon={<Users size={18} />} label="Circles" />
         <Item icon={<Megaphone size={18} />} label="Announcements" />
         <Item icon={<BarChart size={18} />} label="Reports" />
 
@@ -74,13 +74,12 @@ const Item = ({ icon, label, active, danger }) => (
     className={`
     flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer
     transition
-    ${
-      active
+    ${active
         ? "bg-purple-700/40 text-purple-300"
         : danger
-        ? "hover:bg-red-900/20 text-gray-400 hover:text-red-400"
-        : "hover:bg-purple-800/30 text-gray-400 hover:text-white"
-    }
+          ? "hover:bg-red-900/20 text-gray-400 hover:text-red-400"
+          : "hover:bg-purple-800/30 text-gray-400 hover:text-white"
+      }
     `}
   >
     {icon}

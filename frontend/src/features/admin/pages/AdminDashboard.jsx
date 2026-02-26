@@ -38,27 +38,27 @@
 import AdminLayout from "../layouts/AdminLayout";
 import KPICard from "../components/KPICard";
 import LatestRegistrations from "../components/LatestRegistrations";
-import CommunitiesTable from "../components/CommunitiesTable";
+import CirclesTable from "../components/CirclesTable";
 import NetworkChart from "../components/NetworkChart";
 
-export default function AdminDashboard(){
-return(
-<AdminLayout>
+export default function AdminDashboard() {
+    return (
+        <AdminLayout>
 
-<div className="grid grid-cols-4 gap-6 mb-10">
-<KPICard value="24,512" label="Users"/>
-<KPICard value="1,208" label="Communities"/>
-<KPICard value="4,821" label="Active"/>
-<KPICard value="42" label="Flagged"/>
-</div>
+            <div className="grid grid-cols-4 gap-6 mb-10">
+                <KPICard value="24,512" label="Users" />
+                <KPICard value="1,208" label="Circles" />
+                <KPICard value="4,821" label="Active" />
+                <KPICard value="42" label="Flagged" />
+            </div>
 
-<div className="grid grid-cols-2 gap-8">
-<LatestRegistrations/>
-<CommunitiesTable/>
-</div>
+            <div className="grid grid-cols-2 gap-8">
+                <LatestRegistrations />
+                <CirclesTable />
+            </div>
 
-<NetworkChart/>
+            <NetworkChart />
 
-</AdminLayout>
-)
+        </AdminLayout>
+    )
 }
