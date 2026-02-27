@@ -100,7 +100,7 @@ export default function CommunityTable() {
       ))}
 
       {/* Pagination */}
-      <div className="flex justify-between items-center px-10 py-6">
+      {/* <div className="flex justify-between items-center px-10 py-6">
 
         <span className="text-purple-300 text-sm">
           Showing 1 to 5 of 1,248 communities
@@ -124,6 +124,49 @@ export default function CommunityTable() {
           </button>
         </div>
 
+      </div> */}
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-10 py-6">
+
+      {/* Left Text */}
+      <p className="text-sm text-purple-300">
+        Showing <span className="text-white font-semibold">1–5</span> of{" "}
+        <span className="text-white font-semibold">1,248</span> communities
+      </p>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center gap-3">
+
+        {/* Previous */}
+        <button className="pagination-btn">
+          ‹
+        </button>
+
+        {/* Page Numbers */}
+        <button className="pagination-btn active">
+          1
+        </button>
+
+        <button className="pagination-btn">
+          2
+        </button>
+
+        <button className="pagination-btn">
+          3
+        </button>
+
+        <span className="px-2 text-purple-400">…</span>
+
+        <button className="pagination-btn">
+          250
+        </button>
+
+        {/* Next */}
+        <button className="pagination-btn">
+          ›
+        </button>
+
+      </div>
       </div>
     </div>
   );

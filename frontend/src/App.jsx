@@ -8,6 +8,7 @@ import Feed from './features/feed/FeedPage';
 import Messages from './features/messages/MessagesPage';
 import AdminDashboard from './features/admin/pages/AdminDashboard';
 import ManageUsers from './features/admin/pages/ManageUsers';
+import ManageCommunities from './features/admin/pages/ManageCommunities';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/messages" element={<Messages />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/communities" element={<ManageCommunities />} />
           </Routes>
         </main>
       </div>

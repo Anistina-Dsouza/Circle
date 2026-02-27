@@ -30,7 +30,7 @@
 // );
 
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Users, Megaphone, BarChart, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Layers, Megaphone, BarChart, LogOut } from "lucide-react";
 
 export default function Sidebar() {
   return (
@@ -56,7 +56,9 @@ export default function Sidebar() {
         <Link to="/admin/users">
           <Item icon={<Users size={18} />} label="Users" />
         </Link>
-        <Item icon={<Users size={18} />} label="Communities" />
+        <Link to="/admin/communities">
+          <Item icon={<Layers size={18} />} label="Communities" />
+        </Link>
         <Item icon={<Megaphone size={18} />} label="Announcements" />
         <Item icon={<BarChart size={18} />} label="Reports" />
 
