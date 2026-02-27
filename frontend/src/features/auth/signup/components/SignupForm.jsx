@@ -119,10 +119,10 @@ const SignupForm = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
                 // Show success message
-                alert('🎉 Registration successful!');
+              //  alert('🎉 Registration successful!');
 
                 // Redirect to dashboard
-                navigate('/dashboard');
+                navigate('/feed');
             }
         } catch (error) {
             console.error('Registration error:', error);
