@@ -84,6 +84,7 @@ exports.getUserMoments = async (req, res) => {
     .sort({ createdAt: -1 })
     .populate('user', 'username profile.displayName profile.profileImage');
 
+    console.log("fetching stories : ",moments)
     res.json({
       success: true,
       moments
