@@ -3,6 +3,9 @@ import Navbar from "../../../components/Navbar";
 import Hero from "../components/Hero";
 import Features from "../components/Features";
 import Footer from "../../../components/Footer";
+import HowItWorks from "../components/HowItWorks";
+import TrendingCommunities from "../components/TrendingCommunities";
+import CTASection from "../components/CTASection";
 
 export default function Landing() {
     return (
@@ -10,6 +13,9 @@ export default function Landing() {
             <Navbar />
             <Hero />
             <Features />
+            <HowItWorks />
+            <TrendingCommunities />
+            <CTASection />
             <Footer />
         </div>
     );

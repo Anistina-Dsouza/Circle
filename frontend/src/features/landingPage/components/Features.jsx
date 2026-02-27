@@ -1,33 +1,71 @@
-const features = [
+import { Clock, Users, Video, MessageSquare } from "lucide-react";
+
+export default function Features() {
+  const features = [
     {
+      icon: <Clock size={28} className="text-purple-400" />,
       title: "Time-Based Stories",
-      desc: "Content that expires automatically to keep feeds relevant."
+      desc: "Share moments that live in the now. Our unique feed prioritizes current presence over algorithm traps.",
     },
     {
-      title: "Organized Circles",
-      desc: "Focused communities for study, work, and passions."
+      icon: <Users size={28} className="text-purple-400" />,
+      title: "Community Channels",
+      desc: "Deep-dive into niche topics with dedicated channels for every interest and sub-culture.",
     },
     {
-      title: "Real-Time Chat",
-      desc: "Instant messaging without endless scrolling."
-    }
+      icon: <Video size={28} className="text-purple-400" />,
+      title: "Zoom-Based Meetings",
+      desc: "One-click video huddles. Bring your community face-to-face with seamless native integrations.",
+    },
+    {
+      icon: <MessageSquare size={28} className="text-purple-400" />,
+      title: "Private Messaging",
+      desc: "Encrypted, fast, and personal. Build one-on-one relationships within your larger circles.",
+    },
   ];
-  
-  export default function Features() {
-    return (
-      <section className="px-10 mt-28 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        {features.map((f) => (
+
+  return (
+    <section className="py-24 px-6">
+
+      {/* Heading */}
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          Right Place, Right Time
+        </h2>
+        <p className="text-gray-400 text-lg">
+          Everything you need to nurture your digital tribe.
+        </p>
+      </div>
+
+      {/* Cards */}
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
+
+        {features.map((feature, index) => (
           <div
-            key={f.title}
-            className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#9D4EDD] transition"
+            key={index}
+            className="
+              p-10 rounded-[32px]
+              bg-[linear-gradient(180deg,#2b004f,#1a002d)]
+              border border-white/5
+              transition duration-300
+              hover:-translate-y-1
+              hover:border-purple-500/30
+            "
           >
-            <h4 className="text-xl font-semibold mb-3 text-[#C77DFF]">
-              {f.title}
-            </h4>
-            <p className="text-[#E0AAFF]">{f.desc}</p>
+            <div className="mb-8">{feature.icon}</div>
+
+            <h3 className="text-xl font-semibold mb-4">
+              {feature.title}
+            </h3>
+
+            <p className="text-gray-400 leading-relaxed">
+              {feature.desc}
+            </p>
           </div>
         ))}
-      </section>
-    );
-  }
-  
+
+      </div>
+
+    </section>
+  );
+}
