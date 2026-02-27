@@ -53,7 +53,7 @@ export default function Hero() {
         </h1>
 
         <p className="mt-4 md:mt-6 text-base md:text-lg text-[#EDE9FE]/75">
-          A calm, flowing social space designed for meaningful communities.
+          A calm, flowing social space designed for meaningful circles.
         </p>
 
         <button className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold

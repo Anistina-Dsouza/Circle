@@ -47,7 +47,7 @@ export default function Stats() {
         <h3 className="text-3xl font-bold text-[#C77DFF]">
           <CountUp value={10000} />
         </h3>
-        <p className="text-[#E0AAFF]">Communities</p>
+        <p className="text-[#E0AAFF]">Circles</p>
       </div>
 
       <div>

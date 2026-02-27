@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const InterestSelector = () => {
     const interests = [
         'Technology', 'Mindfulness', 'Art', 'Productivity',
-        'Community', 'Design'
+        'Circles', 'Design'
     ];
 
     const [selected, setSelected] = useState([]);
@@ -28,8 +28,8 @@ const InterestSelector = () => {
                         type="button"
                         onClick={() => toggleInterest(interest)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selected.includes(interest)
-                                ? 'bg-brand-purple border-brand-purple text-white'
-                                : 'bg-white/5 border-white/10 text-white/70 hover:border-white/30'
+                            ? 'bg-brand-purple border-brand-purple text-white'
+                            : 'bg-white/5 border-white/10 text-white/70 hover:border-white/30'
                             }`}
                     >
                         {interest}

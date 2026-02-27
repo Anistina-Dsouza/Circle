@@ -83,7 +83,7 @@ const login = async (req, res) => {
     // Check password
     const isPasswordValid = await user.comparePassword(password);
 
-    if (!isPasswordValid) {
+    if (isPasswordValid===false) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -92,7 +92,9 @@ const login = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
-
+    user.onlineStatus.status = 'online';
+    user.onlineStatus.lastSeen = new Date();
+    await user.save();
     // Send response
     res.json({
       success: true,

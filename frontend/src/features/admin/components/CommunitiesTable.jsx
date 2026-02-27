@@ -1,128 +1,70 @@
-import { Users } from "lucide-react";
+import { Palette, Terminal, Dumbbell, Film, Settings } from "lucide-react";
 
 const communities = [
-  {
-    name: "Creative Minds NYC",
-    host: "Julian Richards",
-    members: "8.4k",
-    privacy: "Public",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
-  },
-  {
-    name: "Retro Gamer Lounge",
-    host: "Sarah Chen",
-    members: "12.2k",
-    privacy: "Public",
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420"
-  },
-  {
-    name: "Dev Inner Circle",
-    host: "Marcus Thorne",
-    members: "420",
-    privacy: "Private",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475"
-  },
-  {
-    name: "Night Owls",
-    host: "Elena Rodriguez",
-    members: "3.1k",
-    privacy: "Public",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
-  },
-  {
-    name: "Plant Parents Elite",
-    host: "David Kim",
-    members: "95",
-    privacy: "Private",
-    image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6"
-  }
+  { name: "Digital Arts", cat: "Creative", members: "1.2k", icon: <Palette size={16} /> },
+  { name: "Rust Devs", cat: "Tech", members: "842", icon: <Terminal size={16} /> },
+  { name: "Night Runners", cat: "Health", members: "3.5k", icon: <Dumbbell size={16} /> },
+  { name: "Cinephiles", cat: "Hobbies", members: "2.1k", icon: <Film size={16} /> },
 ];
 
-export default function CommunityTable() {
+export default function CommunitiesTable() {
   return (
-    <div className="bg-[#240046] rounded-[32px] overflow-hidden border border-purple-900/40">
+    <div className="p-6 rounded-[28px] bg-[radial-gradient(circle_at_top,#2a004a,#13001f)] border border-white/5 overflow-hidden">
 
-      {/* Table Header */}
-      <div className="grid grid-cols-5 px-10 py-6 text-sm uppercase tracking-widest text-purple-300 border-b border-purple-900/40">
-        <span>Community Name</span>
-        <span>Host Name</span>
-        <span>Members</span>
-        <span>Privacy Type</span>
-        <span className="text-right">Actions</span>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-semibold">New Communities</h2>
+        <span className="text-purple-400 text-xs tracking-widest">MANAGE</span>
+      </div>
+
+      {/* Column Headings */}
+      <div className="flex text-xs uppercase tracking-widest text-gray-500 pb-4 border-b border-white/5">
+        <div className="w-[45%]">Community</div>
+        <div className="w-[20%]">Category</div>
+        <div className="w-[20%]">Members</div>
+        <div className="w-[15%] text-right">Action</div>
       </div>
 
       {/* Rows */}
-      {communities.map((c, i) => (
-        <div
-          key={i}
-          className="grid grid-cols-5 items-center px-10 py-6 border-b border-purple-900/30 hover:bg-purple-900/20 transition"
-        >
-          {/* Name */}
-          <div className="flex items-center gap-4">
-            <img
-              src={c.image}
-              alt=""
-              className="w-12 h-12 rounded-xl object-cover"
-            />
-            <span className="font-semibold">{c.name}</span>
-          </div>
+      <div className="divide-y divide-white/5">
 
-          {/* Host */}
-          <span className="text-purple-300">{c.host}</span>
-
-          {/* Members */}
-          <div className="flex items-center gap-2 text-purple-200">
-            <Users size={16}/>
-            {c.members}
-          </div>
-
-          {/* Privacy */}
-          <span
-            className={`px-4 py-1 rounded-full text-xs font-semibold w-fit ${
-              c.privacy === "Public"
-                ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                : "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-            }`}
+        {communities.map((c, i) => (
+          <div
+            key={i}
+            className="flex items-center py-4 hover:bg-purple-900/20 transition"
           >
-            {c.privacy.toUpperCase()}
-          </span>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3">
-            <button className="bg-purple-500 px-5 py-2 rounded-full text-sm hover:bg-purple-400 transition">
-              View
-            </button>
-            <button className="bg-purple-800 px-5 py-2 rounded-full text-sm hover:bg-red-900/40 transition">
-              Delete
-            </button>
+            {/* Community */}
+            <div className="w-[45%] flex gap-4 items-center">
+              <div className="w-10 h-10 bg-purple-800/60 rounded-full flex items-center justify-center text-purple-300">
+                {c.icon}
+              </div>
+              <span className="text-sm">{c.name}</span>
+            </div>
+
+            {/* Category */}
+            <div className="w-[20%]">
+              <span className="text-xs px-3 py-1 rounded-full bg-purple-900/40 text-purple-300">
+                {c.cat}
+              </span>
+            </div>
+
+            {/* Members */}
+            <div className="w-[20%]">
+              <span className="text-xs px-3 py-1 rounded-full bg-purple-700/20 text-purple-200">
+                {c.members}
+              </span>
+            </div>
+
+            {/* Action */}
+            <div className="w-[15%] flex justify-end">
+              <button className="p-2 rounded-full hover:bg-purple-800/40 transition">
+                <Settings size={16} />
+              </button>
+            </div>
+
           </div>
-        </div>
-      ))}
-
-      {/* Pagination */}
-      <div className="flex justify-between items-center px-10 py-6">
-
-        <span className="text-purple-300 text-sm">
-          Showing 1 to 5 of 1,248 communities
-        </span>
-
-        <div className="flex gap-3">
-          {[1,2,3].map((p) => (
-            <button
-              key={p}
-              className={`w-10 h-10 rounded-full ${
-                p === 1
-                  ? "bg-purple-500 text-white"
-                  : "bg-purple-900/40 hover:bg-purple-600"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-          <button className="w-10 h-10 rounded-full bg-purple-900/40 hover:bg-purple-600">
-            250
-          </button>
-        </div>
+        ))}
 
       </div>
     </div>

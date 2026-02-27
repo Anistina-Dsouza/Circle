@@ -7,8 +7,17 @@ import Landing from './features/landingPage/pages/Landing';
 import Feed from './features/feed/FeedPage';
 import Messages from './features/messages/MessagesPage';
 import AdminDashboard from './features/admin/pages/AdminDashboard';
+<<<<<<< HEAD
 import ManageUsers from './features/admin/pages/ManageUsers';
 import ManageCommunities from './features/admin/pages/ManageCommunities';
+=======
+import ProfilePage from './features/profile/ProfilePage';
+import EditProfilePage from './features/profile/EditProfilePage';
+import ProtectedRoute from './features/auth/components/ProtectedRoute';
+
+import Circles from './features/circles/pages/CirclesPage';
+import CreateCircle from './features/circles/pages/CreateCirclePage';
+>>>>>>> 91c860c3a7a05ff3a9f12247a0d7aad2364af9a2
 
 function App() {
   return (
@@ -20,11 +29,21 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+<<<<<<< HEAD
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/communities" element={<ManageCommunities />} />
+=======
+            <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
+            <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
+>>>>>>> 91c860c3a7a05ff3a9f12247a0d7aad2364af9a2
           </Routes>
         </main>
       </div>

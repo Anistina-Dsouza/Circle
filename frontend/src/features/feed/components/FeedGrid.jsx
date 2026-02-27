@@ -14,7 +14,7 @@ const posts = [
         user: { name: 'Devin', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80' },
         time: '15M LEFT',
         image: 'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?ixlib=rb-1.2.1&auto=format&fit=crop&w=1080&q=80',
-        caption: 'Just finished the new design system for the Circle community!'
+        caption: 'Just finished the new design system for the Circle!'
     },
     {
         id: 3,

@@ -53,12 +53,17 @@ export default function Sidebar() {
       <nav className="flex-1 space-y-4 overflow-y-auto pr-2">
 
         <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+<<<<<<< HEAD
         <Link to="/admin/users">
           <Item icon={<Users size={18} />} label="Users" />
         </Link>
         <Link to="/admin/communities">
           <Item icon={<Layers size={18} />} label="Communities" />
         </Link>
+=======
+        <Item icon={<Users size={18} />} label="Users" />
+        <Item icon={<Users size={18} />} label="Circles" />
+>>>>>>> 91c860c3a7a05ff3a9f12247a0d7aad2364af9a2
         <Item icon={<Megaphone size={18} />} label="Announcements" />
         <Item icon={<BarChart size={18} />} label="Reports" />
 
@@ -78,13 +83,12 @@ const Item = ({ icon, label, active, danger }) => (
     className={`
     flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer
     transition
-    ${
-      active
+    ${active
         ? "bg-purple-700/40 text-purple-300"
         : danger
-        ? "hover:bg-red-900/20 text-gray-400 hover:text-red-400"
-        : "hover:bg-purple-800/30 text-gray-400 hover:text-white"
-    }
+          ? "hover:bg-red-900/20 text-gray-400 hover:text-red-400"
+          : "hover:bg-purple-800/30 text-gray-400 hover:text-white"
+      }
     `}
   >
     {icon}

@@ -1,4 +1,3 @@
-
 import {
   Users,
   Layers,
@@ -10,14 +9,14 @@ export default function KPICard({ value, label, badge }) {
 
   const icons = {
     Users: <Users size={18} />,
-    Communities: <Layers size={18} />,
+    Circles: <Layers size={18} />,
     Active: <TrendingUp size={18} />,
     Flagged: <AlertTriangle size={18} />,
   };
 
   const colors = {
     Users: "bg-purple-800/60 text-purple-300",
-    Communities: "bg-indigo-800/60 text-indigo-300",
+    Circles: "bg-indigo-800/60 text-indigo-300",
     Active: "bg-green-800/60 text-green-300",
     Flagged: "bg-red-800/60 text-red-300",
   };
