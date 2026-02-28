@@ -125,48 +125,58 @@ export default function CommunityTable() {
         </div>
 
       </div> */}
+      
+      <div className="flex justify-between items-center px-10 py-6">
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-10 py-6">
+        {/* Left Text */}
+        <span className="text-purple-300 text-sm">
+          Showing <span className="text-white font-semibold">1 to 5</span> of{" "}
+          <span className="text-white font-semibold">1,248</span> communities
+        </span>
 
-      {/* Left Text */}
-      <p className="text-sm text-purple-300">
-        Showing <span className="text-white font-semibold">1–5</span> of{" "}
-        <span className="text-white font-semibold">1,248</span> communities
-      </p>
+        {/* Pagination Buttons */}
+        <div className="flex items-center gap-3">
 
-      {/* Pagination Controls */}
-      <div className="flex items-center gap-3">
+          {/* Previous */}
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white transition">
+            ‹
+          </button>
 
-        {/* Previous */}
-        <button className="pagination-btn">
-          ‹
-        </button>
+          {/* Active Page */}
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-gradient-to-r from-purple-500 to-purple-600
+            text-white font-medium shadow-md shadow-purple-900/40">
+            1
+          </button>
 
-        {/* Page Numbers */}
-        <button className="pagination-btn active">
-          1
-        </button>
+          {/* Other Pages */}
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white transition">
+            2
+          </button>
 
-        <button className="pagination-btn">
-          2
-        </button>
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white transition">
+            3
+          </button>
 
-        <button className="pagination-btn">
-          3
-        </button>
+          {/* Ellipsis */}
+          <span className="px-2 text-purple-400 text-sm">...</span>
 
-        <span className="px-2 text-purple-400">…</span>
+          {/* Last Page */}
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white transition">
+            250
+          </button>
 
-        <button className="pagination-btn">
-          250
-        </button>
+          {/* Next */}
+          <button className="w-11 h-11 flex items-center justify-center rounded-full
+            bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white transition">
+            ›
+          </button>
 
-        {/* Next */}
-        <button className="pagination-btn">
-          ›
-        </button>
-
-      </div>
+        </div>
       </div>
     </div>
   );

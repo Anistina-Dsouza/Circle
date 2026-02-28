@@ -41,11 +41,51 @@ export default function ManageCommunities() {
           </div>
 
           {/* Select */}
-          <select className="bg-[#240046] px-6 py-4 rounded-full border border-purple-900/40 outline-none w-64 focus:ring-2 focus:ring-purple-500">
+          {/* <select className="bg-[#240046] px-6 py-4 rounded-full border border-purple-900/40 outline-none w-64 focus:ring-2 focus:ring-purple-500">
             <option>Privacy Type: All</option>
             <option>Public</option>
             <option>Private</option>
-          </select>
+          </select> */}
+
+            <div className="relative w-64">
+
+            <select
+            className="
+                w-full
+                appearance-none
+                bg-[#240046]
+                px-6 pr-12 py-4
+                rounded-full
+                border border-purple-500/30
+                text-purple-200
+                text-sm font-medium
+                outline-none
+                transition-all duration-200
+                hover:border-purple-400
+                focus:border-purple-400
+                focus:ring-2 focus:ring-purple-500/30
+                shadow-md shadow-purple-900/20
+                cursor-pointer
+            "
+            >
+            <option className="bg-[#1a0033] text-purple-200">
+                Privacy Type: All
+            </option>
+            <option className="bg-[#1a0033] text-purple-200">
+                Public
+            </option>
+            <option className="bg-[#1a0033] text-purple-200">
+                Private
+            </option>
+            </select>
+
+            {/* Custom Arrow */}
+            <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center text-purple-400">
+            ▼
+            </div>
+
+            </div>
+
         </div>
 
         <CommunityTable />
