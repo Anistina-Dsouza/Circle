@@ -10,6 +10,7 @@ import AdminDashboard from './features/admin/pages/AdminDashboard';
 
 import ManageUsers from './features/admin/pages/ManageUsers';
 import ManageCommunities from './features/admin/pages/ManageCommunities';
+import Announcements from './features/admin/pages/Announcements';
 
 import ProfilePage from './features/profile/ProfilePage';
 import EditProfilePage from './features/profile/EditProfilePage';
@@ -35,7 +36,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/communities" element={<ManageCommunities />} />
-
+            <Route path="/admin/announcements" element={<Announcements />} />
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />

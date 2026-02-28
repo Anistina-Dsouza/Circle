@@ -28,13 +28,12 @@ export default function Sidebar() {
         </Link>
 
         <Link to="/admin/communities">
-          <Item icon={<Layers size={18} />} label="Communities" />
+          <Item icon={<Layers size={18} />} label="Circles" />
         </Link>
-
-        <Item icon={<Users size={18} />} label="Users" />
-        <Item icon={<Users size={18} />} label="Circles" />
-
-        <Item icon={<Megaphone size={18} />} label="Announcements" />
+        
+        <Link to="/admin/announcements">
+          <Item icon={<Megaphone size={18} />} label="Announcements" />
+        </Link>
         <Item icon={<BarChart size={18} />} label="Reports" />
 
       </nav>

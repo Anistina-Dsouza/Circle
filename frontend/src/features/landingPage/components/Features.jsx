@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Clock, Users, Video, MessageSquare } from "lucide-react";
 
 export default function Features() {
@@ -70,7 +69,7 @@ export default function Features() {
     </section>
   );
 }
-=======
+
 const features = [
   {
     title: "Time-Based Stories",
@@ -86,21 +85,21 @@ const features = [
   }
 ];
 
-export default function Features() {
-  return (
-    <section className="px-10 mt-28 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
-      {features.map((f) => (
-        <div
-          key={f.title}
-          className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#9D4EDD] transition"
-        >
-          <h4 className="text-xl font-semibold mb-3 text-[#C77DFF]">
-            {f.title}
-          </h4>
-          <p className="text-[#E0AAFF]">{f.desc}</p>
-        </div>
-      ))}
-    </section>
-  );
-}
->>>>>>> 91c860c3a7a05ff3a9f12247a0d7aad2364af9a2
+// export default function Features() {
+//   return (
+//     <section className="px-10 mt-28 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+//       {features.map((f) => (
+//         <div
+//           key={f.title}
+//           className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#9D4EDD] transition"
+//         >
+//           <h4 className="text-xl font-semibold mb-3 text-[#C77DFF]">
+//             {f.title}
+//           </h4>
+//           <p className="text-[#E0AAFF]">{f.desc}</p>
+//         </div>
+//       ))}
+//     </section>
+//   );
+// }
+
