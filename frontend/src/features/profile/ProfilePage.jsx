@@ -8,25 +8,25 @@ import ActiveStories from './components/ActiveStories';
 const ProfilePage = () => {
     const { username } = useParams();
     const baseUrl = import.meta.env.VITE_API_URL;
-    
+
     const [user, setUser] = useState(null);
     const [stories, setStories] = useState([]);
     const [followers, setFollowers] = useState([]);
     const [following, setFollowing] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // Use ref to track if component is mounted
     const isMounted = useRef(true);
-    
+
     // Get logged-in user from localStorage - memoize this
     const loggedInUser = useRef(null);
-    
     // Initialize loggedInUser once
     if (!loggedInUser.current) {
         try {
             const stored = localStorage.getItem('user');
             loggedInUser.current = stored ? JSON.parse(stored) : null;
+
         } catch {
             loggedInUser.current = null;
         }
@@ -37,13 +37,12 @@ const ProfilePage = () => {
     // Memoize the fetch function
     const fetchProfileData = useCallback(async () => {
         if (!username) return;
-        
+
         setLoading(true);
         setError(null);
-        
+
         try {
             const token = localStorage.getItem('token');
-            
             if (!token) {
                 throw new Error('No authentication token found');
             }
@@ -59,7 +58,6 @@ const ProfilePage = () => {
                 axios.get(`${baseUrl}/api/users/${username}/following`)
             ]);
 
-            console.log('here is story data frontend: ',storiesRes)
             // Only update state if component is still mounted
             if (!isMounted.current) return;
             console.log('Raw API Responses:', {
@@ -72,17 +70,17 @@ const ProfilePage = () => {
             // Helper function to safely extract array data
             const extractArray = (response) => {
                 if (!response?.data) return [];
-                
+
                 // Case 1: { data: { data: [...] } }
                 if (response.data.data && Array.isArray(response.data.data)) {
                     return response.data.data;
                 }
-                
+
                 // Case 2: { data: [...] }
                 if (Array.isArray(response.data)) {
                     return response.data;
                 }
-                if(response.data.moments && Array.isArray(response.data.moments)){
+                if (response.data.moments && Array.isArray(response.data.moments)) {
                     return response.data.moments;
                 }
                 // Case 3: { data: { followers: [...] } } or { data: { following: [...] } }
@@ -92,48 +90,39 @@ const ProfilePage = () => {
                 if (response.data.following && Array.isArray(response.data.following)) {
                     return response.data.following;
                 }
-                
+
                 // Case 4: { data: { data: { followers: [...] } } }
-                if (response.data.data?.followers && Array.isArray(response.data.data.followers)) {
+                if (response.data?.data?.followers && Array.isArray(response.data.data.followers)) {
                     return response.data.data.followers;
                 }
                 if (response.data.data?.following && Array.isArray(response.data.data.following)) {
                     return response.data.data.following;
                 }
-                
+
                 return [];
             };
 
             // Extract user data
-            const profileUser = userRes.data.data || userRes.data;
-            console.log("fetching profile",profileUser)
+            const profileUser = userRes.data.user || userRes.data.data || userRes.data;
             // Extract arrays safely
             const userStories = extractArray(storiesRes);
             const userFollowers = extractArray(followersRes);
             const userFollowing = extractArray(followingRes);
 
-            console.log('Extracted data:', { 
-                profileUser, 
-                userStories, 
-                userFollowers, 
-                userFollowing,
-                followersType: Array.isArray(userFollowers) ? 'array' : typeof userFollowers,
-                followingType: Array.isArray(userFollowing) ? 'array' : typeof userFollowing
-            });
 
             setUser(profileUser);
             setStories(userStories);
             setFollowers(userFollowers);
             setFollowing(userFollowing);
-            
+
         } catch (err) {
             console.error('Error fetching profile data:', err);
-            
+
             // Only update state if component is still mounted
             if (!isMounted.current) return;
-            
+
             setError(err.response?.data?.message || err.message || 'Failed to load profile');
-            
+
             // If it's own profile and API fails, fallback to localStorage data
             if (isOwnProfile && loggedInUser.current) {
                 setUser({
@@ -161,10 +150,10 @@ const ProfilePage = () => {
     useEffect(() => {
         // Set mounted flag
         isMounted.current = true;
-        
+
         // Fetch data
         fetchProfileData();
-        
+
         // Cleanup function to prevent state updates on unmounted component
         return () => {
             isMounted.current = false;
@@ -186,7 +175,7 @@ const ProfilePage = () => {
                 // Handle different follow object structures
                 const followerUser = follow.follower || follow;
                 const followerId = followerUser?._id || followerUser;
-                
+
                 if (followerId) {
                     return followerId.toString() === loggedInUser.current._id.toString();
                 }
@@ -199,8 +188,8 @@ const ProfilePage = () => {
             name: user.displayName || user.username,
             bio: user.bio || 'No bio yet',
             avatar: user.profilePic || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-            followers: followersArray.length.toLocaleString() || '0',
-            following: followingArray.length.toLocaleString() || '0',
+            followers: (followers.length || 0).toLocaleString(),
+            following: (following.length || 0).toLocaleString(),
             stories: (user.stats?.momentCount || stories.length || 0).toLocaleString(),
             _id: user._id,
             isFollowing
@@ -217,7 +206,7 @@ const ProfilePage = () => {
             const expiresAt = new Date(story.expiresAt);
             const now = new Date();
             const hoursLeft = Math.max(0, Math.floor((expiresAt - now) / (1000 * 60 * 60)));
-            
+
             let timeLeftText = '';
             if (hoursLeft > 0) {
                 timeLeftText = `${hoursLeft}h left`;
@@ -241,13 +230,13 @@ const ProfilePage = () => {
 
         try {
             const token = localStorage.getItem('token');
-            
+
             if (formatUserForHeader()?.isFollowing) {
                 // Unfollow
                 await axios.delete(`${baseUrl}/api/users/${user._id}/unfollow`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 // Update followers list - ensure it's an array
                 setFollowers(prev => {
                     const prevArray = Array.isArray(prev) ? prev : [];
@@ -262,7 +251,7 @@ const ProfilePage = () => {
                 await axios.post(`${baseUrl}/api/users/${user._id}/follow`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 // Add to followers list
                 const newFollower = {
                     follower: {
@@ -272,8 +261,8 @@ const ProfilePage = () => {
                         profilePic: loggedInUser.current.profilePic
                     }
                 };
-                
-                setFollowers(prev => {
+
+            setFollowers(prev => {
                     const prevArray = Array.isArray(prev) ? prev : [];
                     return [newFollower, ...prevArray];
                 });
@@ -306,7 +295,7 @@ const ProfilePage = () => {
                         <div className="text-6xl mb-4">😕</div>
                         <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
                         <p className="text-gray-400 mb-6">{error}</p>
-                        <button 
+                        <button
                             onClick={() => window.history.back()}
                             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full transition-colors"
                         >
@@ -327,13 +316,13 @@ const ProfilePage = () => {
 
             <main className="max-w-5xl mx-auto px-6 py-8">
                 {headerUser && (
-                    <ProfileHeader 
-                        user={headerUser} 
+                    <ProfileHeader
+                        user={headerUser}
                         isOwnProfile={isOwnProfile}
                         onFollowToggle={handleFollowToggle}
                     />
                 )}
-                
+
                 {displayStories.length > 0 ? (
                     <ActiveStories stories={displayStories} />
                 ) : (
@@ -341,7 +330,7 @@ const ProfilePage = () => {
                         <div className="text-6xl mb-4">📸</div>
                         <h3 className="text-xl font-semibold mb-2">No Moments Yet</h3>
                         <p className="text-gray-400">
-                            {isOwnProfile 
+                            {isOwnProfile
                                 ? "You haven't shared any moments. Create your first moment!"
                                 : `${headerUser?.name} hasn't shared any moments yet.`}
                         </p>

@@ -202,7 +202,7 @@ exports.followUser = async (req, res) => {
     });
 
     await User.findByIdAndUpdate(userId, {
-      $inc: { 'stats.followersCount': 1 }
+      $inc: { 'stats.followerCount': 1 }
     });
 
     res.json({
@@ -236,7 +236,7 @@ exports.unfollowUser = async (req, res) => {
     });
 
     await User.findByIdAndUpdate(userId, {
-      $inc: { 'stats.followersCount': -1 }
+      $inc: { 'stats.followerCount': -1 }
     });
 
     res.json({
