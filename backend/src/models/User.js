@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'User'
   // }],
-  
+
   // following: [{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'User'
@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema({
   stats: {
     followerCount: { type: Number, default: 0 },
     followingCount: { type: Number, default: 0 },
+    momentCount: { type: Number, default: 0 },
     circleCount: { type: Number, default: 0 },
     flashCount: { type: Number, default: 0 }
   },
