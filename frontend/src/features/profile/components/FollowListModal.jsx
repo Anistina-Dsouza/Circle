@@ -1,5 +1,5 @@
-import React from 'react';
 import { X, UserPlus, UserCheck, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
     if (!isOpen) return null;
@@ -45,7 +45,11 @@ const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
                                 key={index}
                                 className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl transition-all group"
                             >
-                                <div className="flex items-center space-x-4">
+                                <Link
+                                    to={`/profile/${user.username}`}
+                                    onClick={onClose}
+                                    className="flex items-center space-x-4 flex-1"
+                                >
                                     <div className="relative">
                                         <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-purple-500 to-pink-500">
                                             <img
@@ -64,7 +68,7 @@ const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
                                         </h4>
                                         <p className="text-gray-500 text-xs font-medium">@{user.username}</p>
                                     </div>
-                                </div>
+                                </Link>
 
                                 <button
                                     onClick={() => onFollowToggle && onFollowToggle(user._id || user.id, user.isFollowing)}

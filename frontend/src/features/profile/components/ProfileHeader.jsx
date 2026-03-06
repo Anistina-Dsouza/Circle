@@ -65,13 +65,6 @@ const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers =
                             <MessageSquare size={16} />
                             <span>Message</span>
                         </button>
-                        <Link
-                            to="/profile/edit"
-                            className="flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-purple-500/40 font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"
-                        >
-                            <Edit2 size={16} />
-                            <span>Edit Profile</span>
-                        </Link>
                     </>
                 )}
             </div>
@@ -98,7 +91,7 @@ const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers =
                 users={following}
                 onFollowToggle={onFollowToggle}
             />
-            9        </div>
+        </div>
     );
 };
 
