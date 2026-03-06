@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Users, Video, MessageSquare, Search, Bell, Menu, X, LogOut } from 'lucide-react';
+import { Home, Users, Video, MessageSquare, Search, Bell, Menu, X, LogOut, Compass } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -89,6 +89,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
 
                     <div className="hidden md:flex items-center space-x-2">
                         <NavItem icon={Home} label="Home" to="/feed" active={activePage === 'Home'} />
+                        <NavItem icon={Compass} label="Explore" to="/explore" active={activePage === 'Explore'} />
                         <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} />
                         <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} />
                         <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} />
@@ -157,6 +158,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
             {isOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full bg-[#0F0529] border-b border-white/5 py-4 px-6 flex flex-col space-y-4">
                     <NavItem icon={Home} label="Home" to="/feed" active={activePage === 'Home'} />
+                    <NavItem icon={Compass} label="Explore" to="/explore" active={activePage === 'Explore'} />
                     <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} />
                     <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} />
                     <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} />
