@@ -93,7 +93,7 @@
 //   );
 // }
 
-
+import { Link } from "react-router-dom";
 import { avatar } from "../../../utils/avatar";
 import { Eye } from "lucide-react";
 
@@ -111,7 +111,7 @@ export default function LatestRegistrations() {
       {/* Header */}
       <div className="flex justify-between items-center px-8 py-6 border-b border-white/5">
         <h2 className="text-lg font-semibold">Latest Registrations</h2>
-        <span className="text-purple-400 text-xs tracking-widest">VIEW ALL</span>
+        <Link to="/admin/users" className="text-purple-400 text-xs tracking-widest hover:text-purple-300 transition">VIEW ALL</Link>
       </div>
 
       {/* Column Headings */}

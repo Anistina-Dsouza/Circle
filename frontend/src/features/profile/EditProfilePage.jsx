@@ -6,48 +6,68 @@ import axios from 'axios';
 
 const EditProfilePage = () => {
     const navigate = useNavigate();
+    const baseUrl = import.meta.env.VITE_API_URL;
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    
     const [formData, setFormData] = useState({
         displayName: '',
-        username: '',
         bio: '',
         profilePic: '',
+        coverImage: '',
         preferences: {
-            theme: 'dark'
+            theme: 'dark',
+            language: 'en'
         },
         privacy: {
-            profileVisibility: 'public'
+            profileVisibility: 'public',
+            messagePrivacy: 'everyone',
+            showOnlineStatus: true
         }
     });
 
     useEffect(() => {
         const loadUserData = () => {
-            const userData = localStorage.getItem('user');
-            if (userData) {
-                const user = JSON.parse(userData);
-                setFormData({
-                    displayName: user.displayName || '',
-                    username: user.username || '',
-                    bio: user.bio || '',
-                    profilePic: user.profilePic || '',
-                    preferences: user.preferences || { theme: 'dark' },
-                    privacy: user.privacy || { profileVisibility: 'public' }
-                });
+            try {
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    setFormData({
+                        displayName: user.displayName || '',
+                        bio: user.bio || '',
+                        profilePic: user.profilePic || '',
+                        coverImage: user.coverImage || '',
+                        preferences: {
+                            theme: user.preferences?.theme || 'dark',
+                            language: user.preferences?.language || 'en'
+                        },
+                        privacy: {
+                            profileVisibility: user.privacy?.profileVisibility || 'public',
+                            messagePrivacy: user.privacy?.messagePrivacy || 'everyone',
+                            showOnlineStatus: user.privacy?.showOnlineStatus ?? true
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
             }
         };
         loadUserData();
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
+        
+        // Handle nested fields (e.g., preferences.theme)
         if (name.includes('.')) {
             const [section, field] = name.split('.');
             setFormData(prev => ({
                 ...prev,
                 [section]: {
                     ...prev[section],
-                    [field]: value
+                    [field]: type === 'checkbox' ? checked : value
                 }
             }));
         } else {
@@ -56,22 +76,106 @@ const EditProfilePage = () => {
                 [name]: value
             }));
         }
+        
+        // Clear messages when user types
+        setError('');
+        setSuccess('');
+    };
+
+    const validateForm = () => {
+        if (formData.displayName && formData.displayName.length > 25) {
+            setError('Display name must be less than 25 characters');
+            return false;
+        }
+        if (formData.bio && formData.bio.length > 500) {
+            setError('Bio must be less than 500 characters');
+            return false;
+        }
+        return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!validateForm()) return;
+        
         setSaving(true);
+        setError('');
+        setSuccess('');
+        
         try {
-            const response = await axios.put('http://localhost:5000/api/users/profile', formData);
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            // Prepare data for backend - match controller's expected fields
+            const updateData = {
+                displayName: formData.displayName || undefined,
+                bio: formData.bio || undefined,
+                profilePic: formData.profilePic || undefined,
+                coverImage: formData.coverImage || undefined,
+                preferences: {
+                    theme: formData.preferences.theme,
+                    language: formData.preferences.language
+                },
+                privacy: {
+                    profileVisibility: formData.privacy.profileVisibility,
+                    messagePrivacy: formData.privacy.messagePrivacy,
+                    showOnlineStatus: formData.privacy.showOnlineStatus
+                }
+            };
+
+            // Remove undefined values
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] === undefined) {
+                    delete updateData[key];
+                }
+            });
+
+            console.log('Sending update:', updateData);
+
+            const response = await axios.put(
+                `${baseUrl}/api/users/profile`,
+                updateData,
+                {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Update response:', response.data);
+
             if (response.data.success) {
-                // Update local storage
+                // Update local storage with new user data
                 localStorage.setItem('user', JSON.stringify(response.data.user));
-                alert('Profile updated successfully!');
-                navigate(`/profile/${response.data.user.username}`);
+                
+                setSuccess('Profile updated successfully!');
+                
+                // Redirect after short delay
+                setTimeout(() => {
+                    navigate(`/profile/${response.data.user.username}`);
+                }, 1500);
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert(error.response?.data?.error || 'Failed to update profile');
+            
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.message || 
+                                error.message || 
+                                'Failed to update profile';
+            
+            setError(errorMessage);
+            
+            // Handle token expiration
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/login');
+            }
         } finally {
             setSaving(false);
         }
@@ -103,6 +207,19 @@ const EditProfilePage = () => {
                     </button>
                 </div>
 
+                {/* Success/Error Messages */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500">
+                        {error}
+                    </div>
+                )}
+                
+                {success && (
+                    <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500">
+                        {success}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Profile Picture Section */}
                     <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-3xl p-8 flex flex-col items-center">
@@ -121,7 +238,7 @@ const EditProfilePage = () => {
                         <div className="mt-6 w-full max-w-md">
                             <label className="text-sm font-medium text-gray-400 mb-2 block">Profile Picture URL</label>
                             <input
-                                type="text"
+                                type="url"
                                 name="profilePic"
                                 value={formData.profilePic}
                                 onChange={handleChange}
@@ -146,18 +263,12 @@ const EditProfilePage = () => {
                                     name="displayName"
                                     value={formData.displayName}
                                     onChange={handleChange}
+                                    maxLength="25"
                                     className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
                                 />
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-400 mb-2 block">Username (cannot be changed)</label>
-                                <input
-                                    type="text"
-                                    name="username"
-                                    value={formData.username}
-                                    readOnly
-                                    className="w-full bg-[#0F0529]/50 border border-white/5 rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed"
-                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {formData.displayName?.length || 0}/25 characters
+                                </p>
                             </div>
                         </div>
 
@@ -168,9 +279,13 @@ const EditProfilePage = () => {
                                 value={formData.bio}
                                 onChange={handleChange}
                                 rows="4"
+                                maxLength="500"
                                 className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors resize-none"
                                 placeholder="Describe yourself..."
                             ></textarea>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {formData.bio?.length || 0}/500 characters
+                            </p>
                         </div>
                     </div>
 
@@ -189,8 +304,22 @@ const EditProfilePage = () => {
                                     onChange={handleChange}
                                     className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
                                 >
-                                    <option value="dark">Dark Theme</option>
-                                    <option value="light">Light Theme</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-400 mb-2 block">Language</label>
+                                <select
+                                    name="preferences.language"
+                                    value={formData.preferences.language}
+                                    onChange={handleChange}
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
+                                >
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
                                 </select>
                             </div>
                         </div>
@@ -212,6 +341,29 @@ const EditProfilePage = () => {
                                     <option value="followers">Followers Only</option>
                                     <option value="private">Private</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-400 mb-2 block">Message Privacy</label>
+                                <select
+                                    name="privacy.messagePrivacy"
+                                    value={formData.privacy.messagePrivacy}
+                                    onChange={handleChange}
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
+                                >
+                                    <option value="everyone">Everyone</option>
+                                    <option value="followers">Followers Only</option>
+                                    <option value="none">No One</option>
+                                </select>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-gray-400">Show Online Status</label>
+                                <input
+                                    type="checkbox"
+                                    name="privacy.showOnlineStatus"
+                                    checked={formData.privacy.showOnlineStatus}
+                                    onChange={handleChange}
+                                    className="w-5 h-5 rounded border-white/10 bg-[#0F0529] text-purple-500 focus:ring-purple-500"
+                                />
                             </div>
                         </div>
                     </div>

@@ -26,8 +26,14 @@ const register = async (req, res) => {
       username: finalUsername,
       email,
       password,
-      displayName: name || finalUsername
-    });
+      displayName: name || finalUsername,
+      onlineStatus: {
+        status: 'online',
+        lastSeen: new Date()
+      }
+
+  });
+  await user.save();
 
     // Generate token
     const token = generateToken(user._id);
@@ -37,6 +43,7 @@ const register = async (req, res) => {
       success: true,
       token,
       user
+
     });
   } catch (error) {
     res.status(500).json({

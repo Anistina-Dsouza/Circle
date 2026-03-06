@@ -10,7 +10,7 @@ exports.createMoment = async (req, res) => {
     if (!media || !media?.url) {
       return res.status(400).json({ error: 'Media is required' });
     }
-    
+
     const moment = await Moment.create({
       user: req.userId,
       media,
@@ -49,9 +49,9 @@ exports.getFeed = async (req, res) => {
       expiresAt: { $gt: new Date() },
       isActive: true
     })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .populate('user', 'username profile.displayName profile.profileImage');
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate('user', 'username displayName profilePic');
 
     res.json({
       success: true,
@@ -68,9 +68,9 @@ exports.getUserMoments = async (req, res) => {
   try {
     console.log(req.params)
     const { username } = req.params;
-    
+
     const user = await User.findOne({ username });
-    console.log(user)  
+    console.log(user)
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -81,9 +81,10 @@ exports.getUserMoments = async (req, res) => {
       expiresAt: { $gt: new Date() },
       isActive: true
     })
-    .sort({ createdAt: -1 })
-    .populate('user', 'username profile.displayName profile.profileImage');
+      .sort({ createdAt: -1 })
+      .populate('user', 'username displayName profilePic');
 
+    console.log("fetching stories : ", moments)
     res.json({
       success: true,
       moments
@@ -98,8 +99,8 @@ exports.getUserMoments = async (req, res) => {
 exports.getMoment = async (req, res) => {
   try {
     const moment = await Moment.findById(req.params.momentId)
-      .populate('user', 'username profile.displayName profile.profileImage')
-      .populate('replies.user', 'username profile.displayName');
+      .populate('user', 'username displayName profilePic')
+      .populate('replies.user', 'username displayName');
 
     if (!moment) {
       return res.status(404).json({ error: 'Moment not found' });

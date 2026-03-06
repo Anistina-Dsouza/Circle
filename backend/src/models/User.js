@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePic: {
     type: String,
-    default: 'default_avatar.png'
+    default: 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg'
   },
   bio: {
     type: String,
@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'User'
   // }],
-  
+
   // following: [{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'User'
@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema({
   stats: {
     followerCount: { type: Number, default: 0 },
     followingCount: { type: Number, default: 0 },
+    momentCount: { type: Number, default: 0 },
     circleCount: { type: Number, default: 0 },
     flashCount: { type: Number, default: 0 }
   },

@@ -2,18 +2,24 @@ import React from 'react';
 import { Image, Video, Send } from 'lucide-react';
 
 const CreatePost = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const [content, setContent] = React.useState('');
+    const profilePic = user?.profilePic;
+
     return (
         <div className="bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10">
             <div className="flex items-center space-x-4">
                 <img
-                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"
+                    src={profilePic}
                     alt="Profile"
                     className="w-12 h-12 rounded-full border-2 border-purple-500/30 object-cover"
                 />
                 <div className="flex-1 bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
                     <input
                         type="text"
-                        placeholder="Share a moment with your circles..."
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder={`Share a moment, ${user?.displayName || user?.username || 'User'}...`}
                         className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none"
                     />
                 </div>

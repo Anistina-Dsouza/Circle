@@ -28,8 +28,7 @@ const mockFollowing = [
 ];
 // ------------------------------------
 
-const ProfileHeader = ({ user, isOwnProfile = false }) => {
-    const [isFollowing, setIsFollowing] = useState(false);
+const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle }) => {
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
 
@@ -66,19 +65,26 @@ const ProfileHeader = ({ user, isOwnProfile = false }) => {
                 ) : (
                     <>
                         <button
-                            onClick={() => setIsFollowing(!isFollowing)}
-                            className={`flex items-center space-x-2 px-7 py-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${isFollowing
+                            onClick={onFollowToggle}
+                            className={`flex items-center space-x-2 px-7 py-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${user.isFollowing
                                 ? 'bg-[#1E1B3A] border border-purple-500/50 text-purple-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400'
                                 : 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-500/20'
                                 }`}
                         >
-                            {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
-                            <span>{isFollowing ? 'Following' : 'Follow'}</span>
+                            {user.isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                            <span>{user.isFollowing ? 'Following' : 'Follow'}</span>
                         </button>
                         <button className="flex items-center space-x-2 px-7 py-2.5 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-purple-500/40 font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95">
                             <MessageSquare size={16} />
                             <span>Message</span>
                         </button>
+                        <Link
+                            to="/profile/edit"
+                            className="flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-purple-500/40 font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"
+                        >
+                            <Edit2 size={16} />
+                            <span>Edit Profile</span>
+                        </Link>
                     </>
                 )}
             </div>

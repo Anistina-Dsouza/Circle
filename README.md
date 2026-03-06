@@ -1,128 +1,233 @@
+
 # 🌐 Circle – Full-Stack Social App (MERN)
 
-**Circle** is a modern **full-stack social networking platform** built using the **MERN stack**.  
-The project is maintained as a **single monorepo** containing both **frontend (React)** and **backend (Node.js + Express)**.
+<div align="center">
+  <img width="1908" height="976" alt="image" src="https://github.com/user-attachments/assets/6f3f7ef2-5096-4e9f-aeb2-d9e2cd13ece9" />
+
+  **A modern social networking platform built with the MERN stack**
+  
+  [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)]()
+  [![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js)]()
+  [![Express](https://img.shields.io/badge/Express-4.18-000000?logo=express)]()
+  [![MongoDB](https://img.shields.io/badge/MongoDB-6.0-47A248?logo=mongodb)]()
+  [![Socket.io](https://img.shields.io/badge/Socket.io-4.5-010101?logo=socket.io)]()
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
+</div>
 
 ---
 
-## 🧠 About the Project
+## 📋 Overview
 
-Circle allows users to create communities, chat in real time, share stories, and host video meetings.
+**Circle** is a full-stack social networking platform that reimagines online communities through **time-based content discovery**. Users can create communities (Circles), share ephemeral stories (Moments), chat in real-time (Huddles), and host video meetings (RoundTables).
 
-This project demonstrates **end-to-end system design**, from UI to backend APIs, real-time communication, authentication, and deployment.
+Built as a **monorepo** with React frontend and Node.js backend, this project demonstrates production-ready full-stack development.
 
 ---
 
-## 🗂 Monorepo Structure
+## ✨ Key Features
 
-```text
+| Feature | Description |
+|---------|-------------|
+| **👤 User System** | JWT authentication, profiles, follow/unfollow, privacy settings |
+| **🏘️ Circles** | Communities with public/private options, roles, invite codes |
+| **📸 Moments** | 24-48 hour stories with auto-expiry, view counts, replies |
+| **💬 Huddles** | Real-time chat with Socket.io, reactions, read receipts |
+| **🎥 RoundTables** | Video meetings using WebRTC, screen sharing, recordings |
+| **🔔 Notifications** | In-app and push notifications for engagement |
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 18** – UI library with hooks
+- **React Router** – Navigation
+- **Context API** – State management
+- **Axios** – HTTP client
+- **Socket.io-client** – Real-time communication
+- **Tailwind CSS** – Styling
+
+### Backend
+- **Node.js** – JavaScript runtime
+- **Express.js** – Web framework
+- **MongoDB + Mongoose** – Database & ODM
+- **JWT + Bcrypt** – Authentication
+- **Socket.io** – WebSocket server
+- **Cloudinary** – Media storage
+
+### DevOps
+- **Git/GitHub** – Version control
+- **Vercel** – Frontend hosting
+- **Render** – Backend hosting
+- **MongoDB Atlas** – Database hosting
+
+---
+
+## 📁 Project Structure
+
+```
 circle-app/
-├── client/          # React frontend
-├── server/          # Node.js + Express backend
-├── docs/            # Documentation
+├── client/                    # React frontend
+│   ├── src/
+│   │   ├── components/        # Reusable UI components
+│   │   ├── pages/             # Page components
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── context/           # Context providers
+│   │   ├── services/          # API services
+│   │   └── utils/             # Helper functions
+│   └── package.json
+│
+├── server/                    # Node.js backend
+│   ├── src/
+│   │   ├── models/            # MongoDB models
+│   │   ├── controllers/        # Business logic
+│   │   ├── routes/            # API routes
+│   │   ├── middleware/         # Custom middleware
+│   │   ├── utils/             # Helper functions
+│   │   └── socket/            # WebSocket handlers
+│   └── package.json
+│
 └── README.md
-🚀 Local Development Setup
-1️⃣ Clone the Repository
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- npm or yarn
+- MongoDB Atlas account
+- Cloudinary account
+
+### Installation
+
+**1. Clone the repository**
+```bash
 git clone https://github.com/your-username/circle-app.git
 cd circle-app
-2️⃣ Backend Setup
+```
+
+**2. Backend setup**
+```bash
 cd server
 npm install
-cp .env.example .env
-npm run dev
-Backend runs on:
+cp .env.example .env   # Add your credentials
+npm run dev            # Runs on http://localhost:3000
+```
 
-http://localhost:5000
-3️⃣ Frontend Setup
+**3. Frontend setup**
+```bash
 cd client
 npm install
-npm start
-Frontend runs on:
+cp .env.example .env.local   # Add backend URL
+npm run dev                     # Runs on http://localhost:5173
+```
 
-http://localhost:3000
-🛠 Tech Stack
-Frontend
-React.js
+---
 
-Context API / Hooks
+## 🔧 Environment Variables
 
-Deployed on Vercel
+### Backend (`server/.env`)
+```env
+PORT=3000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+CLIENT_URL=http://localhost:5173
+```
 
-Backend
-Node.js
-
-Express.js
-
-REST APIs
-
-Deployed on Render
-
-Database
-MongoDB Atlas (Free Tier)
-
-Real-time
-Socket.IO
-
-Media Storage
-Cloudinary (Free Tier)
-
-📦 Core Features
-Circles & Sub-circles – Structured communities
-
-Huddles – Real-time group chats with reactions
-
-Moments – 24-hour stories
-
-RoundTables – Video meetings
-
-Follow System – User connections
-
-🔧 Environment Variables
-Backend (server/.env)
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_secret
-CLIENT_URL=http://localhost:3000
-Frontend (client/.env.local)
+### Frontend (`client/.env.local`)
+```env
 REACT_APP_API_URL=http://localhost:5000/api
-📞 API Overview
-Method	Endpoint	Description
-POST	/api/auth/register	User registration
-POST	/api/auth/login	User login
-GET	/api/circles	Fetch circles
-GET	/api/huddles/:id/messages	Chat messages
-🔒 Security
-JWT-based authentication
+REACT_APP_SOCKET_URL=http://localhost:5000
+```
 
-Password hashing using bcrypt
+---
 
-Input validation
+## 📡 API Overview
 
-CORS protection
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | User login |
+| GET | `/api/users/:username` | Get user profile |
+| PUT | `/api/users/profile` | Update profile |
+| POST | `/api/users/:userId/follow` | Follow user |
+| POST | `/api/circles` | Create circle |
+| GET | `/api/circles` | Get all circles |
+| POST | `/api/circles/:circleId/join` | Join circle |
+| POST | `/api/moments` | Create moment |
+| GET | `/api/moments/feed` | Get moments feed |
 
-🚢 Deployment
-Service	Platform
-Frontend	Vercel
-Backend	Render
-Database	MongoDB Atlas
-Media	Cloudinary
-📈 Placement & Interview Value
-This project showcases:
+---
 
-Full-stack MERN architecture
 
-REST API design
+## 🔐 Authentication & Security
 
-Real-time systems (Socket.IO)
+- **JWT-based authentication** – Tokens stored securely
+- **Password hashing** – bcrypt with 10 rounds
+- **Input validation** – All user inputs validated
+- **Rate limiting** – Prevents brute force attacks
+- **CORS protection** – Restricted API access
+- **Helmet.js** – Security headers
 
-Authentication & authorization
+---
 
-Scalable monorepo structure
+## 🧪 Testing the App
 
-Deployment & CI/CD understanding
+Use these credentials to test:
+```json
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+```
 
-📌 Project Status
-🚧 Active Development
+Or register a new account at `/signup`
 
-📜 License
-MIT License
+---
 
+## 📦 Deployment
+
+| Service | Platform | URL |
+|---------|----------|-----|
+| Frontend | Vercel | `https://circle-app.vercel.app` |
+| Backend | Render | `https://circle-api.onrender.com` |
+| Database | MongoDB Atlas | - |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📈 Project Status
+
+✅ **Phase 1-4 Complete** – Authentication, Users, Circles, Moments  
+⏳ **Phase 5-7 In Progress** – Huddles, RoundTables, Notifications  
+🚀 **Production Ready** – Deployed and tested
+
+---
+
+## 📄 License
+
+MIT License – feel free to use this project for learning and portfolio purposes.
+
+---
+
+## 👥 Team
+
+- **Developer** – [Khushi Pal](https://github.com/kkhushi)  [Sakina Kheraj](https://github.com/SakinaKheraj) [Maryam Shaikh](https://github.com/mshaikh19)
+- **Project Link** – [https://github.com/Anistina-Dsouza/circle](https://github.com/Anistina-Dsouza/Circle)
+
+---
+
+<div align="center">
+  Made with ❤️
+</div>
