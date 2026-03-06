@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, UserPlus, UserCheck, Search } from 'lucide-react';
 
-const FollowListModal = ({ isOpen, onClose, title, users }) => {
+const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
     if (!isOpen) return null;
 
     return (
@@ -67,9 +67,10 @@ const FollowListModal = ({ isOpen, onClose, title, users }) => {
                                 </div>
 
                                 <button
+                                    onClick={() => onFollowToggle && onFollowToggle(user._id || user.id, user.isFollowing)}
                                     className={`flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${user.isFollowing
-                                            ? 'bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-400/30'
-                                            : 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-600/20'
+                                        ? 'bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-400/30'
+                                        : 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-600/20'
                                         }`}
                                 >
                                     {user.isFollowing ? <UserCheck size={14} /> : <UserPlus size={14} />}

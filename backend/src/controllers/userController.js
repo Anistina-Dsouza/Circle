@@ -254,18 +254,23 @@ exports.searchUsers = async (req, res) => {
   try {
     const { q } = req.query;
 
-    if (!q || q.length < 2) {
-      return res.json({ success: true, users: [] });
+    let users;
+    if (!q || q.length < 1) {
+      // Return suggested users (random sample)
+      users = await User.aggregate([
+        { $sample: { size: 10 } },
+        { $project: { username: 1, displayName: 1, profilePic: 1, stats: 1, bio: 1 } }
+      ]);
+    } else {
+      users = await User.find({
+        $or: [
+          { username: { $regex: q, $options: 'i' } },
+          { displayName: { $regex: q, $options: 'i' } }
+        ]
+      })
+        .select('username displayName profilePic stats bio')
+        .limit(20);
     }
-
-    const users = await User.find({
-      $or: [
-        { username: { $regex: q, $options: 'i' } },
-        { displayName: { $regex: q, $options: 'i' } }
-      ]
-    })
-      .select('username displayName profilePic stats')
-      .limit(10);
 
     res.json({
       success: true,

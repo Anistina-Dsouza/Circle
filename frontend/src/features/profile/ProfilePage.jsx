@@ -224,53 +224,98 @@ const ProfilePage = () => {
         });
     }, [stories]);
 
+    // Format follows to match FollowListModal structure
+    const formatFollowsForDisplay = useCallback((followsArray) => {
+        const array = Array.isArray(followsArray) ? followsArray : [];
+        return array.map(follow => {
+            // Handle different follow object structures (sometimes it's { follower: { ... } }, sometimes it's the user directly)
+            const userData = follow.follower || follow.following || follow;
+
+            // Check if logged in user is following this specific user
+            // This is tricky because we might not have the full following list for every user in the list
+            // For simplicity, we'll assume if they are in OUR 'following' list, we follow them
+            const isFollowing = Array.isArray(following) && following.some(f => {
+                const fUser = f.following || f;
+                return (fUser._id || fUser).toString() === (userData._id || userData).toString();
+            });
+
+            return {
+                _id: userData._id || userData.id,
+                name: userData.displayName || userData.username || 'User',
+                username: userData.username || 'unknown',
+                avatar: userData.profilePic || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
+                isFollowing: isFollowing,
+                isOnline: false // We don't have this info from follows API usually
+            };
+        });
+    }, [following]);
+
     // Handle follow/unfollow
-    const handleFollowToggle = useCallback(async () => {
-        if (!user?._id) return;
+    const handleFollowToggle = useCallback(async (targetUserId) => {
+        const idToToggle = targetUserId || user?._id;
+        if (!idToToggle) return;
+
+        // Check if we are currently following this specific user
+        const isCurrentlyFollowing = targetUserId
+            ? following.some(f => (f.following?._id || f._id || f).toString() === targetUserId.toString())
+            : formatUserForHeader()?.isFollowing;
 
         try {
             const token = localStorage.getItem('token');
+            const baseUrl = import.meta.env.VITE_API_URL;
 
-            if (formatUserForHeader()?.isFollowing) {
+            if (isCurrentlyFollowing) {
                 // Unfollow
-                await axios.delete(`${baseUrl}/api/users/${user._id}/unfollow`, {
+                await axios.delete(`${baseUrl}/api/users/${idToToggle}/unfollow`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                // Update followers list - ensure it's an array
-                setFollowers(prev => {
-                    const prevArray = Array.isArray(prev) ? prev : [];
-                    return prevArray.filter(follow => {
-                        const followerUser = follow.follower || follow;
-                        const followerId = followerUser?._id || followerUser;
-                        return followerId?.toString() !== loggedInUser.current?._id?.toString();
-                    });
-                });
+                // Update following list locally
+                setFollowing(prev => prev.filter(f => {
+                    const fUser = f.following || f;
+                    return (fUser._id || fUser).toString() !== idToToggle.toString();
+                }));
+
+                // If we unfollowed the profile we are looking at, update followers list too
+                if (idToToggle === user?._id) {
+                    setFollowers(prev => prev.filter(f => {
+                        const fUser = f.follower || f;
+                        return (fUser._id || fUser).toString() !== loggedInUser.current?._id?.toString();
+                    }));
+                }
             } else {
                 // Follow
-                await axios.post(`${baseUrl}/api/users/${user._id}/follow`, {}, {
+                await axios.post(`${baseUrl}/api/users/${idToToggle}/follow`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                // Add to followers list
-                const newFollower = {
-                    follower: {
-                        _id: loggedInUser.current._id,
-                        username: loggedInUser.current.username,
-                        displayName: loggedInUser.current.displayName,
-                        profilePic: loggedInUser.current.profilePic
+                // Add to following list
+                const newFollowing = {
+                    following: {
+                        _id: idToToggle,
+                        // We might not have full data for this user if it's from a list, 
+                        // but the list will re-format based on the update following state
                     }
                 };
+                setFollowing(prev => [newFollowing, ...prev]);
 
-            setFollowers(prev => {
-                    const prevArray = Array.isArray(prev) ? prev : [];
-                    return [newFollower, ...prevArray];
-                });
+                // If we followed the profile we are looking at, update followers list too
+                if (idToToggle === user?._id) {
+                    const newFollower = {
+                        follower: {
+                            _id: loggedInUser.current._id,
+                            username: loggedInUser.current.username,
+                            displayName: loggedInUser.current.displayName,
+                            profilePic: loggedInUser.current.profilePic
+                        }
+                    };
+                    setFollowers(prev => [newFollower, ...prev]);
+                }
             }
         } catch (error) {
             console.error('Follow toggle error:', error);
         }
-    }, [user, baseUrl, formatUserForHeader]);
+    }, [user, baseUrl, following, formatUserForHeader]);
 
     if (loading) {
         return (
@@ -320,6 +365,8 @@ const ProfilePage = () => {
                         user={headerUser}
                         isOwnProfile={isOwnProfile}
                         onFollowToggle={handleFollowToggle}
+                        followers={formatFollowsForDisplay(followers)}
+                        following={formatFollowsForDisplay(following)}
                     />
                 )}
 
