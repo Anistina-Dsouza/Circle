@@ -13,22 +13,9 @@ const StatCard = ({ value, label, onClick }) => (
     </button>
 );
 
-// --- Mock Follower/Following Data ---
-const mockFollowers = [
-    { username: 'luke_sky', name: 'Luke Skywalker', avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=64', isOnline: true, isFollowing: true },
-    { username: 'leia_organa', name: 'Leia Organa', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64', isOnline: false, isFollowing: false },
-    { username: 'han_solo', name: 'Han Solo', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64', isOnline: true, isFollowing: true },
-    { username: 'chewbacca', name: 'Chewbacca', avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=64', isOnline: false, isFollowing: false },
-];
+// --- Mock Data Removed ---
 
-const mockFollowing = [
-    { username: 'darth_vader', name: 'Darth Vader', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=64', isOnline: true, isFollowing: true },
-    { username: 'obi_wan', name: 'Ben Kenobi', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64', isOnline: false, isFollowing: true },
-    { username: 'yoda_master', name: 'Grand Master Yoda', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64', isOnline: true, isFollowing: true },
-];
-// ------------------------------------
-
-const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle }) => {
+const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers = [], following = [] }) => {
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
 
@@ -101,15 +88,17 @@ const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle }) => {
                 isOpen={isFollowersOpen}
                 onClose={() => setIsFollowersOpen(false)}
                 title="Followers"
-                users={mockFollowers}
+                users={followers}
+                onFollowToggle={onFollowToggle}
             />
             <FollowListModal
                 isOpen={isFollowingOpen}
                 onClose={() => setIsFollowingOpen(false)}
                 title="Following"
-                users={mockFollowing}
+                users={following}
+                onFollowToggle={onFollowToggle}
             />
-        </div>
+            9        </div>
     );
 };
 
