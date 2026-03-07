@@ -4,6 +4,8 @@ import axios from 'axios';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import ProfileHeader from './components/ProfileHeader';
 import ActiveStories from './components/ActiveStories';
+import { useAuth } from '../../';
+import FollowListModal from './components/FollowListModal'; // Make sure this import exists
 
 const ProfilePage = () => {
     const { username } = useParams();
@@ -15,7 +17,11 @@ const ProfilePage = () => {
     const [following, setFollowing] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [currentUserFollowing, setCurrentUserFollowing] = useState([]);
+    const [isFollowing, setIsFollowing] = useState(false);
+    
+    // Modal states
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState(null); // 'followers' or 'following'
 
     // Use ref to track if component is mounted
     const isMounted = useRef(true);
@@ -35,7 +41,7 @@ const ProfilePage = () => {
 
     const isOwnProfile = loggedInUser.current?.username === username;
 
-    // Memoize the fetch function
+    // Fetch profile data
     const fetchProfileData = useCallback(async () => {
         if (!username) return;
 
@@ -48,11 +54,8 @@ const ProfilePage = () => {
                 throw new Error('No authentication token found');
             }
 
-            // Set auth header
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-            // Fetch all data in parallel
-            // We also fetch logged in user's following list to show correct follow status in modals
             const requests = [
                 axios.get(`${baseUrl}/api/users/${username}`),
                 axios.get(`${baseUrl}/api/moments/user/${username}`),
@@ -67,7 +70,6 @@ const ProfilePage = () => {
             const results = await Promise.all(requests);
             const [userRes, storiesRes, followersRes, followingRes, currentUserFollowingRes] = results;
 
-            // Only update state if component is still mounted
             if (!isMounted.current) return;
             console.log('Raw API Responses:', {
                 user: userRes.data,
@@ -76,23 +78,17 @@ const ProfilePage = () => {
                 following: followingRes.data
             });
 
-            // Helper function to safely extract array data
             const extractArray = (response) => {
                 if (!response?.data) return [];
 
-                // Case 1: { data: { data: [...] } }
                 if (response.data.data && Array.isArray(response.data.data)) {
                     return response.data.data;
                 }
 
-                // Case 2: { data: [...] }
                 if (Array.isArray(response.data)) {
                     return response.data;
                 }
-                if (response.data.moments && Array.isArray(response.data.moments)) {
-                    return response.data.moments;
-                }
-                // Case 3: { data: { followers: [...] } } or { data: { following: [...] } }
+                
                 if (response.data.followers && Array.isArray(response.data.followers)) {
                     return response.data.followers;
                 }
@@ -100,20 +96,14 @@ const ProfilePage = () => {
                     return response.data.following;
                 }
 
-                // Case 4: { data: { data: { followers: [...] } } }
-                if (response.data?.data?.followers && Array.isArray(response.data.data.followers)) {
-                    return response.data.data.followers;
-                }
-                if (response.data.data?.following && Array.isArray(response.data.data.following)) {
-                    return response.data.data.following;
+                if (response.data.moments && Array.isArray(response.data.moments)) {
+                    return response.data.moments;
                 }
 
                 return [];
             };
 
-            // Extract user data
             const profileUser = userRes.data.user || userRes.data.data || userRes.data;
-            // Extract arrays safely
             const userStories = extractArray(storiesRes);
             const userFollowers = extractArray(followersRes);
             const userFollowing = extractArray(followingRes);
@@ -124,22 +114,24 @@ const ProfilePage = () => {
             setFollowers(userFollowers);
             setFollowing(userFollowing);
 
-            if (isOwnProfile) {
-                setCurrentUserFollowing(userFollowing);
-            } else if (currentUserFollowingRes) {
-                setCurrentUserFollowing(extractArray(currentUserFollowingRes));
+            // Check if current user follows this profile
+            if (loggedInUser && !isOwnProfile) {
+                const isUserFollowing = userFollowers.some(follow => {
+                    const followerUser = follow.follower || follow;
+                    const followerId = followerUser?._id || followerUser;
+                    return followerId?.toString() === loggedInUser._id?.toString();
+                });
+                setIsFollowing(isUserFollowing);
             }
 
         } catch (err) {
             console.error('Error fetching profile data:', err);
 
-            // Only update state if component is still mounted
             if (!isMounted.current) return;
 
             setError(err.response?.data?.message || err.message || 'Failed to load profile');
 
-            // If it's own profile and API fails, fallback to localStorage data
-            if (isOwnProfile && loggedInUser.current) {
+            if (isOwnProfile && loggedInUser) {
                 setUser({
                     username: loggedInUser.current.username,
                     displayName: loggedInUser.current.displayName || loggedInUser.current.username,
@@ -163,19 +155,14 @@ const ProfilePage = () => {
     }, [username, baseUrl, isOwnProfile]); // Remove loggedInUser from dependencies
 
     useEffect(() => {
-        // Set mounted flag
         isMounted.current = true;
-
-        // Fetch data
         fetchProfileData();
-
-        // Cleanup function to prevent state updates on unmounted component
         return () => {
             isMounted.current = false;
         };
     }, [fetchProfileData]); // Only depend on fetchProfileData
 
-    // Format user data to match mockUser structure
+    // Format user data
     const formatUserForHeader = useCallback(() => {
         if (!user) return null;
 
@@ -206,18 +193,16 @@ const ProfilePage = () => {
             followers: (followers.length || 0).toLocaleString(),
             following: (following.length || 0).toLocaleString(),
             stories: (user.stats?.momentCount || stories.length || 0).toLocaleString(),
-            _id: user._id,
-            isFollowing
+            isFollowing: isFollowing
         };
     }, [user, followers, following, stories]);
 
-    // Format stories to match mockStories structure
+    // Format stories
     const formatStoriesForDisplay = useCallback(() => {
         const storiesArray = Array.isArray(stories) ? stories : [];
         if (!storiesArray.length) return [];
 
         return storiesArray.map(story => {
-            // Calculate time left
             const expiresAt = new Date(story.expiresAt);
             const now = new Date();
             const hoursLeft = Math.max(0, Math.floor((expiresAt - now) / (1000 * 60 * 60)));
@@ -239,125 +224,196 @@ const ProfilePage = () => {
         });
     }, [stories]);
 
-    // Format follows to match FollowListModal structure
-    const formatFollowsForDisplay = useCallback((followsArray) => {
-        const array = Array.isArray(followsArray) ? followsArray : [];
-        return array.map(follow => {
-            // Handle different follow object structures (sometimes it's { follower: { ... } }, sometimes it's the user directly)
-            const userData = follow.follower || follow.following || follow;
+    // Core follow/unfollow function
+    const toggleFollow = useCallback(async (targetUserId, targetUsername) => {
+        if (!targetUserId || !loggedInUser) return false;
 
-            // Check if logged in user is following this specific user
-            // We now use the logged-in user's following list
-            const isFollowing = Array.isArray(currentUserFollowing) && currentUserFollowing.some(f => {
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Check current follow status
+            const isCurrentlyFollowing = following.some(f => {
                 const fUser = f.following || f;
-                return (fUser._id || fUser).toString() === (userData._id || userData).toString();
+                return (fUser._id || fUser).toString() === targetUserId.toString();
             });
+
+            if (isCurrentlyFollowing) {
+                // Unfollow
+                await axios.delete(`${baseUrl}/api/users/${targetUserId}/unfollow`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                console.log(`Unfollowed user: ${targetUsername}`);
+            } else {
+                // Follow
+                await axios.post(`${baseUrl}/api/users/${targetUserId}/follow`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                console.log(`Followed user: ${targetUsername}`);
+            }
+            
+            return true; // Success
+        } catch (error) {
+            console.error('Follow toggle error:', error);
+            return false; // Failed
+        }
+    }, [baseUrl, following, loggedInUser]);
+
+    // Handle follow/unfollow from profile header
+    const handleProfileFollowToggle = useCallback(async (targetUserId) => {
+        if (!targetUserId || !loggedInUser) return;
+
+        const previousIsFollowing = isFollowing;
+        const previousFollowers = [...followers];
+
+        console.log("previousIsFollowing ", previousIsFollowing)
+        console.log("previousFollowers ", previousFollowers)
+
+        try {
+            const token = localStorage.getItem('token');
+
+            // Optimistic update
+            setIsFollowing(!isFollowing);
+
+            if (isFollowing) {
+                // Unfollow - remove current user from followers list
+                setFollowers(prev => {
+                    const prevArray = Array.isArray(prev) ? prev : [];
+                    return prevArray.filter(follow => {
+                        const followerUser = follow.follower || follow;
+                        const followerId = followerUser?._id || followerUser;
+                        return followerId?.toString() !== loggedInUser._id?.toString();
+                    });
+                });
+
+                await axios.delete(`${baseUrl}/api/users/${targetUserId}/unfollow`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } else {
+                // Follow - add current user to followers list
+                const newFollower = {
+                    follower: {
+                        _id: loggedInUser._id,
+                        username: loggedInUser.username,
+                        displayName: loggedInUser.displayName,
+                        profilePic: loggedInUser.profilePic
+                    }
+                };
+
+                setFollowers(prev => {
+                    const prevArray = Array.isArray(prev) ? prev : [];
+                    return [newFollower, ...prevArray];
+                });
+
+                await axios.post(`${baseUrl}/api/users/${targetUserId}/follow`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
+        } catch (error) {
+            console.error('Profile follow toggle error:', error);
+            // Revert on error
+            setIsFollowing(previousIsFollowing);
+            setFollowers(previousFollowers);
+        }
+    }, [isFollowing, followers, loggedInUser, baseUrl]);
+
+// Helper to extract follow data from API response
+const extractFollowData = (data) => {
+    if (data?.followers) return data.followers;
+    if (data?.following) return data.following;
+    if (Array.isArray(data)) return data;
+    if (data?.data && Array.isArray(data.data)) return data.data;
+    return [];
+};
+
+// Handle follow/unfollow from modals
+const handleModalFollowToggle = useCallback(async (targetUserId) => {
+    if (!targetUserId || !loggedInUser) return false;
+
+    // Prevent action on own profile
+    if (targetUserId === loggedInUser._id?.toString()) {
+        console.log('Cannot follow/unfollow yourself');
+        return false;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        
+        // Check current follow status from the following list
+        const isCurrentlyFollowing = following.some(f => {
+            const fUser = f.following || f;
+            return (fUser._id || fUser).toString() === targetUserId.toString();
+        });
+
+
+        if (isCurrentlyFollowing) {
+            // Unfollow
+            await axios.delete(`${baseUrl}/api/users/${targetUserId}/unfollow`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } else {
+            // Follow
+            await axios.post(`${baseUrl}/api/users/${targetUserId}/follow`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        }
+
+        // Refresh both followers and following lists
+        const [followersRes, followingRes] = await Promise.all([
+            axios.get(`${baseUrl}/api/users/${username}/followers`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }),
+            axios.get(`${baseUrl}/api/users/${username}/following`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        ]);
+
+        // Update state
+        setFollowers(extractFollowData(followersRes.data));
+        setFollowing(extractFollowData(followingRes.data));
+
+        return true; // Return success
+
+    } catch (error) {
+        console.error('Modal follow toggle error:', error);
+        return false; // Return failure
+    }
+}, [baseUrl, username, following, loggedInUser]);
+
+// Format follows for modal display
+    const formatFollowsForModal = useCallback((followsArray) => {
+        const array = Array.isArray(followsArray) ? followsArray : [];
+        //console.log("follolwers modal data :",array)
+        return array.map(follow => {
+            const userData = follow.follower || follow.following || follow;
+                //console.log("here is user data ",userData)
+            // Check if logged in user is following this specific user
+            const isUserFollowing = loggedInUser ? following.some(f => {
+                const fUser = f.following || f;
+                return (fUser._id || fUser).toString() === (userData.id || userData).toString();
+            }) : false;
 
             return {
                 _id: userData._id || userData.id,
                 name: userData.displayName || userData.username || 'User',
                 username: userData.username || 'unknown',
                 avatar: userData.profilePic || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-                isFollowing: isFollowing,
-                isOnline: false // We don't have this info from follows API usually
+                isFollowing: isUserFollowing,
+                isOwnProfile: loggedInUser?.username === userData.username  // Add this flag
             };
         });
-    }, [currentUserFollowing]);
+    }, [loggedInUser, following]);
 
-    // Handle follow/unfollow
-    const handleFollowToggle = useCallback(async (targetUserId) => {
-        const idToToggle = targetUserId || user?._id;
-        if (!idToToggle) return;
+    // Open modal
+    const openModal = (type) => {
+        setModalType(type);
+        setModalOpen(true);
+    };
 
-        // Check if we are currently following this specific user
-        const isCurrentlyFollowing = targetUserId
-            ? following.some(f => (f.following?._id || f._id || f).toString() === targetUserId.toString())
-            : formatUserForHeader()?.isFollowing;
-
-        try {
-            const token = localStorage.getItem('token');
-            const baseUrl = import.meta.env.VITE_API_URL;
-
-            if (isCurrentlyFollowing) {
-                // Unfollow
-                await axios.delete(`${baseUrl}/api/users/${idToToggle}/unfollow`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
-                // Update current user's following list locally
-                setCurrentUserFollowing(prev => prev.filter(f => {
-                    const fUser = f.following || f;
-                    return (fUser._id || fUser).toString() !== idToToggle.toString();
-                }));
-
-                // If this is the own profile we're viewing, update the following state too
-                if (isOwnProfile) {
-                    setFollowing(prev => prev.filter(f => {
-                        const fUser = f.following || f;
-                        return (fUser._id || fUser).toString() !== idToToggle.toString();
-                    }));
-                }
-
-                // If we unfollowed the profile we are looking at, update followers list and count too
-                if (!isOwnProfile && idToToggle === user?._id) {
-                    setFollowers(prev => prev.filter(f => {
-                        const fUser = f.follower || f;
-                        return (fUser._id || fUser).toString() !== loggedInUser.current?._id?.toString();
-                    }));
-
-                    setUser(prev => ({
-                        ...prev,
-                        stats: {
-                            ...prev.stats,
-                            followerCount: Math.max(0, (prev.stats?.followerCount || 0) - 1)
-                        }
-                    }));
-                }
-            } else {
-                // Follow
-                await axios.post(`${baseUrl}/api/users/${idToToggle}/follow`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
-                // Add to current user's following list
-                const newFollowing = {
-                    following: {
-                        _id: idToToggle,
-                        // We might not have full data for this user
-                    }
-                };
-                setCurrentUserFollowing(prev => [newFollowing, ...prev]);
-
-                // If this is the own profile we're viewing, update the following state too
-                if (isOwnProfile) {
-                    setFollowing(prev => [newFollowing, ...prev]);
-                }
-
-                // If we followed the profile we are looking at, update followers list and count too
-                if (!isOwnProfile && idToToggle === user?._id) {
-                    const newFollower = {
-                        follower: {
-                            _id: loggedInUser.current._id,
-                            username: loggedInUser.current.username,
-                            displayName: loggedInUser.current.displayName,
-                            profilePic: loggedInUser.current.profilePic
-                        }
-                    };
-                    setFollowers(prev => [newFollower, ...prev]);
-
-                    setUser(prev => ({
-                        ...prev,
-                        stats: {
-                            ...prev.stats,
-                            followerCount: (prev.stats?.followerCount || 0) + 1
-                        }
-                    }));
-                }
-            }
-        } catch (error) {
-            console.error('Follow toggle error:', error);
-        }
-    }, [user, baseUrl, currentUserFollowing, isOwnProfile, formatUserForHeader]);
+    // Close modal
+    const closeModal = () => {
+        setModalOpen(false);
+        setModalType(null);
+    };
 
     if (loading) {
         return (
@@ -396,6 +452,8 @@ const ProfilePage = () => {
 
     const headerUser = formatUserForHeader();
     const displayStories = formatStoriesForDisplay();
+    const formattedFollowers = formatFollowsForModal(followers);
+    const formattedFollowing = formatFollowsForModal(following);
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-purple-500/30">
@@ -404,12 +462,14 @@ const ProfilePage = () => {
             <main className="max-w-5xl mx-auto px-6 py-8">
                 {headerUser && (
                     <ProfileHeader
-                        user={headerUser}
-                        isOwnProfile={isOwnProfile}
-                        onFollowToggle={handleFollowToggle}
-                        followers={formatFollowsForDisplay(followers)}
-                        following={formatFollowsForDisplay(following)}
-                    />
+                    user={headerUser}
+                    isOwnProfile={isOwnProfile}
+                    onFollowToggle={(userId) => handleProfileFollowToggle(userId)}     // For header button
+                    onModalFollowToggle={handleModalFollowToggle}                      // For modals
+                    followers={formattedFollowers}
+                    following={formattedFollowing}
+                />
+                
                 )}
 
                 {displayStories.length > 0 ? (
@@ -426,7 +486,15 @@ const ProfilePage = () => {
                     </div>
                 )}
 
-                {/* Bottom spacing */}
+                {/* Follow/Following Modal */}
+    <FollowListModal
+    isOpen={modalOpen}
+    onClose={closeModal}
+    title={modalType === 'followers' ? 'Followers' : 'Following'}
+    users={modalType === 'followers' ? formattedFollowers : formattedFollowing}
+    onFollowToggle={handleModalFollowToggle} 
+/>
+
                 <div className="h-16" />
             </main>
         </div>

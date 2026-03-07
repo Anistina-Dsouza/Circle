@@ -13,9 +13,14 @@ const StatCard = ({ value, label, onClick }) => (
     </button>
 );
 
-// --- Mock Data Removed ---
-
-const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers = [], following = [] }) => {
+const ProfileHeader = ({ 
+    user, 
+    isOwnProfile = false, 
+    onFollowToggle,           // For header button only
+    onModalFollowToggle,      // NEW: For modal follows
+    followers = [], 
+    following = [] 
+}) => {
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
 
@@ -52,7 +57,7 @@ const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers =
                 ) : (
                     <>
                         <button
-                            onClick={onFollowToggle}
+                            onClick={() => onFollowToggle(user._id)}  // Pass user ID
                             className={`flex items-center space-x-2 px-7 py-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${user.isFollowing
                                 ? 'bg-[#1E1B3A] border border-purple-500/50 text-purple-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400'
                                 : 'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-500/20'
@@ -71,25 +76,35 @@ const ProfileHeader = ({ user, isOwnProfile = false, onFollowToggle, followers =
 
             {/* Stats Row */}
             <div className="flex items-center space-x-4 w-full max-w-lg">
-                <StatCard value={user.followers} label="Followers" onClick={() => setIsFollowersOpen(true)} />
-                <StatCard value={user.following} label="Following" onClick={() => setIsFollowingOpen(true)} />
+                <StatCard 
+                    value={user.followers} 
+                    label="Followers" 
+                    onClick={() => setIsFollowersOpen(true)} 
+                />
+                <StatCard 
+                    value={user.following} 
+                    label="Following" 
+                    onClick={() => setIsFollowingOpen(true)} 
+                />
                 <StatCard value={user.stories} label="Stories" />
             </div>
 
-            {/* Modals */}
+            {/* Modals - USING onModalFollowToggle (different function) */}
             <FollowListModal
                 isOpen={isFollowersOpen}
                 onClose={() => setIsFollowersOpen(false)}
                 title="Followers"
                 users={followers}
-                onFollowToggle={onFollowToggle}
+                onFollowToggle={onModalFollowToggle}  // ✅ Use modal function
+                currentUserId={user._id}
             />
             <FollowListModal
                 isOpen={isFollowingOpen}
                 onClose={() => setIsFollowingOpen(false)}
                 title="Following"
                 users={following}
-                onFollowToggle={onFollowToggle}
+                onFollowToggle={onModalFollowToggle}  // ✅ Use modal function
+                currentUserId={user._id}
             />
         </div>
     );

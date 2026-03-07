@@ -1,8 +1,43 @@
+import React, { useState } from 'react';
 import { X, UserPlus, UserCheck, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loadingUserId, setLoadingUserId] = useState(null);
+
     if (!isOpen) return null;
+
+    // Filter users based on search
+    const filteredUsers = users.filter(user => 
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Handle follow/unfollow click
+    const handleFollowClick = async (e, userId, isCurrentlyFollowing) => {
+        console.log("isCurrently Following handleFollowClick", isCurrentlyFollowing)
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log("here is onfollow toggle", onFollowToggle)
+        if (!onFollowToggle) return;
+        
+        setLoadingUserId(userId);
+        
+        try {
+            // Call the parent function and wait for result
+            const success = await onFollowToggle(userId);
+            
+            if (!success) {
+                console.log('Follow toggle failed');
+            }
+        } catch (error) {
+            console.error('Error in follow toggle:', error);
+        } finally {
+            setLoadingUserId(null);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -31,6 +66,8 @@ const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
                         <Search className="text-gray-500 mr-3" size={18} />
                         <input
                             type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={`Search ${title.toLowerCase()}...`}
                             className="bg-transparent border-none outline-none text-white w-full placeholder-gray-600 text-sm"
                         />
@@ -39,10 +76,10 @@ const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
 
                 {/* List */}
                 <div className="px-2 pb-6 max-h-[400px] overflow-y-auto custom-scrollbar">
-                    {users.length > 0 ? (
-                        users.map((user, index) => (
+                    {filteredUsers.length > 0 ? (
+                        filteredUsers.map((user) => (
                             <div
-                                key={index}
+                                key={user._id}
                                 className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl transition-all group"
                             >
                                 <Link
@@ -70,21 +107,53 @@ const FollowListModal = ({ isOpen, onClose, title, users, onFollowToggle }) => {
                                     </div>
                                 </Link>
 
-                                <button
-                                    onClick={() => onFollowToggle && onFollowToggle(user._id || user.id, user.isFollowing)}
-                                    className={`flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${user.isFollowing
-                                        ? 'bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-400/30'
-                                        : 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-600/20'
-                                        }`}
-                                >
-                                    {user.isFollowing ? <UserCheck size={14} /> : <UserPlus size={14} />}
-                                    <span>{user.isFollowing ? 'Following' : 'Follow'}</span>
-                                </button>
+                                {/* Don't show follow button for current user */}
+                                {!user.isOwnProfile && (
+                                    <button
+                                        onClick={(e) => handleFollowClick(e, user._id, user.isFollowing)}
+                                        disabled={loadingUserId === user._id}
+                                        className={`flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all 
+                                            ${user.isFollowing 
+                                                ? 'bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-400/30' 
+                                                : 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-600/20'
+                                            }
+                                            ${loadingUserId === user._id ? 'opacity-50 cursor-not-allowed' : ''}
+                                        `}
+                                    >
+                                        {loadingUserId === user._id ? (
+                                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                        ) : user.isFollowing ? (
+                                            <UserCheck size={14} />
+                                        ) : (
+                                            <UserPlus size={14} />
+                                        )}
+                                        <span>
+                                            {loadingUserId === user._id 
+                                                ? '...' 
+                                                : user.isFollowing 
+                                                    ? 'Following' 
+                                                    : 'Follow'
+                                            }
+                                        </span>
+                                    </button>
+                                )}
                             </div>
                         ))
                     ) : (
                         <div className="py-20 text-center">
-                            <p className="text-gray-500 font-medium">No {title.toLowerCase()} yet.</p>
+                            {searchQuery ? (
+                                <div>
+                                    <p className="text-gray-500 font-medium">No results found for "{searchQuery}"</p>
+                                    <button 
+                                        onClick={() => setSearchQuery('')}
+                                        className="mt-2 text-purple-400 text-sm hover:text-purple-300"
+                                    >
+                                        Clear search
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 font-medium">No {title.toLowerCase()} yet.</p>
+                            )}
                         </div>
                     )}
                 </div>
