@@ -29,7 +29,7 @@ const momentSchema = new mongoose.Schema({
   // Duration settings (in hours)
   duration: {
     type: Number,
-    enum: [1, 6, 12, 24, 48],
+    enum: [1, 6, 12, 24, 48, 168],
     default: 24
   },
   expiresAt: {

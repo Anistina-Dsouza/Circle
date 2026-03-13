@@ -71,7 +71,7 @@ const CirclesPage = () => {
                     <h2 className="text-3xl font-bold tracking-tight">Explore Circles</h2>
                     <Link
                         to="/circles/create"
-                        className="flex items-center space-x-2 px-8 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-purple-900/40"
+                        className="flex items-center space-x-2 px-8 py-3 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-pink-500 font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-purple-900/40"
                     >
                         <Plus size={20} />
                         <span>Create Circle</span>

@@ -8,7 +8,7 @@ const FeedHeader = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                 Your Feed
             </h1>
-            <div className="bg-[#1E1B3A] p-1 rounded-full flex border border-white/5">
+            {/* <div className="bg-[#1E1B3A] p-1 rounded-full flex border border-white/5">
                 <button
                     onClick={() => setActiveTab('live')}
                     className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === 'live' ? 'bg-[#7C3AED] text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
@@ -21,7 +21,7 @@ const FeedHeader = () => {
                 >
                     Upcoming
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 };
