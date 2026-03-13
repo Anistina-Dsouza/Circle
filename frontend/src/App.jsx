@@ -15,6 +15,7 @@ import Announcements from './features/admin/pages/Announcements';
 import ProfilePage from './features/profile/ProfilePage';
 import EditProfilePage from './features/profile/EditProfilePage';
 import ExploreUsersPage from './features/profile/ExploreUsersPage';
+import StoryViewer from './features/stories/pages/StoryViewerPage';
 import ProtectedRoute from './features/auth/components/ProtectedRoute';
 
 import Circles from './features/circles/pages/CirclesPage';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
+            <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           </Routes>
         </main>

@@ -71,7 +71,6 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
 
             if (response.data.success) {
                 onClose();
-                window.location.reload(); 
             }
         } catch (error) {
             console.error('Error posting story:', error);

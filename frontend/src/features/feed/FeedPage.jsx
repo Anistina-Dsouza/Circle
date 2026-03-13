@@ -6,6 +6,12 @@ import StoriesBar from './components/StoriesBar';
 import FeedGrid from './components/FeedGrid';
 
 const FeedPage = () => {
+    const [refreshKey, setRefreshKey] = React.useState(0);
+
+    const handleRefresh = () => {
+        setRefreshKey(prev => prev + 1);
+    };
+
     return (
         <div className="min-h-screen bg-[#0F0529] text-white  font-sans selection:bg-purple-500/30">
             <FeedNavbar />
@@ -13,11 +19,11 @@ const FeedPage = () => {
             <main className="max-w-7xl mx-auto  px-6 py-8">
                 <FeedHeader />
 
-                <CreateStoryBar />
+                <CreateStoryBar onPostSuccess={handleRefresh} />
 
-                <StoriesBar />
+                <StoriesBar key={`stories-${refreshKey}`} onPostSuccess={handleRefresh} />
 
-                <FeedGrid />
+                <FeedGrid key={`feed-${refreshKey}`} />
             </main>
         </div>
     );
