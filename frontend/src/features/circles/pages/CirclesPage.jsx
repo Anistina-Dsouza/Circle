@@ -1,80 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import CircleHeader from '../components/CircleHeader';
 import FilterBar from '../components/FilterBar';
 import CircleCard from '../components/CircleCard';
-import { Plus } from 'lucide-react';
-
-const mockCircles = [
-    {
-        id: 1,
-        name: "Tech Pioneers",
-        description: "Discussing the future of AI and space exploration with leading experts.",
-        icon: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png",
-        members: "24.8k",
-        schedule: "8PM",
-        status: "Live Now",
-        category: "Technology"
-    },
-    {
-        id: 2,
-        name: "Minimalist Design",
-        description: "A hub for designers focusing on clean aesthetics and functional UI components.",
-        icon: "https://cdn-icons-png.flaticon.com/512/3850/3850285.png",
-        members: "12.2k",
-        schedule: "Weekly",
-        status: "",
-        category: "UI/UX Design"
-    },
-    {
-        id: 3,
-        name: "Game Dev Central",
-        description: "From Indie to AAA. Share your shaders, code, and level designs.",
-        icon: "https://cdn-icons-png.flaticon.com/512/681/681392.png",
-        members: "38.5k",
-        schedule: "24/7",
-        status: "Active",
-        category: "Gaming"
-    },
-    {
-        id: 4,
-        name: "Sonic Waves",
-        description: "Deep dives into analog synthesis and modern digital production techniques.",
-        icon: "https://cdn-icons-png.flaticon.com/512/3081/3081120.png",
-        members: "8.9k",
-        schedule: "Thu 7PM",
-        status: "",
-        category: "Digital Art"
-    },
-    {
-        id: 5,
-        name: "React Universe",
-        description: "Exploring the ecosystem of React, Next.js, and server components.",
-        icon: "https://cdn-icons-png.flaticon.com/512/919/919851.png",
-        members: "15.4k",
-        schedule: "Daily",
-        status: "",
-        category: "Technology"
-    },
-    {
-        id: 6,
-        name: "Esports Elite",
-        description: "The competitive scene for global shooters and strategy titles.",
-        icon: "https://cdn-icons-png.flaticon.com/512/2164/2164327.png",
-        members: "42.1k",
-        schedule: "Live TV",
-        status: "",
-        category: "Gaming"
-    }
-];
+import { Plus, AlertCircle } from 'lucide-react';
 
 const CirclesPage = () => {
+    const [circles, setCircles] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('All Categories');
+    const [pagination, setPagination] = useState({ page: 1, hasMore: false });
 
-    const filteredCircles = selectedCategory === 'All Categories'
-        ? mockCircles
-        : mockCircles.filter(c => c.category === selectedCategory);
+    const baseUrl = import.meta.env.VITE_API_URL;
+
+    const fetchCircles = useCallback(async (category = 'All Categories', pageNum = 1, shouldAppend = false) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const params = new URLSearchParams();
+            if (category !== 'All Categories') {
+                params.append('category', category);
+            }
+            params.append('page', pageNum);
+            params.append('limit', 12);
+
+            const response = await axios.get(`${baseUrl}/api/circles?${params.toString()}`);
+
+            if (response.data.success) {
+                const newCircles = response.data.circles || [];
+                setCircles(prev => shouldAppend ? [...prev, ...newCircles] : newCircles);
+                setPagination({
+                    page: response.data.pagination.page,
+                    hasMore: response.data.pagination.hasMore
+                });
+            }
+        } catch (err) {
+            console.error('Error fetching circles:', err);
+            setError(err.response?.data?.error || 'Failed to load circles');
+        } finally {
+            setLoading(false);
+        }
+    }, [baseUrl]);
+
+    useEffect(() => {
+        fetchCircles(selectedCategory, 1, false);
+    }, [selectedCategory, fetchCircles]);
+
+    const handleLoadMore = () => {
+        if (pagination.hasMore && !loading) {
+            fetchCircles(selectedCategory, pagination.page + 1, true);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-purple-500/30">
@@ -99,17 +78,46 @@ const CirclesPage = () => {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredCircles.map((circle) => (
-                        <CircleCard key={circle.id} circle={circle} />
-                    ))}
-                </div>
+                {error && (
+                    <div className="mb-10 p-6 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center space-x-3 text-red-500">
+                        <AlertCircle size={24} />
+                        <span className="text-lg font-medium">{error}</span>
+                    </div>
+                )}
 
-                <div className="flex justify-center mt-20">
-                    <button className="px-10 py-4 rounded-2xl border border-white/5 text-gray-400 hover:text-white hover:border-purple-500/30 transition-all bg-white/5 backdrop-blur-md font-semibold text-lg">
-                        Load More Circles
-                    </button>
-                </div>
+                {loading && circles.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-gray-400 font-medium">Loading circles...</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {circles.map((circle) => (
+                                <CircleCard key={circle._id || circle.id} circle={circle} />
+                            ))}
+                        </div>
+
+                        {circles.length === 0 && !loading && (
+                            <div className="text-center py-32 bg-[#1A1140]/30 border border-dashed border-white/10 rounded-[40px]">
+                                <h3 className="text-2xl font-bold text-gray-400 mb-2">No circles found</h3>
+                                <p className="text-gray-600">Try selecting a different category or create your own!</p>
+                            </div>
+                        )}
+
+                        {pagination.hasMore && (
+                            <div className="flex justify-center mt-20">
+                                <button
+                                    onClick={handleLoadMore}
+                                    disabled={loading}
+                                    className="px-10 py-4 rounded-2xl border border-white/5 text-gray-400 hover:text-white hover:border-purple-500/30 transition-all bg-white/5 backdrop-blur-md font-semibold text-lg disabled:opacity-50"
+                                >
+                                    {loading ? 'Loading...' : 'Load More Circles'}
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
 
                 <footer className="mt-40 pt-20 border-t border-white/5 text-center">
                     <div className="flex items-center justify-center space-x-2 mb-8 scale-110">
@@ -131,5 +139,6 @@ const CirclesPage = () => {
         </div>
     );
 };
+
 
 export default CirclesPage;

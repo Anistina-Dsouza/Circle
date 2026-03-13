@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // =========== CREATE CIRCLE ===========
 exports.createCircle = async (req, res) => {
   try {
-    const { name, description, type, coverImage } = req.body;
+    const { name, description, type, coverImage, category } = req.body;
     
     // Validation
     if (!name || name.length < 3) {
@@ -29,6 +29,7 @@ exports.createCircle = async (req, res) => {
       name,
       description,
       type: type || 'public',
+      category: category || 'Technology',
       coverImage: coverImage || 'default_circle.png',
       creator: req.userId,
       members: [{
@@ -64,6 +65,7 @@ exports.getPublicCircles = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
     const search = req.query.search || '';
+    const category = req.query.category || '';
     
     // Build query
     let query = { isActive: true, type: 'public' };
@@ -72,12 +74,16 @@ exports.getPublicCircles = async (req, res) => {
       query.$text = { $search: search };
     }
     
+    if (category && category !== 'All Categories') {
+      query.category = category;
+    }
+    
     // Get circles
     const circles = await Circle.find(query)
       .sort({ 'stats.memberCount': -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select('name slug description coverImage stats.memberCount creator createdAt')
+      .select('name slug description coverImage category stats creator createdAt')
       .populate('creator', 'username profile.displayName profile.profileImage');
     
     const total = await Circle.countDocuments(query);
