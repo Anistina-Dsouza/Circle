@@ -4,7 +4,7 @@ import axios from 'axios';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import ProfileHeader from './components/ProfileHeader';
 import ActiveStories from './components/ActiveStories';
-import { useAuth } from '../../';
+//import { useAuth } from '../../';
 import FollowListModal from './components/FollowListModal'; // Make sure this import exists
 
 const ProfilePage = () => {
