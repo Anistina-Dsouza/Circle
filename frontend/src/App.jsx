@@ -34,7 +34,6 @@ function App() {
 
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/communities" element={<ManageCommunities />} />
             <Route path="/admin/announcements" element={<Announcements />} />
@@ -46,7 +45,7 @@ function App() {
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
-
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>

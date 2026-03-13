@@ -3,9 +3,14 @@ import { Plus } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-const StoryCircle = ({ name, avatar, isAdd = false, username }) => {
+import CreateStoryModal from './CreateStoryModal';
+
+const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
     const content = (
-        <div className="flex flex-col items-center space-y-2 cursor-pointer group">
+        <div 
+            onClick={onClick}
+            className="flex flex-col items-center space-y-2 cursor-pointer group"
+        >
             <div className={`
                 w-16 h-16 rounded-full p-[3px] 
                 ${isAdd ? 'border-2 border-dashed border-gray-500 hover:border-white' : 'bg-gradient-to-tr from-yellow-400 to-purple-600 group-hover:from-yellow-300 group-hover:to-pink-500'}
@@ -29,7 +34,7 @@ const StoryCircle = ({ name, avatar, isAdd = false, username }) => {
         </div>
     );
 
-    if (isAdd) return content;
+    if (isAdd || onClick) return content;
     return (
         <Link to={`/profile/${username}`}>
             {content}
@@ -40,6 +45,7 @@ const StoryCircle = ({ name, avatar, isAdd = false, username }) => {
 const StoriesBar = () => {
     const [stories, setStories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -94,7 +100,13 @@ const StoriesBar = () => {
 
     return (
         <div className="flex items-center space-x-6 overflow-x-auto py-4 scrollbar-hide mb-8 no-scrollbar">
-            <StoryCircle isAdd name="Add Story" avatar={user?.profilePic} />
+            <StoryCircle 
+                isAdd 
+                name="Add Story" 
+                avatar={user?.profilePic} 
+                onClick={() => setIsModalOpen(true)}
+            />
+            
             {stories.map(story => (
                 <StoryCircle
                     key={story.id}
@@ -108,6 +120,10 @@ const StoriesBar = () => {
                 <div className="flex items-center space-x-4 ml-2">
                     <p className="text-sm text-gray-500 italic">Follow people to see their stories here</p>
                 </div>
+            )}
+
+            {isModalOpen && (
+                <CreateStoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             )}
         </div>
     );
