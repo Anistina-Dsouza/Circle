@@ -2,34 +2,29 @@ import React, { useState } from 'react';
 import { Link as LinkIcon, Send, Plus, Loader2, CheckCircle2, X } from 'lucide-react';
 import axios from 'axios';
 
-const CreateStoryBar = () => {
+const CreateStoryBar = ({ onPostSuccess }) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const [caption, setCaption] = useState('');
     const [loading, setLoading] = useState(false);
     const [mediaUrl, setMediaUrl] = useState('');
-    const [mediaType, setMediaType] = useState('image');
     const [status, setStatus] = useState('idle'); // idle, success, error
     const [showUrlInput, setShowUrlInput] = useState(false);
+    const [tempUrl, setTempUrl] = useState('');
 
     const profilePic = user?.profilePic;
     const baseUrl = import.meta.env.VITE_API_URL;
 
-    const handleUrlSubmit = (url) => {
-        if (url.trim()) {
-            setMediaUrl(url.trim());
-            // Basic detection for video
-            if (url.match(/\.(mp4|webm|ogg)$/i)) {
-                setMediaType('video');
-            } else {
-                setMediaType('image');
-            }
+    const handleUrlSubmit = () => {
+        if (tempUrl.trim()) {
+            setMediaUrl(tempUrl.trim());
             setShowUrlInput(false);
+            setTempUrl('');
         }
     };
 
     const handlePostStory = async () => {
         if (!mediaUrl) {
-            alert('Please provide an image or video URL for your story');
+            alert('Please provide an image URL for your story');
             setShowUrlInput(true);
             return;
         }
@@ -42,7 +37,7 @@ const CreateStoryBar = () => {
             const response = await axios.post(`${baseUrl}/api/moments`, {
                 media: {
                     url: mediaUrl,
-                    type: mediaType
+                    type: 'image' // Restricted to image in the bar as per user request
                 },
                 caption,
                 duration: 24,
@@ -55,10 +50,15 @@ const CreateStoryBar = () => {
                 setCaption('');
                 setMediaUrl('');
                 setStatus('success');
+                
+                // Soft refresh
+                if (onPostSuccess) {
+                    onPostSuccess();
+                }
+
                 setTimeout(() => {
                     setStatus('idle');
-                    window.location.reload(); 
-                }, 1500);
+                }, 2000);
             }
         } catch (error) {
             console.error('Error posting story:', error);
@@ -70,7 +70,7 @@ const CreateStoryBar = () => {
     };
 
     return (
-        <div className="bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10 transition-all">
+        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10">
             <div className="flex items-center space-x-4">
                 {/* User Avatar */}
                 <div className="relative shrink-0">
@@ -84,73 +84,60 @@ const CreateStoryBar = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col space-y-2">
+                <div className="flex-1 flex flex-col">
                     {/* Caption Input */}
                     <div className="flex-1 bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
                         <input
                             type="text"
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
-                            placeholder={`Write a caption, ${user?.displayName || user?.username || 'User'}...`}
+                            placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
                             className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
                         />
                     </div>
-                    
-                    {/* URL Selection Input */}
-                    {showUrlInput && (
-                        <div className="flex items-center space-x-2 px-2 animate-in slide-in-from-top-1 duration-200">
-                            <div className="flex-1 bg-[#160D33] rounded-full px-4 py-2 border border-blue-500/30 flex items-center">
-                                <LinkIcon size={12} className="text-blue-400 mr-2" />
-                                <input
-                                    type="url"
-                                    placeholder="Paste image or video URL..."
-                                    className="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-[10px]"
-                                    autoFocus
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') handleUrlSubmit(e.target.value);
-                                    }}
-                                    onBlur={(e) => handleUrlSubmit(e.target.value)}
-                                />
-                            </div>
-                            <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
-                                <X size={14} />
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Preview of chosen URL */}
-                    {mediaUrl && (
-                        <div className="flex items-center space-x-3 px-3 py-1 bg-purple-500/5 rounded-xl border border-purple-500/10 w-fit">
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-purple-500/30 shadow-sm">
-                                {mediaType === 'image' ? (
-                                    <img src={mediaUrl} className="w-full h-full object-cover" />
-                                ) : (
-                                    <video src={mediaUrl} className="w-full h-full object-cover" />
-                                )}
-                                <button 
-                                    onClick={() => setMediaUrl('')}
-                                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                                >
-                                    <X size={12} className="text-white" />
-                                </button>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">URL Media Set</span>
-                                <span className="text-[8px] text-purple-400/60 truncate max-w-[200px]">{mediaUrl}</span>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center space-x-2 shrink-0">
-                    <button 
-                        onClick={() => setShowUrlInput(!showUrlInput)}
-                        className={`p-3 transition-all rounded-full ${showUrlInput ? 'bg-blue-500/20 text-blue-400' : 'text-blue-400 hover:bg-blue-500/10 shadow-lg shadow-blue-500/5'}`}
-                        title="Add Media Link"
-                    >
-                        <LinkIcon size={24} />
-                    </button>
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowUrlInput(!showUrlInput)}
+                            className={`p-3 transition-all rounded-full ${showUrlInput || mediaUrl ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            title="Add Image URL"
+                        >
+                            <LinkIcon size={24} />
+                        </button>
+
+                        {/* Pop-over URL Input */}
+                        {showUrlInput && (
+                            <div className="absolute right-0 bottom-full mb-4 w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200 z-30">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
+                                    <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    <input
+                                        type="url"
+                                        value={tempUrl}
+                                        onChange={(e) => setTempUrl(e.target.value)}
+                                        placeholder="https://example.com/image.jpg"
+                                        className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                                        autoFocus
+                                        onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                                    />
+                                    <button 
+                                        onClick={handleUrlSubmit}
+                                        className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors"
+                                    >
+                                        Apply Image
+                                    </button>
+                                </div>
+                                <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[#1A1140] border-r border-b border-purple-500/30 rotate-45"></div>
+                            </div>
+                        )}
+                    </div>
                     
                     <button 
                         onClick={handlePostStory}
@@ -166,13 +153,38 @@ const CreateStoryBar = () => {
                             <CheckCircle2 size={16} />
                         ) : (
                             <>
-                                <span className="hidden sm:inline">STORY</span>
+                                <span className="hidden sm:inline font-bold">POST</span>
                                 <Plus size={16} />
                             </>
                         )}
                     </button>
                 </div>
             </div>
+
+            {/* Media Preview - Popping from the side/bottom */}
+            {mediaUrl && (
+                <div className="mt-4 flex items-center space-x-3 px-4 py-2 bg-purple-500/5 rounded-2xl border border-purple-500/10 animate-in slide-in-from-left-2 duration-300">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-500/50 shadow-lg group">
+                        <img src={mediaUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Preview" />
+                        <button 
+                            onClick={() => setMediaUrl('')}
+                            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <X size={16} className="text-white" />
+                        </button>
+                    </div>
+                    <div className="flex flex-col flex-1 overflow-hidden">
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Image Attached</span>
+                        <span className="text-[9px] text-gray-400 truncate pr-4">{mediaUrl}</span>
+                    </div>
+                    <button 
+                        onClick={() => setMediaUrl('')}
+                        className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

@@ -36,18 +36,23 @@ const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
 
     if (isAdd || onClick) return content;
     return (
-        <Link to={`/profile/${username}`}>
+        <Link to={`/stories/${username}`}>
             {content}
         </Link>
     );
 };
 
-const StoriesBar = () => {
+const StoriesBar = ({ onPostSuccess }) => {
     const [stories, setStories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        if (onPostSuccess) onPostSuccess();
+    };
 
     useEffect(() => {
         const fetchStories = async () => {
@@ -123,7 +128,7 @@ const StoriesBar = () => {
             )}
 
             {isModalOpen && (
-                <CreateStoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                <CreateStoryModal isOpen={isModalOpen} onClose={handleModalClose} />
             )}
         </div>
     );
