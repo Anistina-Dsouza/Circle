@@ -21,6 +21,11 @@ const circleSchema = new mongoose.Schema({
     type: String,
     default: 'default_circle.png'
   },
+  category: {
+    type: String,
+    default: 'Technology',
+    index: true
+  },
   type: {
     type: String,
     enum: ['public', 'private'],
@@ -134,7 +139,7 @@ circleSchema.pre('save', function (next) {
   if (this.members) {
     this.stats.memberCount = this.members.length;
   }
-
+// 
   // next();
 });
 

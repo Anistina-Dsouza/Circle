@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { ArrowLeft, Plus, Globe, Lock, Shield, Image as ImageIcon } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 
@@ -10,20 +11,52 @@ const CreateCirclePage = () => {
         description: '',
         category: 'Technology',
         visibility: 'public',
-        icon: ''
+        icon: '',
+        settings: {
+            allowMemberPosts: true,
+            allowMemberInvites: true,
+            requirePostApproval: false
+        }
     });
+
+    const handleSettingToggle = (setting) => {
+        setFormData(prev => ({
+            ...prev,
+            settings: {
+                ...prev.settings,
+                [setting]: !prev.settings[setting]
+            }
+        }));
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Placeholder for API call
-        console.log('Creating Circle:', formData);
-        alert('Circle created successfully! (Mock)');
-        navigate('/circles');
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/circles`, {
+                name: formData.name,
+                description: formData.description,
+                category: formData.category,
+                type: formData.visibility,
+                coverImage: formData.icon,
+                settings: formData.settings
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.data.success) {
+                navigate(`/circles`);
+            }
+        } catch (error) {
+            console.error('Error creating circle:', error);
+            alert(error.response?.data?.error || 'Failed to create circle');
+        }
     };
 
     return (
@@ -139,6 +172,35 @@ const CreateCirclePage = () => {
                                 placeholder="Paste an image URL for the circle icon..."
                                 className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all font-medium"
                             />
+                        </div>
+                    </div>
+
+                    {/* Permission Settings */}
+                    <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                            <Shield size={20} className="text-purple-400" />
+                            Circle Permissions
+                        </h3>
+                        <div className="space-y-4">
+                            {[
+                                { id: 'allowMemberPosts', label: 'Allow members to post', desc: 'Anyone in the circle can create new posts' },
+                                { id: 'allowMemberInvites', label: 'Allow members to invite', desc: 'Members can generate invite codes' },
+                                { id: 'requirePostApproval', label: 'Require post approval', desc: 'Moderators must approve posts before they go live' }
+                            ].map((item) => (
+                                <div key={item.id} className="flex items-center justify-between p-4 bg-[#0F0529] rounded-2xl border border-white/5">
+                                    <div>
+                                        <p className="font-semibold">{item.label}</p>
+                                        <p className="text-xs text-gray-500">{item.desc}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSettingToggle(item.id)}
+                                        className={`w-12 h-6 rounded-full transition-all relative ${formData.settings[item.id] ? 'bg-purple-600' : 'bg-gray-700'}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.settings[item.id] ? 'right-1' : 'left-1'}`} />
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
