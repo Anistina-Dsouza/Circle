@@ -81,8 +81,9 @@ const CreateCirclePage = () => {
                     {/* Basic Info */}
                     <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Circle Name</label>
+                            <label htmlFor="name" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Circle Name</label>
                             <input
+                                id="name"
                                 type="text"
                                 name="name"
                                 value={formData.name}
@@ -94,8 +95,9 @@ const CreateCirclePage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Description</label>
+                            <label htmlFor="description" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Description</label>
                             <textarea
+                                id="description"
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
@@ -111,8 +113,9 @@ const CreateCirclePage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
+                                <label htmlFor="category" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
                                 <select
+                                    id="category"
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
@@ -155,7 +158,7 @@ const CreateCirclePage = () => {
 
                     {/* Icon URL */}
                     <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-2xl">
-                        <label className="block text-sm font-semibold text-gray-400 mb-4 ml-1">Circle Icon URL</label>
+                        <label htmlFor="icon" className="block text-sm font-semibold text-gray-400 mb-4 ml-1">Circle Icon URL</label>
                         <div className="flex items-center space-x-4">
                             <div className="w-20 h-20 rounded-2xl bg-[#0F0529] border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                                 {formData.icon ? (
@@ -165,6 +168,7 @@ const CreateCirclePage = () => {
                                 )}
                             </div>
                             <input
+                                id="icon"
                                 type="text"
                                 name="icon"
                                 value={formData.icon}
