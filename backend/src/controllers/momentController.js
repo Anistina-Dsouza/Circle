@@ -51,7 +51,8 @@ exports.getFeed = async (req, res) => {
     })
       .sort({ createdAt: -1 })
       .limit(20)
-      .populate('user', 'username displayName profilePic');
+      .populate('user', 'username displayName profilePic')
+      .populate('viewers', 'username displayName profilePic');
 
     res.json({
       success: true,
@@ -82,7 +83,8 @@ exports.getUserMoments = async (req, res) => {
       isActive: true
     })
       .sort({ createdAt: -1 })
-      .populate('user', 'username displayName profilePic');
+      .populate('user', 'username displayName profilePic')
+      .populate('viewers', 'username displayName profilePic');
 
     console.log("fetching stories : ", moments)
     res.json({
@@ -100,14 +102,15 @@ exports.getMoment = async (req, res) => {
   try {
     const moment = await Moment.findById(req.params.momentId)
       .populate('user', 'username displayName profilePic')
-      .populate('replies.user', 'username displayName');
+      .populate('replies.user', 'username displayName')
+      .populate('viewers', 'username displayName profilePic');
 
     if (!moment) {
       return res.status(404).json({ error: 'Moment not found' });
     }
 
     // Add view
-    await moment.addView();
+    await moment.addView(req.userId);
 
     res.json({
       success: true,
