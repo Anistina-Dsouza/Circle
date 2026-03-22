@@ -78,9 +78,15 @@ const protect = async (req, res, next) => {
         error: 'Invalid token'
       });
     }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        error: 'Token expired'
+      });
+    }
     res.status(401).json({
       success: false,
-      error: 'Not authorized'
+      error: error.message || 'Not authorized'
     });
   }
 };

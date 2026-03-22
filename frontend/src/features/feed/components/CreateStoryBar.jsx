@@ -33,7 +33,6 @@ const CreateStoryBar = ({ onPostSuccess }) => {
         setStatus('idle');
         try {
             const token = localStorage.getItem('token');
-            
             const response = await axios.post(`${baseUrl}/api/moments`, {
                 media: {
                     url: mediaUrl,

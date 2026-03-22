@@ -54,6 +54,11 @@ const momentSchema = new mongoose.Schema({
     default: 0
   },
   
+  viewers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  
   replies: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -90,9 +95,13 @@ momentSchema.pre('save', function(next) {
 });
 
 // Simple methods
-momentSchema.methods.addView = function() {
-  this.viewCount += 1;
-  return this.save();
+momentSchema.methods.addView = function(userId) {
+  if (userId && !this.viewers.includes(userId)) {
+    this.viewers.push(userId);
+    this.viewCount = this.viewers.length;
+    return this.save();
+  }
+  return Promise.resolve(this);
 };
 
 momentSchema.methods.addReply = function(userId, message) {

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
 import StoryInfo from '../components/StoryInfo';
+import StoryViewersModal from '../components/StoryViewersModal';
 
 const StoryViewerPage = () => {
     const { username } = useParams();
@@ -13,6 +14,7 @@ const StoryViewerPage = () => {
     const [progress, setProgress] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isPaused, setIsPaused] = useState(false);
+    const [showViewers, setShowViewers] = useState(false);
     const [error, setError] = useState(null);
     
     const progressTimer = useRef(null);
@@ -52,7 +54,7 @@ const StoryViewerPage = () => {
     }, [username, baseUrl]);
 
     useEffect(() => {
-        if (loading || stories.length === 0 || isPaused || error) return;
+        if (loading || stories.length === 0 || isPaused || error || showViewers) return;
 
         const step = (PROGRESS_INTERVAL / STORY_DURATION) * 100;
         
@@ -67,7 +69,21 @@ const StoryViewerPage = () => {
         }, PROGRESS_INTERVAL);
 
         return () => clearInterval(progressTimer.current);
-    }, [currentIndex, loading, stories.length, isPaused, error]);
+    }, [currentIndex, loading, stories.length, isPaused, error, showViewers]);
+
+    // Record view whenever a new story is displayed
+    useEffect(() => {
+        if (!loading && stories.length > 0 && stories[currentIndex]) {
+            const momentId = stories[currentIndex]._id || stories[currentIndex].id;
+            if (momentId) {
+                const token = localStorage.getItem('token');
+                // Silently fetch to record view
+                axios.get(`${baseUrl}/api/moments/${momentId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }).catch(e => console.log('Silent view tracking error', e));
+            }
+        }
+    }, [currentIndex, loading, stories, baseUrl]);
 
     const handleNext = () => {
         if (currentIndex < stories.length - 1) {
@@ -161,26 +177,20 @@ const StoryViewerPage = () => {
 
     return (
         <div className="fixed inset-0 bg-[#0F0529] z-[100] flex flex-col items-center justify-center overflow-hidden font-sans">
-            {/* Minimalist Background with subtle top close */}
-            <button 
-                onClick={() => navigate(-1)}
-                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-white z-50 transition-colors"
-            >
-                <X size={28} />
-            </button>
 
             {/* Stories Container (Card Style) */}
-            <div className="relative w-full max-w-[420px] h-full max-h-[90vh] flex flex-col pt-12 pb-8">
+            <div className="relative w-full max-w-[420px] h-full h-[95vh] flex flex-col py-8">
                 
-                {/* Header Elements (Top of Card) */}
-                <div className="mb-8 px-1 shrink-0">
+                {/* Header Elements (Top of Container) */}
+                <div className="mb-6 px-1 shrink-0 z-10 w-full relative">
                     <ProgressBar stories={stories} currentIndex={currentIndex} progress={progress} />
-                    <div className="mt-8">
+                    <div className="mt-4">
                         <StoryInfo 
                             user={currentStory.user} 
                             createdAt={currentStory.createdAt} 
                             isOwnStory={isOwnStory}
                             onDelete={handleDelete}
+                            onClose={() => navigate(-1)}
                         />
                     </div>
                 </div>
@@ -188,11 +198,11 @@ const StoryViewerPage = () => {
                 {/* Main Card Content */}
                 <div 
                     className="flex-1 min-h-0 bg-[#1E1B3A] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative cursor-pointer group border border-white/5"
-                    onMouseDown={() => setIsPaused(true)}
-                    onMouseUp={() => setIsPaused(false)}
-                    onTouchStart={() => setIsPaused(true)}
-                    onTouchEnd={() => setIsPaused(false)}
-                    onClick={handleContainerClick}
+                    onMouseDown={() => !showViewers && setIsPaused(true)}
+                    onMouseUp={() => !showViewers && setIsPaused(false)}
+                    onTouchStart={() => !showViewers && setIsPaused(true)}
+                    onTouchEnd={() => !showViewers && setIsPaused(false)}
+                    onClick={(e) => !showViewers && handleContainerClick(e)}
                 >
                     {/* Media */}
                     {currentStory.media.type === 'video' ? (
@@ -215,10 +225,13 @@ const StoryViewerPage = () => {
 
                     {/* Viewers Badge (Bottom-Center as per ref) */}
                     <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
-                        <div className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto">
+                        <div 
+                            onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
+                            className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto hover:bg-[#5f4e99] transition-colors"
+                        >
                             <Eye size={16} className="text-purple-300" />
                             <span className="text-xs font-bold text-white tracking-wide">
-                                {currentStory.viewCount || 0} Viewers
+                                {currentStory.viewers?.length || currentStory.viewCount || 0} Viewers
                             </span>
                             <ChevronUp size={16} className="text-purple-300 ml-1" />
                         </div>
@@ -226,14 +239,10 @@ const StoryViewerPage = () => {
 
                     {/* Caption (Left-Bottom as per ref) */}
                     {currentStory.caption && (
-                        <div className="absolute bottom-10 left-8 right-8 pointer-events-none">
-                            <p className="text-white/90 text-[13px] font-medium leading-relaxed drop-shadow-sm line-clamp-3">
+                        <div className="absolute bottom-10 left-8 right-8 pointer-events-none z-10">
+                            <p className="text-white/90 text-sm font-medium leading-relaxed drop-shadow-md line-clamp-3">
                                 {currentStory.caption}
                             </p>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                <span className="text-purple-300 text-[10px] font-bold">#CircleVibes</span>
-                                <span className="text-purple-300 text-[10px] font-bold">#StoryTime</span>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -252,6 +261,13 @@ const StoryViewerPage = () => {
                     <ChevronRight size={48} />
                 </button>
             </div>
+
+            {/* Story Viewers Modal */}
+            <StoryViewersModal 
+                isOpen={showViewers} 
+                onClose={() => { setShowViewers(false); setIsPaused(false); }} 
+                viewers={currentStory.viewers || []} 
+            />
         </div>
     );
 };
