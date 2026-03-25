@@ -45,7 +45,7 @@ const CircleCard = ({ circle }) => {
                 </div>
 
                 <Link 
-                    to={`/circles/${circle.slug}`}
+                    to={`/circles/${circle.slug}/join`}
                     className="block w-full text-center py-3.5 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold transition-all transform active:scale-95 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)]"
                 >
                     View Circle
