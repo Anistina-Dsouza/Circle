@@ -21,15 +21,26 @@ router.delete('/:circleId', circleController.deleteCircle);
 router.post('/:circleId/join', circleController.joinCircle);
 router.post('/:circleId/leave', circleController.leaveCircle);
 
-// Moderation
+// =========== JOIN REQUEST SYSTEM (PRIVATE CIRCLES) ===========
+// User requests to join private circle
+router.post('/:circleId/request-join', circleController.requestToJoin);
+
+// Admin views pending requests
+router.get('/:circleId/pending-requests', circleController.getPendingRequests);
+
+// Admin views all requests with filters
+router.get('/:circleId/requests', circleController.getAllRequests);
+
+// Admin approves/rejects
+router.post('/:circleId/requests/:requestId/approve', circleController.approveJoinRequest);
+router.post('/:circleId/requests/:requestId/reject', circleController.rejectJoinRequest);
+
+// =========== MODERATION ===========
 router.post('/:circleId/moderators', circleController.addModerator);
 router.delete('/:circleId/moderators/:userId', circleController.removeModerator);
 
-// Invites
+// =========== INVITES ===========
 router.post('/:circleId/generate-invite', circleController.generateInviteCode);
 router.post('/join/:inviteCode', circleController.joinWithInvite);
-
-// Ownership
-router.post('/:circleId/transfer-ownership', circleController.transferOwnership);
 
 module.exports = router;
