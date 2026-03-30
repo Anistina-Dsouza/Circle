@@ -61,7 +61,11 @@ const LoginForm = () => {
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
-            navigate('/feed');
+            if (response.data.user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/feed');
+            }
         } catch (error) {
             console.error('Login error:', error);
 
