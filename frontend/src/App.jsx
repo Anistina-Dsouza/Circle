@@ -18,6 +18,7 @@ import EditProfilePage from './features/profile/EditProfilePage';
 import ExploreUsersPage from './features/profile/ExploreUsersPage';
 import StoryViewer from './features/stories/pages/StoryViewerPage';
 import ProtectedRoute from './features/auth/components/ProtectedRoute';
+import AdminRoute from './features/auth/components/AdminRoute';
 
 import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
@@ -52,20 +53,20 @@ function App() {
 
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/admin/users" element={<ManageUsers />} />
-            <Route path="/admin/communities" element={<ManageCommunities />} />
-            <Route path="/admin/announcements" element={<Announcements />} />
+            <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+            <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
+            <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
             <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </main>
       </div>
