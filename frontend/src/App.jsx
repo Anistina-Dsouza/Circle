@@ -23,6 +23,7 @@ import AdminRoute from './features/auth/components/AdminRoute';
 import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
+import CircleDetails from './features/circles/pages/CircleDetailsPage';
 
 
 function App() {

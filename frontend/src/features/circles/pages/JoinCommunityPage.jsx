@@ -21,7 +21,7 @@ const JoinCommunityPage = () => {
                 if (response.data.success) {
                     setCircle(response.data.circle);
                     if (response.data.circle.isMember) {
-                        navigate('/circles');
+                        navigate(`/circles/${slug}`);
                     }
                 }
             } catch (err) {
@@ -44,7 +44,7 @@ const JoinCommunityPage = () => {
                 { message: introduction },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            navigate('/circles');
+            navigate(`/circles/${slug}`);
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to send join request. Please try again.');
         } finally {
