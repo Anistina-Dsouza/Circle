@@ -133,9 +133,9 @@ exports.getCircleBySlug = async (req, res) => {
       slug: req.params.slug,
       isActive: true 
     })
-    .populate('creator', 'username profile.displayName profile.profileImage')
-    .populate('members.user', 'username profile.displayName profile.profileImage')
-    .populate('moderators.user', 'username profile.displayName profile.profileImage');
+    .populate('creator', 'username displayName profilePic')
+    .populate('members.user', 'username displayName profilePic onlineStatus')
+    .populate('moderators.user', 'username displayName profilePic');
     
     if (!circle) {
       return res.status(404).json({ error: 'Circle not found' });
@@ -152,7 +152,7 @@ exports.getCircleBySlug = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         const member = circle.members.find(
-          m => m.user._id.toString() === decoded.userId
+          m => m.user._id.toString() === decoded.id
         );
         
         if (member) {

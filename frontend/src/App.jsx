@@ -22,6 +22,7 @@ import ProtectedRoute from './features/auth/components/ProtectedRoute';
 import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
+import CircleDetails from './features/circles/pages/CircleDetailsPage';
 
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
+            <Route path="/circles/:slug" element={<ProtectedRoute><CircleDetails /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
