@@ -12,17 +12,29 @@ const CirclesPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('All Categories');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [pagination, setPagination] = useState({ page: 1, hasMore: false });
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const baseUrl = import.meta.env.VITE_API_URL;
 
-    const fetchCircles = useCallback(async (category = 'All Categories', pageNum = 1, shouldAppend = false) => {
+    const fetchCircles = useCallback(async (category = 'All Categories', search = '', pageNum = 1, shouldAppend = false) => {
         setLoading(true);
         setError(null);
+        if (!shouldAppend) setCircles([]); // Clear existing circles while loading new ones
+
         try {
             const params = new URLSearchParams();
             if (category !== 'All Categories') {
                 params.append('category', category);
+            }
+            if (search) {
+                params.append('search', search);
             }
             params.append('page', pageNum);
             params.append('limit', 12);
@@ -46,12 +58,12 @@ const CirclesPage = () => {
     }, [baseUrl]);
 
     useEffect(() => {
-        fetchCircles(selectedCategory, 1, false);
-    }, [selectedCategory, fetchCircles]);
+        fetchCircles(selectedCategory, debouncedSearch, 1, false);
+    }, [selectedCategory, debouncedSearch, fetchCircles]);
 
     const handleLoadMore = () => {
         if (pagination.hasMore && !loading) {
-            fetchCircles(selectedCategory, pagination.page + 1, true);
+            fetchCircles(selectedCategory, debouncedSearch, pagination.page + 1, true);
         }
     };
 
@@ -60,7 +72,10 @@ const CirclesPage = () => {
             <FeedNavbar activePage="Circles" />
 
             <main className="max-w-7xl mx-auto px-6 pb-20">
-                <CircleHeader />
+                <CircleHeader 
+                    searchQuery={searchQuery} 
+                    onSearchChange={setSearchQuery} 
+                />
 
                 <FilterBar
                     selectedCategory={selectedCategory}

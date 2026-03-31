@@ -85,7 +85,34 @@ const circleSchema = new mongoose.Schema({
       ref: 'User'
     }
   }],
-
+  // Add this to your circleSchema
+  pendingRequests: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    introduction: {
+      type: String,
+      maxlength: 500,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    requestedAt: {
+      type: Date,
+      default: Date.now
+    },
+    reviewedAt: Date,
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    rejectionReason: String
+  }],
   // Stats
   stats: {
     memberCount: { type: Number, default: 0 },
@@ -139,7 +166,7 @@ circleSchema.pre('save', function (next) {
   if (this.members) {
     this.stats.memberCount = this.members.length;
   }
-// 
+  // 
   // next();
 });
 

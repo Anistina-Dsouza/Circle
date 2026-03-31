@@ -601,3 +601,345 @@ exports.transferOwnership = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// =========== REQUEST TO JOIN PRIVATE CIRCLE ===========
+exports.requestToJoin = async (req, res) => {
+  try {
+    const { introduction } = req.body;
+    const { circleId } = req.params;
+    
+    // Validate introduction
+    if (!introduction || introduction.trim().length < 10) {
+      return res.status(400).json({ 
+        error: 'Please provide a brief introduction (minimum 10 characters)' 
+      });
+    }
+    
+    const circle = await Circle.findById(circleId);
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    // Check if circle is private
+    if (circle.type !== 'private') {
+      return res.status(400).json({ 
+        error: 'This circle is public. Use /join to join directly.' 
+      });
+    }
+    
+    // Check if already member
+    if (circle.isMember(req.userId)) {
+      return res.status(400).json({ error: 'You are already a member of this circle' });
+    }
+    
+    // Check if already has pending request
+    const existingRequest = circle.pendingRequests.find(
+      r => r.user.toString() === req.userId && r.status === 'pending'
+    );
+    
+    if (existingRequest) {
+      return res.status(400).json({ 
+        error: 'You already have a pending request for this circle' 
+      });
+    }
+    
+    // Check if previously rejected (optional: add cooldown)
+    const rejectedRequest = circle.pendingRequests.find(
+      r => r.user.toString() === req.userId && r.status === 'rejected'
+    );
+    
+    if (rejectedRequest) {
+      const rejectedAt = new Date(rejectedRequest.reviewedAt);
+      const now = new Date();
+      const daysSinceRejection = (now - rejectedAt) / (1000 * 60 * 60 * 24);
+      
+      if (daysSinceRejection < 7) {
+        return res.status(400).json({ 
+          error: `You were rejected ${Math.floor(daysSinceRejection)} days ago. Please wait ${7 - Math.floor(daysSinceRejection)} more days before requesting again.` 
+        });
+      }
+    }
+    
+    // Add pending request
+    circle.pendingRequests.push({
+      user: req.userId,
+      introduction: introduction.trim(),
+      requestedAt: new Date(),
+      status: 'pending'
+    });
+    
+    await circle.save();
+    
+    // Get admin/creator info for notification (optional)
+    const adminUser = await User.findById(circle.creator).select('username');
+    
+    res.json({
+      success: true,
+      message: `Join request sent to ${adminUser?.username || 'admin'} successfully. You will be notified once approved.`,
+      requestId: circle.pendingRequests[circle.pendingRequests.length - 1]._id
+    });
+    
+  } catch (error) {
+    console.error('Request to join error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== GET PENDING REQUESTS (ADMIN ONLY) ===========
+exports.getPendingRequests = async (req, res) => {
+  try {
+    const { circleId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    
+    const circle = await Circle.findById(circleId)
+      .populate({
+        path: 'pendingRequests.user',
+        select: 'username profile.displayName profile.profileImage stats.followerCount createdAt'
+      })
+      .populate('pendingRequests.reviewedBy', 'username');
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    // Check if user is admin or creator
+    const isAdmin = circle.members.some(
+      m => m.user.toString() === req.userId && ['admin'].includes(m.role)
+    );
+    
+    const isCreator = circle.creator.toString() === req.userId;
+    
+    if (!isAdmin && !isCreator) {
+      return res.status(403).json({ error: 'Only admins can view pending requests' });
+    }
+    
+    // Get only pending requests
+    const pendingRequests = circle.pendingRequests.filter(
+      r => r.status === 'pending'
+    );
+    
+    // Calculate stats
+    const total = pendingRequests.length;
+    const paginatedRequests = pendingRequests.slice(skip, skip + limit);
+    
+    res.json({
+      success: true,
+      pendingRequests: paginatedRequests,
+      stats: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+        hasMore: page < Math.ceil(total / limit)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Get pending requests error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== GET ALL REQUESTS (WITH FILTERS) ===========
+exports.getAllRequests = async (req, res) => {
+  try {
+    const { circleId } = req.params;
+    const status = req.query.status || 'all'; // pending, approved, rejected, all
+    
+    const circle = await Circle.findById(circleId)
+      .populate({
+        path: 'pendingRequests.user',
+        select: 'username profile.displayName profile.profileImage'
+      })
+      .populate('pendingRequests.reviewedBy', 'username');
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    // Check if user is admin or creator
+    const isAdmin = circle.members.some(
+      m => m.user.toString() === req.userId && ['admin'].includes(m.role)
+    );
+    
+    const isCreator = circle.creator.toString() === req.userId;
+    
+    if (!isAdmin && !isCreator) {
+      return res.status(403).json({ error: 'Only admins can view requests' });
+    }
+    
+    // Filter by status
+    let filteredRequests = circle.pendingRequests;
+    if (status !== 'all') {
+      filteredRequests = circle.pendingRequests.filter(r => r.status === status);
+    }
+    
+    // Sort by requestedAt (newest first)
+    filteredRequests.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+    
+    res.json({
+      success: true,
+      requests: filteredRequests,
+      counts: {
+        pending: circle.pendingRequests.filter(r => r.status === 'pending').length,
+        approved: circle.pendingRequests.filter(r => r.status === 'approved').length,
+        rejected: circle.pendingRequests.filter(r => r.status === 'rejected').length,
+        total: circle.pendingRequests.length
+      }
+    });
+    
+  } catch (error) {
+    console.error('Get all requests error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== APPROVE JOIN REQUEST ===========
+exports.approveJoinRequest = async (req, res) => {
+  try {
+    const { circleId, requestId } = req.params;
+    
+    const circle = await Circle.findById(circleId);
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    // Check if user is admin or creator
+    const isAdmin = circle.members.some(
+      m => m.user.toString() === req.userId && ['admin'].includes(m.role)
+    );
+    
+    const isCreator = circle.creator.toString() === req.userId;
+    
+    if (!isAdmin && !isCreator) {
+      return res.status(403).json({ error: 'Only admins can approve requests' });
+    }
+    
+    // Find the request
+    const requestIndex = circle.pendingRequests.findIndex(
+      r => r._id.toString() === requestId
+    );
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+    
+    const request = circle.pendingRequests[requestIndex];
+    
+    if (request.status !== 'pending') {
+      return res.status(400).json({ 
+        error: `This request has already been ${request.status}` 
+      });
+    }
+    
+    // Update request status
+    request.status = 'approved';
+    request.reviewedAt = new Date();
+    request.reviewedBy = req.userId;
+    
+    // Add user as member
+    const userId = request.user;
+    
+    // Check if already member (safety check)
+    const isAlreadyMember = circle.members.some(
+      m => m.user.toString() === userId.toString()
+    );
+    
+    if (!isAlreadyMember) {
+      circle.members.push({
+        user: userId,
+        role: 'member',
+        joinedAt: new Date(),
+        invitedBy: req.userId
+      });
+      circle.stats.memberCount = circle.members.length;
+      
+      // Update user's circle count
+      await User.findByIdAndUpdate(userId, {
+        $inc: { 'stats.circleCount': 1 }
+      });
+    }
+    
+    await circle.save();
+    
+    // Get user info for response
+    const userInfo = await User.findById(userId).select('username profile.displayName');
+    
+    res.json({
+      success: true,
+      message: `Successfully approved ${userInfo?.username || 'user'}'s request to join ${circle.name}`,
+      user: userInfo
+    });
+    
+  } catch (error) {
+    console.error('Approve request error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== REJECT JOIN REQUEST ===========
+exports.rejectJoinRequest = async (req, res) => {
+  try {
+    const { circleId, requestId } = req.params;
+    const { rejectionReason } = req.body;
+    
+    const circle = await Circle.findById(circleId);
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    // Check if user is admin or creator
+    const isAdmin = circle.members.some(
+      m => m.user.toString() === req.userId && ['admin'].includes(m.role)
+    );
+    
+    const isCreator = circle.creator.toString() === req.userId;
+    
+    if (!isAdmin && !isCreator) {
+      return res.status(403).json({ error: 'Only admins can reject requests' });
+    }
+    
+    // Find the request
+    const requestIndex = circle.pendingRequests.findIndex(
+      r => r._id.toString() === requestId
+    );
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+    
+    const request = circle.pendingRequests[requestIndex];
+    
+    if (request.status !== 'pending') {
+      return res.status(400).json({ 
+        error: `This request has already been ${request.status}` 
+      });
+    }
+    
+    // Update request status
+    request.status = 'rejected';
+    request.reviewedAt = new Date();
+    request.reviewedBy = req.userId;
+    request.rejectionReason = rejectionReason || 'No reason provided';
+    
+    await circle.save();
+    
+    // Get user info for response
+    const userInfo = await User.findById(request.user).select('username profile.displayName');
+    
+    res.json({
+      success: true,
+      message: `Rejected ${userInfo?.username || 'user'}'s request to join ${circle.name}`,
+      rejectionReason: request.rejectionReason
+    });
+    
+  } catch (error) {
+    console.error('Reject request error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

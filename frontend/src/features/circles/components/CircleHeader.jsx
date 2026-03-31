@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
-const CircleHeader = () => {
+const CircleHeader = ({ searchQuery, onSearchChange }) => {
     return (
         <div className="text-center pt-16 pb-12">
             <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
@@ -14,8 +14,12 @@ const CircleHeader = () => {
 
                 <div className="relative flex items-center bg-[#1A1140] border border-white/10 rounded-full px-6 py-4 focus-within:border-purple-500/50 transition-all shadow-2xl">
                     <Search className="text-gray-400 group-focus-within:text-purple-400 transition-colors mr-3" size={20} />
+                    <label htmlFor="search-circles" className="sr-only">Search for circles or topics</label>
                     <input
+                        id="search-circles"
                         type="text"
+                        value={searchQuery || ''}
+                        onChange={(e) => onSearchChange?.(e.target.value)}
                         placeholder="Search for circles or topics..."
                         className="bg-transparent border-none outline-none text-white w-full placeholder-gray-500 text-lg"
                     />
