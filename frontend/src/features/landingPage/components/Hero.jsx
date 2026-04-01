@@ -26,9 +26,7 @@ export default function Hero() {
   return (
     <section
       ref={ref}
-      className="relative w-full h-[92vh] overflow-hidden
-                 bg-gradient-to-b from-[#120B2F] to-[#1A1045]
-                 flex items-center justify-center"
+      className="relative w-full h-[94vh] overflow-hidden bg-[#0F0529] flex items-center justify-center"
     >
       {/* lighter background glow */}
       <div className="absolute inset-0 -z-10">
