@@ -19,44 +19,51 @@ const CircleDMList = ({ members = [] }) => {
                 Members
             </p>
 
-            {members.slice(0, 8).map((m) => {
-                const u      = m.user || {};
-                const name   = getMemberName(u);
-                const pic    = getMemberPic(u);
-                const online = getMemberOnline(u);
-                const uname  = u.username;
+            {members.filter(m => m.user?.onlineStatus?.status === 'online').length === 0 ? (
+                <p className="px-2 py-3 text-[11px] text-gray-600 italic">No members online</p>
+            ) : (
+                members
+                    .filter(m => m.user?.onlineStatus?.status === 'online')
+                    .slice(0, 15)
+                    .map((m) => {
+                        const u      = m.user || {};
+                        const name   = getMemberName(u);
+                        const pic    = getMemberPic(u);
+                        const online = getMemberOnline(u);
+                        const uname  = u.username;
 
-                return (
-                    <div key={m._id || u._id} className="flex items-center gap-2.5 px-2 py-2 rounded-xl group hover:bg-white/5 transition-all">
-                        {/* Avatar → profile */}
-                        <Link to={`/profile/${uname}`} className="relative shrink-0">
-                            <img
-                                src={pic}
-                                alt={name}
-                                className="w-7 h-7 rounded-full object-cover"
-                            />
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0F0529] ${online ? 'bg-green-400' : 'bg-gray-700'}`} />
-                        </Link>
+                        return (
+                            <div key={m._id || u._id} className="flex items-center gap-2.5 px-2 py-2 rounded-xl group hover:bg-white/5 transition-all">
+                                {/* Avatar → profile */}
+                                <Link to={`/profile/${uname}`} className="relative shrink-0">
+                                    <img
+                                        src={pic}
+                                        alt={name}
+                                        className="w-7 h-7 rounded-full object-cover"
+                                    />
+                                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0F0529] bg-green-400" />
+                                </Link>
 
-                        {/* Name → profile */}
-                        <Link
-                            to={`/profile/${uname}`}
-                            className="flex-1 min-w-0 text-sm font-medium text-gray-400 group-hover:text-white transition-colors truncate"
-                        >
-                            {name}
-                        </Link>
+                                {/* Name → profile */}
+                                <Link
+                                    to={`/profile/${uname}`}
+                                    className="flex-1 min-w-0 text-sm font-medium text-gray-400 group-hover:text-white transition-colors truncate"
+                                >
+                                    {name}
+                                </Link>
 
-                        {/* DM icon → messages */}
-                        <button
-                            onClick={() => navigate(`/messages?user=${uname}`)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all shrink-0"
-                            title={`Message ${name}`}
-                        >
-                            <MessageCircle size={13} />
-                        </button>
-                    </div>
-                );
-            })}
+                                {/* DM icon → messages */}
+                                <button
+                                    onClick={() => navigate(`/messages?user=${uname}`)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all shrink-0"
+                                    title={`Message ${name}`}
+                                >
+                                    <MessageCircle size={13} />
+                                </button>
+                            </div>
+                        );
+                    })
+            )}
         </aside>
     );
 };

@@ -130,7 +130,8 @@ const CircleDetailsPage = () => {
 
     /* ── render ─────────────────────────────────────────────  */
     const coverSrc       = circle.coverImage?.startsWith('http') ? circle.coverImage : DEFAULT_COVER;
-    const onlineEstimate = formatCount(Math.max(1, Math.floor((circle.stats?.memberCount || 1) * 0.15)));
+    const onlineCount = (circle.members || []).filter(m => m.user?.onlineStatus?.status === 'online').length;
+    const onlineDisplay = formatCount(Math.max(onlineCount, 0));
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans flex flex-col">
@@ -166,7 +167,7 @@ const CircleDetailsPage = () => {
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                                    {onlineEstimate} Online Now
+                                    {onlineDisplay} Online Now
                                 </span>
                             </div>
                         </div>
@@ -208,10 +209,6 @@ const CircleDetailsPage = () => {
                             </>
                         )}
 
-                        {/* Share */}
-                        <button className="p-2.5 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition-colors text-gray-300">
-                            <Share2 size={16} />
-                        </button>
                     </div>
                 </div>
             </div>

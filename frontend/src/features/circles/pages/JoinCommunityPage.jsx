@@ -17,7 +17,10 @@ const JoinCommunityPage = () => {
     useEffect(() => {
         const fetchCircle = async () => {
             try {
-                const response = await axios.get(`${baseUrl}/api/circles/${slug}`);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${baseUrl}/api/circles/${slug}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
                 if (response.data.success) {
                     setCircle(response.data.circle);
                     if (response.data.circle.isMember) {
