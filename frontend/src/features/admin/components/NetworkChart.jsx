@@ -30,6 +30,7 @@ export default function NetworkChart() {
   ];
 
   const [active, setActive] = useState("WED");
+  const [timeline, setTimeline] = useState("Live View");
 
   return (
     <div className="mt-10 p-10 rounded-[28px] bg-[#140021] border border-white/5">
@@ -44,10 +45,14 @@ export default function NetworkChart() {
         </div>
 
         <div className="flex gap-3">
-          <button className="px-4 py-2 rounded-full bg-purple-800/40 text-sm text-purple-300">
+          <button 
+            onClick={() => setTimeline("Live View")}
+            className={`px-4 py-2 rounded-full text-sm transition ${timeline === "Live View" ? "bg-purple-800/40 text-purple-300" : "bg-purple-900/10 text-gray-500 hover:text-gray-300"}`}>
             Live View
           </button>
-          <button className="px-4 py-2 rounded-full bg-purple-900/30 text-sm text-gray-400">
+          <button 
+            onClick={() => setTimeline("7 Days")}
+            className={`px-4 py-2 rounded-full text-sm transition ${timeline === "7 Days" ? "bg-purple-800/40 text-purple-300" : "bg-purple-900/10 text-gray-500 hover:text-gray-300"}`}>
             7 Days
           </button>
         </div>

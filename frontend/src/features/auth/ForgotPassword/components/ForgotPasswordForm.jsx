@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 const ForgotPasswordForm = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const validate = () => {
         if (!email) {
@@ -18,11 +20,20 @@ const ForgotPasswordForm = () => {
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (validate()) {
-            console.log('Password reset requested for:', email);
-            setSubmitted(true);
+            setLoading(true);
+            try {
+                const baseUrl = import.meta.env.VITE_API_URL || '';
+                await axios.post(`${baseUrl}/api/auth/forgot-password`, { email });
+                setSubmitted(true);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Something went wrong. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -35,7 +46,7 @@ const ForgotPasswordForm = () => {
                     </div>
                     <h2 className="text-3xl font-bold mb-4 text-white">Check your email</h2>
                     <p className="text-white/40 mb-8">
-                        We've sent a password reset link to <span className="text-white font-semibold">{email}</span>
+                        We've sent a secure password reset link to <span className="text-white font-semibold flex justify-center mt-2">{email}</span>
                     </p>
                     <Link to="/login" className="flex items-center justify-center space-x-2 text-brand-purple hover:text-brand-purple/80 font-bold transition-all">
                         <ArrowLeft size={18} />
@@ -70,6 +81,7 @@ const ForgotPasswordForm = () => {
                             }}
                             className={`auth-input ${error ? 'border-red-500/50 focus:ring-red-500/50' : ''}`}
                             placeholder="name@example.com"
+                            disabled={loading}
                         />
                         {error && (
                             <div className="flex items-center mt-1 text-red-500 text-xs gap-1">
@@ -79,8 +91,8 @@ const ForgotPasswordForm = () => {
                         )}
                     </div>
 
-                    <button type="submit" className="btn-primary mt-8">
-                        Reset Password
+                    <button disabled={loading} type="submit" className="btn-primary mt-8 flex justify-center items-center">
+                        {loading ? <Loader2 size={24} className="animate-spin" /> : "Reset Password"}
                     </button>
                 </form>
             </div>

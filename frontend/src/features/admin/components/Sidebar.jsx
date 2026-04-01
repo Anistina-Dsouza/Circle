@@ -1,7 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, Layers, Megaphone, BarChart, LogOut } from "lucide-react";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <aside
       className="
@@ -21,7 +29,9 @@ export default function Sidebar() {
       {/* Navigation (scrollable if long) */}
       <nav className="flex-1 space-y-4 overflow-y-auto pr-2">
 
-        <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+        <Link to="/admin">
+          <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+        </Link>
 
         <Link to="/admin/users">
           <Item icon={<Users size={18} />} label="Users" />
@@ -34,21 +44,24 @@ export default function Sidebar() {
         <Link to="/admin/announcements">
           <Item icon={<Megaphone size={18} />} label="Announcements" />
         </Link>
-        <Item icon={<BarChart size={18} />} label="Reports" />
+        <Link to="/admin" onClick={() => alert("Detailed Reports engine is coming soon!")}>
+          <Item icon={<BarChart size={18} />} label="Reports" />
+        </Link>
 
       </nav>
 
       {/* Logout pinned bottom */}
       <div className="pt-6 border-t border-white/5">
-        <Item icon={<LogOut size={18} />} label="Logout" danger />
+        <Item icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
       </div>
 
     </aside>
   );
 }
 
-const Item = ({ icon, label, active, danger }) => (
+const Item = ({ icon, label, active, danger, onClick }) => (
   <div
+    onClick={onClick}
     className={`
     flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer
     transition

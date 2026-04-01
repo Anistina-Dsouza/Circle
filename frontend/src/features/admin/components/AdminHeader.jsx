@@ -80,9 +80,7 @@ export default function AdminHeader() {
           className="
           w-9 h-9 rounded-full
           ring-2 ring-purple-700/40
-          hover:ring-purple-500
           transition
-          cursor-pointer
           "
         />
 
