@@ -36,7 +36,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
             const response = await axios.post(`${baseUrl}/api/moments`, {
                 media: {
                     url: mediaUrl,
-                    type: 'image' // Restricted to image in the bar as per user request
+                    type: 'image' 
                 },
                 caption,
                 duration: 24,
