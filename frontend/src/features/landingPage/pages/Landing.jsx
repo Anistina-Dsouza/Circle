@@ -26,7 +26,7 @@ export default function Landing() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#10002B] via-[#240046] to-[#3C096C] text-white">
+        <div className="min-h-screen bg-[#0F0529] text-white">
             <Navbar isLoggedIn={isLoggedIn} user={user} />
             <Hero />
             <Features />

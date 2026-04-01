@@ -1,105 +1,74 @@
-import { Clock, Users, Video, MessageSquare } from "lucide-react";
+import React from 'react';
+import { MessageSquare, Users, Shield, Zap, Heart, Globe } from 'lucide-react';
 
-export default function Features() {
-  const features = [
-    {
-      icon: <Clock size={28} className="text-purple-400" />,
-      title: "Time-Based Stories",
-      desc: "Share moments that live in the now. Our unique feed prioritizes current presence over algorithm traps.",
-    },
-    {
-      icon: <Users size={28} className="text-purple-400" />,
-      title: "Community Channels",
-      desc: "Deep-dive into niche topics with dedicated channels for every interest and sub-culture.",
-    },
-    {
-      icon: <Video size={28} className="text-purple-400" />,
-      title: "Zoom-Based Meetings",
-      desc: "One-click video huddles. Bring your community face-to-face with seamless native integrations.",
-    },
-    {
-      icon: <MessageSquare size={28} className="text-purple-400" />,
-      title: "Private Messaging",
-      desc: "Encrypted, fast, and personal. Build one-on-one relationships within your larger circles.",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6">
-
-      {/* Heading */}
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4">
-          Right Place, Right Time
-        </h2>
-        <p className="text-gray-400 text-lg">
-          Everything you need to nurture your digital tribe.
-        </p>
-      </div>
-
-      {/* Cards */}
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
-
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="
-              p-10 rounded-[32px]
-              bg-[linear-gradient(180deg,#2b004f,#1a002d)]
-              border border-white/5
-              transition duration-300
-              hover:-translate-y-1
-              hover:border-purple-500/30
-            "
-          >
-            <div className="mb-8">{feature.icon}</div>
-
-            <h3 className="text-xl font-semibold mb-4">
-              {feature.title}
-            </h3>
-
-            <p className="text-gray-400 leading-relaxed">
-              {feature.desc}
-            </p>
-          </div>
-        ))}
-
-      </div>
-
-    </section>
-  );
-}
-
-const features = [
+const FEATURES = [
   {
-    title: "Time-Based Stories",
-    desc: "Content that expires automatically to keep feeds relevant."
+    icon: <MessageSquare className="w-6 h-6 text-violet-400" />,
+    title: "Vibrant Messaging",
+    desc: "Real-time communication with rich media, reactions, and a crystal-clear, glassmorphic interface."
   },
   {
-    title: "Organized Circles",
-    desc: "Focused circles for study, work, and passions."
+    icon: <Users className="w-6 h-6 text-fuchsia-400" />,
+    title: "Private Circles",
+    desc: "Create exclusive spaces for your closest friends or team with full control over privacy and invites."
   },
   {
-    title: "Real-Time Chat",
-    desc: "Instant messaging without endless scrolling."
+    icon: <Zap className="w-6 h-6 text-amber-400" />,
+    title: "Instant Connection",
+    desc: "Find and join communities instantly. No clutter, no noise—just pure, meaningful connections."
+  },
+  {
+    icon: <Shield className="w-6 h-6 text-emerald-400" />,
+    title: "Safe & Secure",
+    desc: "Powerful moderation tools and end-to-end focus on user safety and digital well-being."
+  },
+  {
+    icon: <Heart className="w-6 h-6 text-rose-400" />,
+    title: "Member Focused",
+    desc: "Designed for people, not algorithms. Your feed is yours, curated by the circles you choose."
+  },
+  {
+    icon: <Globe className="w-6 h-6 text-sky-400" />,
+    title: "Global Reach",
+    desc: "Connect with like-minded individuals from around the world across any category or interest."
   }
 ];
 
-// export default function Features() {
-//   return (
-//     <section className="px-10 mt-28 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
-//       {features.map((f) => (
-//         <div
-//           key={f.title}
-//           className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#9D4EDD] transition"
-//         >
-//           <h4 className="text-xl font-semibold mb-3 text-[#C77DFF]">
-//             {f.title}
-//           </h4>
-//           <p className="text-[#E0AAFF]">{f.desc}</p>
-//         </div>
-//       ))}
-//     </section>
-//   );
-// }
+export default function Features() {
+  return (
+    <section className="py-24 relative overflow-hidden bg-[#0F0529]">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
 
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
+            Designed for <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Human Connection</span>
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed font-medium">
+            Circle brings back what social spaces used to be. Meaningful, calm, and entirely yours.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((f, i) => (
+            <div 
+              key={i}
+              className="group p-8 rounded-3xl border border-white/5 bg-white/2 backdrop-blur-xl hover:bg-white/5 hover:border-violet-500/20 transition-all duration-300 shadow-lg shadow-black/20"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-violet-500/10 transition-all duration-300">
+                {f.icon}
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3 group-hover:text-violet-300 transition-colors">
+                {f.title}
+              </h3>
+              <p className="text-gray-500 leading-relaxed text-sm group-hover:text-gray-400 transition-colors">
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
