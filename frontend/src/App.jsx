@@ -62,6 +62,7 @@ function App() {
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
+            <Route path="/circles/:slug" element={<ProtectedRoute><CircleDetails /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
