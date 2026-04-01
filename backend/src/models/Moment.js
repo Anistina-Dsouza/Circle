@@ -7,7 +7,7 @@ const momentSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  
+
   // Content
   media: {
     url: {
@@ -25,7 +25,7 @@ const momentSchema = new mongoose.Schema({
     type: String,
     maxlength: 200
   },
-  
+
   // Duration settings (in hours)
   duration: {
     type: Number,
@@ -37,7 +37,7 @@ const momentSchema = new mongoose.Schema({
     //required: true,
     index: { expireAfterSeconds: 0 } // Auto-delete when expired
   },
-  
+
   // Audience
   audience: {
     type: String,
@@ -48,17 +48,29 @@ const momentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  
+
   viewCount: {
     type: Number,
     default: 0
   },
-  
-  viewers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  
+
+  viewers: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    validate: {
+      validator: function(v) {
+        // Enforce uniqueness within the array instead of using `unique: true` 
+        // which would restrict a user to only exist in ONE moment across the entire app!
+        // Using `unique: true` on a field inside a schema creates a unique index in MongoDB,
+        // which would prevent the same user ID from appearing in the viewers list of any other document.
+        return v.length === new Set(v.map(id => id.toString())).size;
+      },
+      message: 'User already exists in viewers array'
+    }
+  },
+
   replies: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -73,7 +85,7 @@ const momentSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
-  
+
   isActive: {
     type: Boolean,
     default: true
@@ -87,7 +99,7 @@ momentSchema.index({ user: 1, createdAt: -1 });
 momentSchema.index({ audience: 1, createdAt: -1 });
 
 // Set expiresAt before saving
-momentSchema.pre('save', function(next) {
+momentSchema.pre('save', function (next) {
   if (!this.expiresAt) {
     const hours = this.duration || 24;
     this.expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
@@ -95,16 +107,29 @@ momentSchema.pre('save', function(next) {
 });
 
 // Simple methods
-momentSchema.methods.addView = function(userId) {
-  if (userId && !this.viewers.includes(userId)) {
-    this.viewers.push(userId);
-    this.viewCount = this.viewers.length;
-    return this.save();
+momentSchema.methods.addView = function (userId) {
+  if (!userId) return Promise.resolve(this);
+
+  const userIdStr = userId.toString();
+  const alreadyViewed = this.viewers.some(v => {
+    const vId = v && v._id ? v._id.toString() : (v ? v.toString() : '');
+    return vId === userIdStr;
+  });
+
+  if (!alreadyViewed) {
+    // Use atomic update to prevent React Strict Mode duplicate updates
+    return this.constructor.updateOne(
+      { _id: this._id, viewers: { $ne: userId } },
+      {
+        $addToSet: { viewers: userId },
+        $inc: { viewCount: 1 }
+      }
+    ).then(() => this);
   }
   return Promise.resolve(this);
 };
 
-momentSchema.methods.addReply = function(userId, message) {
+momentSchema.methods.addReply = function (userId, message) {
   this.replies.push({
     user: userId,
     message,
