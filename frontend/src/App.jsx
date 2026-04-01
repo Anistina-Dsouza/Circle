@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './features/auth/Login/LoginPage';
 import Signup from './features/auth/Signup/SignupPage';
 import ForgotPassword from './features/auth/ForgotPassword/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/ForgotPassword/ResetPasswordPage';
 import Landing from './features/landingPage/pages/Landing';
 import Feed from './features/feed/FeedPage';
 import Messages from './features/messages/MessagesPage';
@@ -51,6 +52,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
             <Route path="/feed" element={<Feed />} />
             <Route path="/messages" element={<Messages />} />

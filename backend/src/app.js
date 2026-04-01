@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const circleRoutes = require('./routes/circleRoutes');
 const momentRoutes = require('./routes/momentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/moments', momentRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 // 404 handler
