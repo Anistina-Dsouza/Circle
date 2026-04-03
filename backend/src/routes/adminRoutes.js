@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardStats } = require('../controllers/adminController');
+const { getDashboardStats, getAllUsers, toggleUserSuspension } = require('../controllers/adminController');
 const { adminAuth } = require('../middleware/auth');
 
 // @route   GET /api/admin/dashboard
-// @desc    Get dashboard statistics, top users, and new circles
-// @access  Private/Admin
 router.get('/dashboard', adminAuth, getDashboardStats);
+
+// @route   GET /api/admin/users
+router.get('/users', adminAuth, getAllUsers);
+
+// @route   PUT /api/admin/users/:id/suspend
+router.put('/users/:id/suspend', adminAuth, toggleUserSuspension);
 
 module.exports = router;
