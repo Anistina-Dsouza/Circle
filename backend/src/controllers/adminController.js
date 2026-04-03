@@ -56,6 +56,68 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    // Fetch all users safely excluding passwords
+    const users = await User.find({}).sort({ createdAt: -1 }).select('-password -resetPasswordToken -resetPasswordExpires');
+    
+    // Join logic: Calculate strictly pending user reports for each node footprint
+    const usersWithReports = await Promise.all(users.map(async (u) => {
+      const reportsCount = await Report.countDocuments({
+        reportedItemId: u._id,
+        reportedItemType: 'User',
+        status: 'pending'
+      });
+      return {
+        ...u.toObject(),
+        pendingReports: reportsCount
+      };
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: usersWithReports
+    });
+  } catch (error) {
+    console.error('All Users Fetch Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve users directory map', error: error.message });
+  }
+};
+
+const toggleUserSuspension = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User logic node not found.' });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Administrators cannot be suspended natively via UI.' });
+    }
+
+    // Toggle the Active state completely
+    user.isActive = !user.isActive;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: `User context ${user.isActive ? 'restored' : 'suspended'} successfully.`,
+      data: {
+        _id: user._id,
+        isActive: user.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('User Suspension Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to construct and persist status flip', error: error.message });
+  }
+};
+
 module.exports = {
-  getDashboardStats
+  getDashboardStats,
+  getAllUsers,
+  toggleUserSuspension
 };

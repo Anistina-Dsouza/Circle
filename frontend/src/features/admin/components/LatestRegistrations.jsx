@@ -57,12 +57,14 @@ export default function LatestRegistrations({ users }) {
               <div className="w-[20%]">
                 <span
                   className={`px-4 py-1.5 rounded-full text-xs font-semibold
-                  ${u.isVerified
-                    ? "bg-[#123c2a] text-green-400"
-                    : "bg-[#3a2f00] text-yellow-400"
+                  ${!u.isActive 
+                    ? "bg-red-900/40 text-red-500 border border-red-500/20" 
+                    : u.isVerified
+                      ? "bg-[#123c2a] text-green-400"
+                      : "bg-[#3a2f00] text-yellow-400"
                   }`}
                 >
-                  {u.isVerified ? "VERIFIED" : "PENDING"}
+                  {!u.isActive ? "SUSPENDED" : (u.isVerified ? "VERIFIED" : "PENDING")}
                 </span>
               </div>
 
