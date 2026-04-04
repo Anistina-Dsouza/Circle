@@ -74,7 +74,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
             }
         } catch (error) {
             console.error('Error posting story:', error);
-            alert(error.response?.data?.error || 'Failed to post story');
+            console.log(error.response?.data?.error || 'Failed to post story');
         } finally {
             setLoading(false);
         }

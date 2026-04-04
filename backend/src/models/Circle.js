@@ -83,9 +83,30 @@ const circleSchema = new mongoose.Schema({
     invitedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-    }
+    },
+
+    // ── CHAT ADDITION ──────────────────────────────────────
+    // Tracks where each member last read — used for unread badge count
+    lastReadMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CircleMessage',
+      default: null
+    },
+    lastReadAt: {
+      type: Date,
+      default: null
+    },
+    // Per-member notification preference for this circle
+    notifLevel: {
+      type: String,
+      enum: ['all', 'mentions', 'none'],
+      default: 'all'
+    },
+    isMuted: { type: Boolean, default: false },
+    mutedUntil: { type: Date, default: null }
+    // ── END CHAT ADDITION ───────────────────────────────────
   }],
-  // Add this to your circleSchema
+
   pendingRequests: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -113,27 +134,53 @@ const circleSchema = new mongoose.Schema({
     },
     rejectionReason: String
   }],
+
   // Stats
   stats: {
-    memberCount: { type: Number, default: 0 },
-    messageCount: { type: Number, default: 0 },
-    flashCount: { type: Number, default: 0 },
+    memberCount:  { type: Number, default: 0 },
+    messageCount: { type: Number, default: 0 },   // ← already existed, now actually used
+    flashCount:   { type: Number, default: 0 },
     meetingCount: { type: Number, default: 0 }
   },
 
   // Settings
   settings: {
-    allowMemberPosts: { type: Boolean, default: true },
-    allowMemberInvites: { type: Boolean, default: true },
-    requirePostApproval: { type: Boolean, default: false }
+    allowMemberPosts:    { type: Boolean, default: true },
+    allowMemberInvites:  { type: Boolean, default: true },
+    requirePostApproval: { type: Boolean, default: false },
+
+    // ── CHAT ADDITION ──────────────────────────────────────
+    // 0 = no slow mode. Any value = seconds a member must wait between messages
+    slowMode: { type: Number, default: 0 },
+    // Which content types members are allowed to send
+    allowedContentTypes: {
+      type: [String],
+      enum: ['text', 'image', 'video', 'audio', 'file', 'poll', 'gif'],
+      default: ['text', 'image', 'video', 'audio', 'file', 'gif']
+    }
+    // ── END CHAT ADDITION ───────────────────────────────────
   },
 
+  // ── CHAT ADDITION ────────────────────────────────────────
+  // Snapshot of the latest message — powers the circle list preview
+  // exactly like WhatsApp group list
+  lastMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CircleMessage',
+    default: null
+  },
+  lastActivity: {
+    type: Date,
+    default: Date.now   // updated every time a message is sent
+  },
+  // ── END CHAT ADDITION ─────────────────────────────────────
+
   // Status
-  isActive: { type: Boolean, default: true, index: true },
+  isActive:   { type: Boolean, default: true,  index: true },
   isFeatured: { type: Boolean, default: false, index: true }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
+  toJSON:   { virtuals: true },
   toObject: { virtuals: true }
 });
 
@@ -141,39 +188,34 @@ const circleSchema = new mongoose.Schema({
 circleSchema.index({ name: 'text', description: 'text' });
 circleSchema.index({ type: 1, 'stats.memberCount': -1 });
 circleSchema.index({ creator: 1 });
-circleSchema.index({ 'members.user': 1 }); // Added for member lookup
+circleSchema.index({ 'members.user': 1 });
+// ── CHAT ADDITION: sort circle list by latest activity ──
+circleSchema.index({ lastActivity: -1 });
+// ── END CHAT ADDITION ───────────────────────────────────
 
 // =========== MIDDLEWARE ===========
 circleSchema.pre('save', function (next) {
-  // Generate slug from name
   if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphen
-      .replace(/^-+|-+$/g, '');      // Remove leading/trailing hyphens
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
-  // Generate unique invite code for private circles
   if (this.type === 'private' && !this.inviteCode) {
-    // More unique: timestamp + random + name hash
     const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 6);
-    const nameHash = this.name.substring(0, 3).toUpperCase();
+    const random    = Math.random().toString(36).substring(2, 6);
+    const nameHash  = this.name.substring(0, 3).toUpperCase();
     this.inviteCode = `${nameHash}-${timestamp}-${random}`.toUpperCase();
   }
 
-  // Update member count
   if (this.members) {
     this.stats.memberCount = this.members.length;
   }
-  // 
-  // next();
 });
 
-// Ensure member list doesn't have duplicates
 circleSchema.pre('save', function (next) {
   if (this.members && this.members.length > 0) {
-    // Remove duplicate members by user ID
     const seen = new Set();
     this.members = this.members.filter(member => {
       const userId = member.user.toString();
@@ -182,7 +224,6 @@ circleSchema.pre('save', function (next) {
       return true;
     });
   }
-  // next();
 });
 
 // =========== VIRTUAL FIELDS ===========
@@ -195,14 +236,18 @@ circleSchema.virtual('isAdmin').get(function () {
 
 // =========== INSTANCE METHODS ===========
 circleSchema.methods.addMember = function (userId, role = 'member', invitedBy = null) {
-  // Check if already member
   const existing = this.members.find(m => m.user.toString() === userId.toString());
   if (!existing) {
     this.members.push({
       user: userId,
       role,
       joinedAt: new Date(),
-      invitedBy
+      invitedBy,
+      // chat fields initialised to safe defaults — no extra work needed
+      lastReadMessage: null,
+      lastReadAt: null,
+      notifLevel: 'all',
+      isMuted: false
     });
     this.stats.memberCount = this.members.length;
   }
@@ -225,15 +270,9 @@ circleSchema.methods.getMemberRole = function (userId) {
 };
 
 circleSchema.methods.addModerator = function (userId, role = 'moderator', addedBy = null) {
-  // Check if already moderator
   const existing = this.moderators.find(m => m.user.toString() === userId.toString());
   if (!existing) {
-    this.moderators.push({
-      user: userId,
-      role,
-      addedAt: new Date(),
-      addedBy
-    });
+    this.moderators.push({ user: userId, role, addedAt: new Date(), addedBy });
   }
   return this.save();
 };
@@ -244,15 +283,38 @@ circleSchema.methods.removeModerator = function (userId) {
 };
 
 circleSchema.methods.isModerator = function (userId) {
-  const isCreator = this.creator.toString() === userId.toString();
+  const isCreator    = this.creator.toString() === userId.toString();
   const inModerators = this.moderators.some(m => m.user.toString() === userId.toString());
-  const isMemberMod = this.members.some(m =>
+  const isMemberMod  = this.members.some(m =>
     m.user.toString() === userId.toString() &&
     ['admin', 'moderator'].includes(m.role)
   );
-
   return isCreator || inModerators || isMemberMod;
 };
+
+// ── CHAT ADDITION: two new instance methods ─────────────────────────────────
+
+// Call this every time a new CircleMessage is saved
+// Usage: await circle.updateLastMessage(message._id)
+circleSchema.methods.updateLastMessage = function (messageId) {
+  this.lastMessage  = messageId;
+  this.lastActivity = new Date();
+  this.stats.messageCount += 1;
+  return this.save();
+};
+
+// Call this when a member opens the circle chat
+// Usage: await circle.markRead(userId, message._id)
+circleSchema.methods.markRead = function (userId, messageId) {
+  const member = this.members.find(m => m.user.toString() === userId.toString());
+  if (member) {
+    member.lastReadMessage = messageId;
+    member.lastReadAt      = new Date();
+  }
+  return this.save();
+};
+
+// ── END CHAT ADDITION ────────────────────────────────────────────────────────
 
 // =========== STATIC METHODS ===========
 circleSchema.statics.findBySlug = function (slug) {
@@ -266,10 +328,7 @@ circleSchema.statics.findByInviteCode = function (code) {
 };
 
 circleSchema.statics.getPopular = function (limit = 10) {
-  return this.find({
-    isActive: true,
-    type: 'public'
-  })
+  return this.find({ isActive: true, type: 'public' })
     .sort({ 'stats.memberCount': -1, createdAt: -1 })
     .limit(limit)
     .select('name slug description coverImage stats memberCount');

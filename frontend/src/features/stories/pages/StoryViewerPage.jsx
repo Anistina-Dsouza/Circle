@@ -224,18 +224,20 @@ const StoryViewerPage = () => {
                     )}
 
                     {/* Viewers Badge (Bottom-Center as per ref) */}
-                    <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
-                        <div 
-                            onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
-                            className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto hover:bg-[#5f4e99] transition-colors"
-                        >
-                            <Eye size={16} className="text-purple-300" />
-                            <span className="text-xs font-bold text-white tracking-wide">
-                                {currentStory.viewers?.length || currentStory.viewCount || 0} Viewers
-                            </span>
-                            <ChevronUp size={16} className="text-purple-300 ml-1" />
+                    {isOwnStory && (
+                        <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
+                            <div 
+                                onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
+                                className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto hover:bg-[#5f4e99] transition-colors"
+                            >
+                                <Eye size={16} className="text-purple-300" />
+                                <span className="text-xs font-bold text-white tracking-wide">
+                                    {currentStory.viewers?.length || currentStory.viewCount || 0} Viewers
+                                </span>
+                                <ChevronUp size={16} className="text-purple-300 ml-1" />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Caption (Left-Bottom as per ref) */}
                     {currentStory.caption && (
