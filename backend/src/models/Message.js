@@ -1,128 +1,86 @@
+// models/Message.js  ← ONLY for direct DM messages
 const mongoose = require('mongoose');
 
-const messageSchema = new mongoose.Schema({
-  // Sender
+const MessageSchema = new mongoose.Schema({
+  conversationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conversation',
+    required: true
+  },
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  
-  // For personal chat
-  receiver: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  
-  // For group chat
-  circle: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Circle'
-  },
-  channel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Channel'
-  },
-  
-  // Content
+
   content: {
-    text: {
-      type: String,
-      maxlength: 2000
-    },
-    media: [{
-      url: String,
-      type: {
-        type: String,
-        enum: ['image', 'video', 'file', 'audio']
-      },
-      thumbnail: String,
-      filename: String,
-      size: Number
-    }]
+    text:      { type: String, default: null },
+    mediaUrl:  { type: String, default: null },
+    mediaType: { type: String, default: null },  // 'image'|'video'|'audio'|'file'
+    fileName:  { type: String, default: null },
+    fileSize:  { type: Number, default: null },
+    mimeType:  { type: String, default: null },
+    thumbnail: { type: String, default: null },
+    duration:  { type: Number, default: null }   // seconds, for audio/video
   },
-  
-  // Status
-  status: {
+
+  contentType: {
     type: String,
-    enum: ['sent', 'delivered', 'read'],
-    default: 'sent'
+    enum: ['text', 'image', 'video', 'audio', 'file', 'gif', 'system'],
+    default: 'text'
   },
-  
-  // Replies
+
+  // Reply to another message in the same DM
   replyTo: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Message'
+    ref: 'Message',
+    default: null
   },
-  
-  // Reactions
+
+  // Reactions: [{ emoji: '👍', users: [userId, ...] }]
   reactions: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    emoji: String,
-    reactedAt: {
-      type: Date,
-      default: Date.now
-    }
+    emoji: { type: String, required: true },
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
   }],
-  
-  // Mentions
-  mentions: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+
+  // Read receipt — only 1 other person in a DM so this is simple
+  isRead:  { type: Boolean, default: false },
+  readAt:  { type: Date, dfault: null },
+
+  // Edit support
+  isEdited: { type: Boolean, default: false },
+  editHistory: [{
+    text:     String,
+    editedAt: { type: Date, default: Date.now }
   }],
-  
-  // Metadata
-  isEdited: {
-    type: Boolean,
-    default: false
-  },
-  editedAt: Date,
-  
-  isDeleted: {
-    type: Boolean,
-    default: false
-  },
-  deletedAt: Date,
-  deletedBy: {
+
+  // "Delete for me" vs "Delete for everyone"
+  isDeleted:  { type: Boolean, default: false },
+  deletedAt:  { type: Date, default: null },
+  deletedFor: [{
+    user:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    deletedAt: Date
+  }],
+
+  // Forwarded from another DM message
+  forwardedFrom: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
-}, {
-  timestamps: true
-});
+    ref: 'Message',
+    default: null
+  },
 
-// Indexes
-messageSchema.index({ sender: 1, createdAt: -1 });
-messageSchema.index({ receiver: 1, createdAt: -1 });
-messageSchema.index({ circle: 1, channel: 1, createdAt: -1 });
-messageSchema.index({ createdAt: -1 });
-messageSchema.index({ 'content.text': 'text' });
+  // system messages: "You connected on CircleApp" etc.
+  systemData: { type: mongoose.Schema.Types.Mixed, default: null },
 
-// Instance methods
-messageSchema.methods.markAsRead = function() {
-  this.status = 'read';
-  return this.save();
-};
+  meta: { type: mongoose.Schema.Types.Mixed, default: {} }
+}, { timestamps: true });
 
-messageSchema.methods.addReaction = function(userId, emoji) {
-  // Remove existing reaction from same user
-  this.reactions = this.reactions.filter(r => r.user.toString() !== userId.toString());
-  
-  // Add new reaction
-  this.reactions.push({
-    user: userId,
-    emoji: emoji
-  });
-  
-  return this.save();
-};
+// =========== INDEXES ===========
+// Core: load messages for a conversation, oldest first for chat UI
+MessageSchema.index({ conversationId: 1, createdAt: 1 });
+// Cursor-based pagination (scroll up to load older messages)
+MessageSchema.index({ conversationId: 1, _id: -1 });
+// Find all messages sent by a user (for account deletion / data export)
+MessageSchema.index({ sender: 1 });
 
-messageSchema.methods.removeReaction = function(userId) {
-  this.reactions = this.reactions.filter(r => r.user.toString() !== userId.toString());
-  return this.save();
-};
-
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model('Message', MessageSchema);
