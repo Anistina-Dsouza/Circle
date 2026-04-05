@@ -10,6 +10,9 @@ const userRoutes = require('./routes/userRoutes');
 const circleRoutes = require('./routes/circleRoutes');
 const momentRoutes = require('./routes/momentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const conversationRoutes = require('./routes/conversationRoutes'); 
+const circleMessageRoutes = require('./routes/circleMessageRoutes'); // Import circle message routes
+
 
 const app = express();
 
@@ -57,6 +60,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/moments', momentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/conversations', conversationRoutes); // Route for conversations
+app.use('/api/circlemessages', circleMessageRoutes); // Route for circle messages
 
 
 // 404 handler
