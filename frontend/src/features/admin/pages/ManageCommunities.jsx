@@ -1,9 +1,76 @@
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import CommunityTable from "../components/DetailedCommunityTables";
 import CommunityStats from "../components/CommunityStats";
 import { Search } from "lucide-react";
+import axios from "axios";
 
 export default function ManageCommunities() {
+  const [circles, setCircles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [privacyFilter, setPrivacyFilter] = useState("all");
+  const [dashboardStats, setDashboardStats] = useState(null);
+
+  const fetchCircles = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      
+      const [circlesRes, statsRes] = await Promise.all([
+        axios.get(`${baseUrl}/api/admin/circles`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }),
+        axios.get(`${baseUrl}/api/admin/dashboard`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+      ]);
+
+      if (circlesRes.data.success) {
+        setCircles(circlesRes.data.data);
+      }
+      if (statsRes.data.success) {
+        setDashboardStats(statsRes.data.data.stats);
+      }
+    } catch (err) {
+      console.error('Failed to fetch communities', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCircles();
+  }, []);
+
+  const handleToggleStatus = async (id) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.put(`${baseUrl}/api/admin/circles/${id}/status`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      fetchCircles();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to toggle status');
+    }
+  };
+
+  // Compute filtered circles
+  const processedCircles = circles.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (c.creator?.displayName || c.creator?.username || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPrivacy = privacyFilter === "all" || c.type === privacyFilter;
+    return matchesSearch && matchesPrivacy;
+  });
+
+  const newCirclesCount = circles.filter(c => {
+     const oneDay = 24 * 60 * 60 * 1000;
+     return (new Date() - new Date(c.createdAt)) < oneDay;
+  }).length;
+  
+  const avgMembers = circles.length > 0
+    ? (circles.reduce((acc, c) => acc + (c.stats?.memberCount || 0), 0) / circles.length).toFixed(1)
+    : "0";
+
   return (
     <div className="flex bg-[#10002B] text-white min-h-screen">
 
@@ -19,13 +86,9 @@ export default function ManageCommunities() {
             <h1 className="text-4xl font-bold">Community Management</h1>
 
             <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 px-5 py-2 rounded-full text-sm">
-              1,248 Circles
+              {circles.length} Circles
             </span>
           </div>
-
-          <button className="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-3 rounded-full font-medium shadow-lg shadow-purple-900/30 hover:opacity-90 transition">
-            + Create New Circle
-          </button>
         </div>
 
         {/* Controls */}
@@ -35,6 +98,8 @@ export default function ManageCommunities() {
           <div className="relative flex-1">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-purple-300" size={18}/>
             <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name, host, or keyword..."
               className="w-full bg-[#240046] pl-14 pr-6 py-4 rounded-full outline-none border border-purple-900/40 focus:ring-2 focus:ring-purple-500 transition"
             />
@@ -50,6 +115,8 @@ export default function ManageCommunities() {
             <div className="relative w-64">
 
             <select
+            value={privacyFilter}
+            onChange={(e) => setPrivacyFilter(e.target.value)}
             className="
                 w-full
                 appearance-none
@@ -68,13 +135,13 @@ export default function ManageCommunities() {
                 cursor-pointer
             "
             >
-            <option className="bg-[#1a0033] text-purple-200">
+            <option value="all" className="bg-[#1a0033] text-purple-200">
                 Privacy Type: All
             </option>
-            <option className="bg-[#1a0033] text-purple-200">
+            <option value="public" className="bg-[#1a0033] text-purple-200">
                 Public
             </option>
-            <option className="bg-[#1a0033] text-purple-200">
+            <option value="private" className="bg-[#1a0033] text-purple-200">
                 Private
             </option>
             </select>
@@ -88,9 +155,13 @@ export default function ManageCommunities() {
 
         </div>
 
-        <CommunityTable />
+        <CommunityTable data={processedCircles} loading={loading} onToggleStatus={handleToggleStatus} />
 
-        <CommunityStats />
+        <CommunityStats 
+            newCircles={newCirclesCount} 
+            engagement={avgMembers} 
+            reportedItems={dashboardStats?.flaggedItems || 0} 
+        />
 
       </main>
     </div>
