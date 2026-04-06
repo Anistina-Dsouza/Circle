@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
     Users, Share2, Settings, Loader2,
-    Globe, Lock, CheckCircle, LogOut, UserPlus
+    Globe, Lock, CheckCircle, LogOut, UserPlus, Flag
 } from 'lucide-react';
 
 import FeedNavbar         from '../../feed/components/FeedNavbar';
@@ -13,6 +13,7 @@ import CircleChatArea     from '../components/CircleChatArea';
 import CircleMembersPanel from '../components/CircleMembersPanel';
 import CircleLeaveModal   from '../components/CircleLeaveModal';
 import CircleInviteModal  from '../components/CircleInviteModal';
+import ReportModal        from '../../../components/common/ReportModal';
 
 /* ── helpers ──────────────────────────────────────────────── */
 const DEFAULT_COVER = 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop';
@@ -40,6 +41,7 @@ const CircleDetailsPage = () => {
     const [leaveOpen,   setLeaveOpen]   = useState(false);
     const [leaveLoading, setLeaveLoading] = useState(false);
     const [inviteOpen,  setInviteOpen]  = useState(false);
+    const [reportOpen,  setReportOpen]  = useState(false);
 
     const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -176,6 +178,14 @@ const CircleDetailsPage = () => {
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 pb-1 flex-wrap">
 
+                        <button
+                            onClick={() => setReportOpen(true)}
+                            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 text-gray-400 font-semibold transition-all mr-1"
+                            title="Report Circle"
+                        >
+                            <Flag size={15} />
+                        </button>
+
                         {/* Invite button — visible to all members if allowed */}
                         {canInvite && (
                             <button
@@ -249,6 +259,13 @@ const CircleDetailsPage = () => {
                 onClose={() => setInviteOpen(false)}
                 circle={circle}
                 isAdmin={isAdmin}
+            />
+
+            <ReportModal
+                isOpen={reportOpen}
+                onClose={() => setReportOpen(false)}
+                reportedItemId={circle?._id}
+                reportedItemType="Circle"
             />
         </div>
     );

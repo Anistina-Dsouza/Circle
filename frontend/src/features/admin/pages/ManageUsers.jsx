@@ -3,12 +3,14 @@ import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import ViewReportsModal from "../components/ViewReportsModal";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('default');
+  const [viewReportItemId, setViewReportItemId] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -44,6 +46,18 @@ export default function ManageUsers() {
       fetchUsers(); // Refresh grid natively mapping truth
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to toggle status');
+    }
+  };
+
+  const handleDismiss = async (id) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.put(`${baseUrl}/api/admin/reports/${id}/dismiss`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to dismiss reports');
     }
   };
 
@@ -158,9 +172,9 @@ export default function ManageUsers() {
                   {/* Flags (Reports) */}
                   <div className="w-[10%] flex justify-center">
                     {user.pendingReports > 0 ? (
-                      <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-red-500/30">
+                      <button onClick={() => setViewReportItemId(user._id)} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-red-500/30 hover:bg-red-500 hover:text-white transition cursor-pointer">
                         {user.pendingReports} Pending
-                      </span>
+                      </button>
                     ) : (
                       <span className="text-gray-600 text-xs">-</span>
                     )}
@@ -203,6 +217,14 @@ export default function ManageUsers() {
           })()}
 
         </div>
+
+        <ViewReportsModal
+            isOpen={!!viewReportItemId}
+            onClose={() => setViewReportItemId(null)}
+            itemId={viewReportItemId}
+            itemType="User"
+            onDismiss={handleDismiss}
+        />
 
       </div>
 
