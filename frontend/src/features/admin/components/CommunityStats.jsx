@@ -1,24 +1,22 @@
-export default function CommunityStats() {
+export default function CommunityStats({ newCircles = 0, engagement = '0', reportedItems = 0 }) {
     return (
       <div className="grid md:grid-cols-3 gap-8 mt-10">
   
         <StatCard
           title="New Circles Today"
-          value="+24"
-          trend="+12%"
+          value={`+${newCircles}`}
           positive
         />
   
         <StatCard
-          title="Avg. Engagement"
-          value="84.2%"
-          trend="+4%"
+          title="Avg. Members per Circle"
+          value={engagement}
           positive
         />
   
         <StatCard
           title="Reported Items"
-          value="12"
+          value={reportedItems}
           subtitle="Pending Review"
           danger
         />

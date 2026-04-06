@@ -116,8 +116,53 @@ const toggleUserSuspension = async (req, res) => {
   }
 };
 
+const getAllCircles = async (req, res) => {
+  try {
+    const circles = await Circle.find({})
+      .populate('creator', 'displayName username profilePic')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: circles
+    });
+  } catch (error) {
+    console.error('All Circles Fetch Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve circles', error: error.message });
+  }
+};
+
+const toggleCircleStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const circle = await Circle.findById(id);
+
+    if (!circle) {
+      return res.status(404).json({ success: false, message: 'Circle not found.' });
+    }
+
+    circle.isActive = !circle.isActive;
+    await circle.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: `Circle ${circle.isActive ? 'restored' : 'suspended'} successfully.`,
+      data: {
+        _id: circle._id,
+        isActive: circle.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('Circle Suspension Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to toggle circle status', error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
-  toggleUserSuspension
+  toggleUserSuspension,
+  getAllCircles,
+  toggleCircleStatus
 };
