@@ -60,8 +60,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/moments', momentRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/conversations', conversationRoutes); // Route for conversations
-app.use('/api/circlemessages', circleMessageRoutes); // Route for circle messages
+app.use('/api/dm/conversations', conversationRoutes); 
+app.use('/api/circlemessages', circleMessageRoutes); 
 
 
 // 404 handler
