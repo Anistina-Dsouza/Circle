@@ -1,14 +1,15 @@
 import { Loader2, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-export default function CommunityTable({ data = [], loading = false, onToggleStatus }) {
+export default function CommunityTable({ data = [], loading = false, onToggleStatus, onViewReports }) {
   return (
     <div className="bg-[#240046] rounded-[32px] overflow-hidden border border-purple-900/40 min-h-[400px]">
 
       {/* Table Header */}
-      <div className="grid grid-cols-5 px-10 py-6 text-sm uppercase tracking-widest text-purple-300 border-b border-purple-900/40">
+      <div className="grid grid-cols-6 px-10 py-6 text-sm uppercase tracking-widest text-purple-300 border-b border-purple-900/40">
         <span>Community Name</span>
         <span>Host Name</span>
         <span>Members</span>
+        <span>Flags</span>
         <span>Privacy Type</span>
         <span className="text-right">Actions</span>
       </div>
@@ -23,7 +24,7 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
           {data.map((c) => (
             <div
               key={c._id}
-              className={`grid grid-cols-5 items-center px-10 py-6 transition ${
+              className={`grid grid-cols-6 items-center px-10 py-6 transition ${
                 c.isActive ? 'hover:bg-purple-900/20' : 'bg-red-900/5 opacity-75 grayscale-[20%]'
               }`}
             >
@@ -48,6 +49,17 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
                 {c.stats?.memberCount || 0}
               </div>
 
+              {/* Flags */}
+              <div>
+                {c.pendingReports > 0 ? (
+                  <button onClick={() => onViewReports(c._id)} className="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-red-500 hover:text-white transition cursor-pointer">
+                    {c.pendingReports} Pending
+                  </button>
+                ) : (
+                  <span className="text-gray-500 text-sm">None</span>
+                )}
+              </div>
+
               {/* Privacy */}
               <span
                 className={`px-4 py-1 rounded-full text-xs font-semibold w-fit ${
@@ -60,8 +72,8 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
               </span>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3">
-                <Link to={`/circle/${c.slug}`} className="bg-purple-500/20 text-purple-300 px-5 py-2 rounded-full text-sm hover:bg-purple-500 hover:text-white transition">
+              <div className="flex justify-end gap-2">
+                <Link to={`/circles/${c.slug}`} className="bg-purple-500/20 text-purple-300 px-5 py-2 rounded-full text-sm hover:bg-purple-500 hover:text-white transition">
                   View
                 </Link>
                 <button 

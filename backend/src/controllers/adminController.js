@@ -122,9 +122,21 @@ const getAllCircles = async (req, res) => {
       .populate('creator', 'displayName username profilePic')
       .sort({ createdAt: -1 });
 
+    const circlesWithReports = await Promise.all(circles.map(async (c) => {
+      const reportsCount = await Report.countDocuments({
+        reportedItemId: c._id,
+        reportedItemType: 'Circle',
+        status: 'pending'
+      });
+      return {
+        ...c.toObject(),
+        pendingReports: reportsCount
+      };
+    }));
+
     res.status(200).json({
       success: true,
-      data: circles
+      data: circlesWithReports
     });
   } catch (error) {
     console.error('All Circles Fetch Error:', error);
@@ -159,10 +171,52 @@ const toggleCircleStatus = async (req, res) => {
   }
 };
 
+const dismissReports = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    
+    await Report.updateMany(
+      { reportedItemId: itemId, status: 'pending' },
+      { $set: { status: 'dismissed', resolvedBy: req.user?._id, resolvedAt: new Date() } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Reports dismissed successfully.'
+    });
+  } catch (error) {
+    console.error('Dismiss Reports Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to dismiss reports', error: error.message });
+  }
+};
+
+const getItemReports = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    
+    const reports = await Report.find({ 
+      reportedItemId: itemId, 
+      status: 'pending' 
+    })
+    .populate('reporter', 'displayName username profilePic')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    console.error('Get Item Reports Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch reports', error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
   toggleUserSuspension,
   getAllCircles,
-  toggleCircleStatus
+  toggleCircleStatus,
+  dismissReports,
+  getItemReports
 };

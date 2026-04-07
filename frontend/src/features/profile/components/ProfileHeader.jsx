@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { MessageSquare, UserCheck, UserPlus, Edit2 } from 'lucide-react';
+import { MessageSquare, UserCheck, UserPlus, Edit2, Flag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import FollowListModal from './FollowListModal';
+import ReportModal from '../../../components/common/ReportModal';
 
 const StatCard = ({ value, label, onClick }) => (
     <button
@@ -23,6 +24,7 @@ const ProfileHeader = ({
 }) => {
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
     return (
         <div className="flex flex-col items-center text-center pt-10 pb-6">
@@ -70,6 +72,13 @@ const ProfileHeader = ({
                             <MessageSquare size={16} />
                             <span>Message</span>
                         </button>
+                        <button 
+                            onClick={() => setIsReportOpen(true)}
+                            className="flex items-center justify-center w-11 h-11 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-red-500/40 hover:text-red-400 font-semibold text-gray-400 transition-all duration-300 hover:scale-105 active:scale-95"
+                            title="Report User"
+                        >
+                            <Flag size={16} />
+                        </button>
                     </>
                 )}
             </div>
@@ -105,6 +114,13 @@ const ProfileHeader = ({
                 users={following}
                 onFollowToggle={onModalFollowToggle}  // ✅ Use modal function
                 currentUserId={user._id}
+            />
+
+            <ReportModal
+                isOpen={isReportOpen}
+                onClose={() => setIsReportOpen(false)}
+                reportedItemId={user._id}
+                reportedItemType="User"
             />
         </div>
     );

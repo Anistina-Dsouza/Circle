@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import CommunityTable from "../components/DetailedCommunityTables";
 import CommunityStats from "../components/CommunityStats";
+import ViewReportsModal from "../components/ViewReportsModal";
 import { Search } from "lucide-react";
 import axios from "axios";
 
@@ -11,6 +12,7 @@ export default function ManageCommunities() {
   const [searchTerm, setSearchTerm] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState("all");
   const [dashboardStats, setDashboardStats] = useState(null);
+  const [viewReportItemId, setViewReportItemId] = useState(null);
 
   const fetchCircles = async () => {
     try {
@@ -51,6 +53,18 @@ export default function ManageCommunities() {
       fetchCircles();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to toggle status');
+    }
+  };
+
+  const handleDismiss = async (id) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.put(`${baseUrl}/api/admin/reports/${id}/dismiss`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      fetchCircles();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to dismiss reports');
     }
   };
 
@@ -155,12 +169,20 @@ export default function ManageCommunities() {
 
         </div>
 
-        <CommunityTable data={processedCircles} loading={loading} onToggleStatus={handleToggleStatus} />
+        <CommunityTable data={processedCircles} loading={loading} onToggleStatus={handleToggleStatus} onViewReports={(id) => setViewReportItemId(id)} />
 
         <CommunityStats 
             newCircles={newCirclesCount} 
             engagement={avgMembers} 
             reportedItems={dashboardStats?.flaggedItems || 0} 
+        />
+
+        <ViewReportsModal
+            isOpen={!!viewReportItemId}
+            onClose={() => setViewReportItemId(null)}
+            itemId={viewReportItemId}
+            itemType="Circle"
+            onDismiss={handleDismiss}
         />
 
       </main>
