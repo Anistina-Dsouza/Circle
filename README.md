@@ -28,9 +28,9 @@ Built as a **monorepo** with React frontend and Node.js backend, this project de
 
 | Feature | Description |
 |---------|-------------|
-| **👤 User System** | JWT authentication, profiles, follow/unfollow, privacy settings |
+| **👤 User System** | JWT authentication, profiles, follow/unfollow, reportuser, privacy settings |
 | **🏘️ Circles** | Communities with public/private options, roles, invite codes |
-| **📸 Moments** | 24-48 hour stories with auto-expiry, view counts, replies |
+| **📸 Moments** | customized hour stories with auto-expiry, view counts, replies |
 | **💬 Huddles** | Real-time chat with Socket.io, reactions, read receipts |
 | **🎥 RoundTables** | Video meetings using WebRTC, screen sharing, recordings |
 | **🔔 Notifications** | In-app and push notifications for engagement |
@@ -46,12 +46,14 @@ Built as a **monorepo** with React frontend and Node.js backend, this project de
 - **Axios** – HTTP client
 - **Socket.io-client** – Real-time communication
 - **Tailwind CSS** – Styling
+- **Lucide React** – Dynamic SVG iconography
 
 ### Backend
 - **Node.js** – JavaScript runtime
 - **Express.js** – Web framework
 - **MongoDB + Mongoose** – Database & ODM
 - **JWT + Bcrypt** – Authentication
+- **Nodemailer** – Secure email delivery
 - **Socket.io** – WebSocket server
 - **Cloudinary** – Media storage
 
@@ -158,6 +160,7 @@ REACT_APP_SOCKET_URL=http://localhost:5000
 | POST | `/api/circles/:circleId/join` | Join circle |
 | POST | `/api/moments` | Create moment |
 | GET | `/api/moments/feed` | Get moments feed |
+| POST | `/api/reports` | Submit a violation report (User or Circle) |
 
 ---
 
@@ -223,7 +226,7 @@ MIT License – feel free to use this project for learning and portfolio purpose
 
 ## 👥 Team
 
-- **Developer** – [Khushi Pal](https://github.com/kkhushi)  [Sakina Kheraj](https://github.com/SakinaKheraj) [Maryam Shaikh](https://github.com/mshaikh19)
+- **Developer** – [Khushi Pal](https://github.com/kkhushi)  [Sakina Kheraj](https://github.com/SakinaKheraj) [Maryam Shaikh](https://github.com/mshaikh19)  [Anistina Dsouza](https://github.com/Anistina-Dsouza)
 - **Project Link** – [https://github.com/Anistina-Dsouza/circle](https://github.com/Anistina-Dsouza/Circle)
 
 ---

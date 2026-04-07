@@ -3,10 +3,14 @@ import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import ViewReportsModal from "../components/ViewReportsModal";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('default');
+  const [viewReportItemId, setViewReportItemId] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -45,6 +49,18 @@ export default function ManageUsers() {
     }
   };
 
+  const handleDismiss = async (id) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.put(`${baseUrl}/api/admin/reports/${id}/dismiss`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to dismiss reports');
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
@@ -61,6 +77,28 @@ export default function ManageUsers() {
           <div>
             <h1 className="text-2xl font-semibold">User Management</h1>
             <p className="text-gray-400 text-sm">Manage platform network users and flag suspensions</p>
+          </div>
+          
+          <div className="flex gap-4">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+            >
+              <option value="all">All Accounts</option>
+              <option value="active">Active Accounts</option>
+              <option value="suspended">Suspended Accounts</option>
+            </select>
+            
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+            >
+              <option value="default">Default Sort</option>
+              <option value="alphabetical">Alphabetical (A-Z)</option>
+              <option value="flagged">Most Flagged</option>
+            </select>
           </div>
         </div>
 
@@ -82,10 +120,25 @@ export default function ManageUsers() {
              <div className="flex items-center justify-center p-20 text-purple-400">
                <Loader2 className="animate-spin w-8 h-8" />
              </div>
-          ) : (
-            <div className="divide-y divide-white/5">
-              {users.map(user => (
-                <div key={user._id} className={`flex items-center px-8 py-5 transition ${user.isActive ? 'hover:bg-purple-900/20' : 'bg-red-900/5 opacity-75 grayscale-[20%]'}`}>
+          ) : (() => {
+            let processed = [...users];
+
+            if (filter === 'active') {
+              processed = processed.filter(user => user.isActive);
+            } else if (filter === 'suspended') {
+              processed = processed.filter(user => !user.isActive);
+            }
+
+            if (sort === 'alphabetical') {
+              processed.sort((a, b) => a.displayName.localeCompare(b.displayName));
+            } else if (sort === 'flagged') {
+              processed.sort((a, b) => (b.pendingReports || 0) - (a.pendingReports || 0));
+            }
+
+            return (
+              <div className="divide-y divide-white/5">
+                {processed.map(user => (
+                  <div key={user._id} className={`flex items-center px-8 py-5 transition ${user.isActive ? 'hover:bg-purple-900/20' : 'bg-red-900/5 opacity-75 grayscale-[20%]'}`}>
 
                   {/* User */}
                   <div className="w-[30%] flex items-center gap-4">
@@ -119,9 +172,9 @@ export default function ManageUsers() {
                   {/* Flags (Reports) */}
                   <div className="w-[10%] flex justify-center">
                     {user.pendingReports > 0 ? (
-                      <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-red-500/30">
+                      <button onClick={() => setViewReportItemId(user._id)} className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-red-500/30 hover:bg-red-500 hover:text-white transition cursor-pointer">
                         {user.pendingReports} Pending
-                      </span>
+                      </button>
                     ) : (
                       <span className="text-gray-600 text-xs">-</span>
                     )}
@@ -153,16 +206,25 @@ export default function ManageUsers() {
                   </div>
 
                 </div>
-              ))}
-              
-              {users.length === 0 && (
-                  <div className="p-10 text-center text-gray-500">No core users discovered entirely.</div>
-              )}
+                ))}
+                
+                {processed.length === 0 && (
+                    <div className="p-10 text-center text-gray-500">No core users discovered entirely.</div>
+                )}
 
-            </div>
-          )}
+              </div>
+            );
+          })()}
 
         </div>
+
+        <ViewReportsModal
+            isOpen={!!viewReportItemId}
+            onClose={() => setViewReportItemId(null)}
+            itemId={viewReportItemId}
+            itemType="User"
+            onDismiss={handleDismiss}
+        />
 
       </div>
 

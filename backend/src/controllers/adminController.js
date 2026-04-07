@@ -116,8 +116,107 @@ const toggleUserSuspension = async (req, res) => {
   }
 };
 
+const getAllCircles = async (req, res) => {
+  try {
+    const circles = await Circle.find({})
+      .populate('creator', 'displayName username profilePic')
+      .sort({ createdAt: -1 });
+
+    const circlesWithReports = await Promise.all(circles.map(async (c) => {
+      const reportsCount = await Report.countDocuments({
+        reportedItemId: c._id,
+        reportedItemType: 'Circle',
+        status: 'pending'
+      });
+      return {
+        ...c.toObject(),
+        pendingReports: reportsCount
+      };
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: circlesWithReports
+    });
+  } catch (error) {
+    console.error('All Circles Fetch Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve circles', error: error.message });
+  }
+};
+
+const toggleCircleStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const circle = await Circle.findById(id);
+
+    if (!circle) {
+      return res.status(404).json({ success: false, message: 'Circle not found.' });
+    }
+
+    circle.isActive = !circle.isActive;
+    await circle.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: `Circle ${circle.isActive ? 'restored' : 'suspended'} successfully.`,
+      data: {
+        _id: circle._id,
+        isActive: circle.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('Circle Suspension Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to toggle circle status', error: error.message });
+  }
+};
+
+const dismissReports = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    
+    await Report.updateMany(
+      { reportedItemId: itemId, status: 'pending' },
+      { $set: { status: 'dismissed', resolvedBy: req.user?._id, resolvedAt: new Date() } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Reports dismissed successfully.'
+    });
+  } catch (error) {
+    console.error('Dismiss Reports Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to dismiss reports', error: error.message });
+  }
+};
+
+const getItemReports = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    
+    const reports = await Report.find({ 
+      reportedItemId: itemId, 
+      status: 'pending' 
+    })
+    .populate('reporter', 'displayName username profilePic')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    console.error('Get Item Reports Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch reports', error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
-  toggleUserSuspension
+  toggleUserSuspension,
+  getAllCircles,
+  toggleCircleStatus,
+  dismissReports,
+  getItemReports
 };
