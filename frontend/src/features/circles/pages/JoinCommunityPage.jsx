@@ -1,30 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Users, Info, ArrowLeft, Loader2, Lock } from 'lucide-react';
+import { Users, Info, ArrowLeft, Loader2, Lock, Globe, CheckCircle2 } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 
 const JoinCommunityPage = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const inviteCode = searchParams.get('code');
+
     const [circle, setCircle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [joinLoading, setJoinLoading] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
     const [error, setError] = useState(null);
     const [introduction, setIntroduction] = useState('');
     const baseUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-        const fetchCircle = async () => {
+        const fetchAndAutoJoin = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${baseUrl}/api/circles/${slug}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
+                // 1. Fetch circle details
+                const circleRes = await axios.get(`${baseUrl}/api/circles/${slug}`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                if (response.data.success) {
-                    setCircle(response.data.circle);
-                    if (response.data.circle.isMember) {
-                        navigate(`/circles/${slug}`);
+
+                if (circleRes.data.success) {
+                    const circleData = circleRes.data.circle;
+                    setCircle(circleData);
+
+                    if (circleData.isMember) {
+                        setRedirecting(true);
+                        setSuccessMsg('Already a member! Redirecting you...');
+                        setTimeout(() => {
+                            navigate(`/circles/${slug}`);
+                        }, 800);
+                        return;
+                    }
+
+                    // 2. If code exists, attempt auto-join
+                    if (inviteCode) {
+                        setJoinLoading(true);
+                        try {
+                            const joinRes = await axios.post(
+                                `${baseUrl}/api/circles/join/${inviteCode}`,
+                                {},
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                            
+                            if (joinRes.data.success) {
+                                setRedirecting(true);
+                                setSuccessMsg('Joined successfully!');
+                                setTimeout(() => {
+                                    navigate(`/circles/${slug}`);
+                                }, 1200);
+                            }
+                        } catch (err) {
+                            setError(err.response?.data?.error || 'Invite link is invalid or expired.');
+                        } finally {
+                            setJoinLoading(false);
+                        }
                     }
                 }
             } catch (err) {
@@ -34,8 +78,8 @@ const JoinCommunityPage = () => {
             }
         };
 
-        if (slug) fetchCircle();
-    }, [slug, baseUrl, navigate]);
+        if (slug) fetchAndAutoJoin();
+    }, [slug, inviteCode, baseUrl, navigate]);
 
     const handleJoinRequest = async () => {
         setJoinLoading(true);
@@ -43,11 +87,15 @@ const JoinCommunityPage = () => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
-                `${baseUrl}/api/circles/${circle._id || circle.id}/join`,
-                { message: introduction },
+                `${baseUrl}/api/circles/${circle._id || circle.id}/request-join`,
+                { introduction: introduction },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            navigate(`/circles/${slug}`);
+            
+            setSuccessMsg('Join request sent!');
+            setTimeout(() => {
+                navigate('/circles');
+            }, 2000);
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to send join request. Please try again.');
         } finally {
@@ -61,11 +109,25 @@ const JoinCommunityPage = () => {
         return count.toString();
     };
 
-    if (loading) {
+    if (loading || redirecting) {
         return (
-            <div className="min-h-screen bg-[#0F0529] flex flex-col items-center justify-center">
-                <Loader2 className="w-12 h-12 text-violet-500 animate-spin mb-4" />
-                <p className="text-gray-400 font-medium">Locating Community...</p>
+            <div className="min-h-screen bg-[#0F0529] flex flex-col items-center justify-center relative">
+                {/* Background Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
+                
+                {successMsg && (
+                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-3 rounded-2xl flex items-center gap-3">
+                            <CheckCircle2 size={20} />
+                            <span className="font-bold text-sm tracking-wide">{successMsg}</span>
+                        </div>
+                    </div>
+                )}
+                
+                <Loader2 className="w-12 h-12 text-violet-500 animate-spin mb-4 relative z-10" />
+                <p className="text-gray-400 font-medium relative z-10">
+                    {redirecting ? 'Entering Community...' : 'Locating Community...'}
+                </p>
             </div>
         );
     }
@@ -86,9 +148,21 @@ const JoinCommunityPage = () => {
         );
     }
 
+    if (!circle) return null;
+
     return (
-        <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-violet-500/30">
-            <FeedNavbar activePage="Circles" />
+        <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-violet-500/30 relative">
+            <FeedNavbar activePage="Circles" /> 
+
+            {/* Success Toast */}
+            {successMsg && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-2xl shadow-emerald-900/40 flex items-center gap-3 border border-emerald-400/20">
+                        <CheckCircle2 size={20} />
+                        <span className="font-bold text-sm tracking-wide">{successMsg}</span>
+                    </div>
+                </div>
+            )}
 
             <div className="max-w-3xl mx-auto px-6 py-10">
                 {/* Back Link */}
@@ -157,11 +231,15 @@ const JoinCommunityPage = () => {
 
                         {/* Right Panel — Join Form */}
                         <div className="md:col-span-3 px-8 py-10">
-                            <h2 className="text-xl font-bold text-white mb-1">Ready to join?</h2>
+                             <h2 className="text-xl font-bold text-white mb-1">
+                                {inviteCode ? 'Verifying Invite...' : 'Ready to join?'}
+                            </h2>
                             <p className="text-gray-500 text-xs mb-7">
-                                {circle.type === 'private'
-                                    ? 'This is a private circle. Introduce yourself and an admin will review your request.'
-                                    : 'Write a short intro and send your request to become a member.'}
+                                {inviteCode 
+                                    ? `Please wait while we add you to ${circle.name}...`
+                                    : circle.type === 'private'
+                                        ? 'This is a private circle. Joining is usually via invite link, but you can send a request to the admins.'
+                                        : 'This community requires membership approval. Introduce yourself to get started.'}
                             </p>
 
                             {/* Textarea */}

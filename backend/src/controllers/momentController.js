@@ -38,19 +38,27 @@ exports.createMoment = async (req, res) => {
 // =========== GET MOMENT FEED ===========
 exports.getFeed = async (req, res) => {
   try {
-    // Get users I follow
-    const follows = await Follow.find({ follower: req.userId }).select('following');
+    // Get users I follow (accepted follows only)
+    const follows = await Follow.find({ 
+      follower: req.userId,
+      status: 'accepted'
+    }).select('following');
     const followingIds = follows.map(f => f.following);
     followingIds.push(req.userId); // Include my own moments
 
     const moments = await Moment.find({
-      user: { $in: followingIds },
-      audience: 'public',
+      $or: [
+        { audience: 'public' },
+        { 
+          user: { $in: followingIds }, 
+          audience: 'followers' 
+        }
+      ],
       expiresAt: { $gt: new Date() },
       isActive: true
     })
       .sort({ createdAt: -1 })
-      .limit(20)
+      .limit(50) // Increased limit for global public stories
       .populate('user', 'username displayName profilePic')
       .populate('viewers', 'username displayName profilePic');
 
@@ -76,17 +84,34 @@ exports.getUserMoments = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const moments = await Moment.find({
+    // Check if current user follows this user (accepted only)
+    const isFollowing = req.userId ? await Follow.findOne({
+      follower: req.userId,
+      following: user._id,
+      status: 'accepted'
+    }) : null;
+
+    const isOwnProfile = req.userId && user._id.toString() === req.userId;
+
+    const query = {
       user: user._id,
-      audience: 'public',
       expiresAt: { $gt: new Date() },
       isActive: true
-    })
+    };
+
+    if (!isFollowing && !isOwnProfile) {
+      // Only show public moments if not following and not own profile
+      query.audience = 'public';
+    } else {
+      // Show public and followers-only moments
+      query.audience = { $in: ['public', 'followers'] };
+    }
+
+    const moments = await Moment.find(query)
       .sort({ createdAt: -1 })
       .populate('user', 'username displayName profilePic')
       .populate('viewers', 'username displayName profilePic');
 
-    console.log("fetching stories : ", moments)
     res.json({
       success: true,
       moments
@@ -107,6 +132,24 @@ exports.getMoment = async (req, res) => {
 
     if (!moment) {
       return res.status(404).json({ error: 'Moment not found' });
+    }
+
+    // Permission check
+    const isOwner = moment.user?._id?.toString() === req.userId || moment.user?.toString() === req.userId;
+    const isPublic = moment.audience === 'public';
+    
+    let canView = isOwner || isPublic;
+    
+    if (!canView && moment.audience === 'followers') {
+      const isFollowing = await Follow.findOne({
+        follower: req.userId,
+        following: moment.user?._id || moment.user
+      });
+      if (isFollowing) canView = true;
+    }
+
+    if (!canView) {
+      return res.status(403).json({ error: 'Not authorized to view this story' });
     }
 
     // Add view
