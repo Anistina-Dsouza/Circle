@@ -123,7 +123,7 @@ const StoriesBar = ({ onPostSuccess }) => {
 
             {stories.length === 0 && (
                 <div className="flex items-center space-x-4 ml-2">
-                    <p className="text-sm text-gray-500 italic">Follow people to see their stories here</p>
+                    <p className="text-sm text-gray-500 italic">No active stories at the moment. Be the first to post!</p>
                 </div>
             )}
 

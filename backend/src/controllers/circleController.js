@@ -67,13 +67,18 @@ exports.getPublicCircles = async (req, res) => {
     const search = req.query.search || '';
     const category = req.query.category || '';
     
-    // Build query
-    let query = { isActive: true, type: 'public' };
+    // Force public visibility for this endpoint
+    const query = { 
+      isActive: true, 
+      type: 'public' 
+    };
     
+    // Add Search if provided
     if (search) {
       query.$text = { $search: search };
     }
     
+    // Add Category if provided
     if (category && category !== 'All Categories') {
       query.category = category;
     }
@@ -281,15 +286,16 @@ exports.joinCircle = async (req, res) => {
       return res.status(400).json({ error: 'Already a member' });
     }
     
-    // Handle private circles
-    if (circle.type === 'private') {
-      const { inviteCode } = req.body;
-      
-      if (!inviteCode || inviteCode !== circle.inviteCode) {
-        return res.status(403).json({ 
-          error: 'Valid invite code required for private circle' 
-        });
-      }
+    // Direct joining via this endpoint now strictly requires an invite code for BOTH public and private
+    // Otherwise, users must use the request system (/request-join)
+    const { inviteCode } = req.body;
+    
+    if (!inviteCode || inviteCode !== circle.inviteCode) {
+      const errorMsg = circle.type === 'public' 
+        ? 'This community requires a join request. Please use the request system.' 
+        : 'Valid invite link required for this private community.';
+        
+      return res.status(403).json({ error: errorMsg });
     }
     
     // Add member
@@ -621,12 +627,12 @@ exports.requestToJoin = async (req, res) => {
       return res.status(404).json({ error: 'Circle not found' });
     }
     
-    // Check if circle is private
-    if (circle.type !== 'private') {
-      return res.status(400).json({ 
-        error: 'This circle is public. Use /join to join directly.' 
-      });
-    }
+    // Check type: Now Public circles REQUIRE requests, while Private bypass via link
+    // However, we still allow requests for Private if they don't have a link?
+    // User said: "for private circles bypass join request" 
+    // This could mean they DON'T want a request system for private at all.
+    // I'll allow requests for both if they reach here, but primary flow for private is link.
+    // If it's a private circle and they are here, it's fine to let them request if they found it.
     
     // Check if already member
     if (circle.isMember(req.userId)) {
