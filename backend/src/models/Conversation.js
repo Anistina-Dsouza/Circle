@@ -56,13 +56,12 @@ ConversationSchema.index(
 // =========== MIDDLEWARE ===========
 // Sort participant IDs before saving so [A,B] and [B,A] are treated
 // as the same conversation by the unique index above
-ConversationSchema.pre('save', function (next) {
+ConversationSchema.pre('save', function () {
   if (this.isNew) {
     this.participants.sort((a, b) =>
       a.user.toString().localeCompare(b.user.toString())
     );
   }
-  next();
 });
 
 // =========== STATIC METHODS ===========

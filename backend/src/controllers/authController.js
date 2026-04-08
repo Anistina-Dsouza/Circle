@@ -168,7 +168,7 @@ const updateProfile = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
+    
     const user = await User.findOne({ email });
     if (!user) {
       // Return 404 securely or just return ok to prevent email scanning. We'll return 404 for UX.
