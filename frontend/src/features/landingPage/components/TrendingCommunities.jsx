@@ -99,8 +99,10 @@ export default function TrendingCommunities() {
                       <span className="font-bold text-gray-300">{c.stats?.memberCount || 0}</span> members
                     </span>
                     <span className="flex items-center gap-2">
-                      <Globe size={15} className="text-sky-500/60" />
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest leading-none">Public</span>
+                      {c.type === 'private' ? <Lock size={15} className="text-pink-500/60" /> : <Globe size={15} className="text-sky-500/60" />}
+                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest leading-none">
+                        {c.type === 'private' ? 'Private' : 'Public'}
+                      </span>
                     </span>
                   </div>
 

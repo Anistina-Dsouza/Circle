@@ -22,6 +22,7 @@ const StoryViewerPage = () => {
     const currentUser = JSON.parse(localStorage.getItem('user'));
     const STORY_DURATION = 5000;
     const PROGRESS_INTERVAL = 50;
+    const step = (PROGRESS_INTERVAL / STORY_DURATION) * 100;
 
     useEffect(() => {
         const fetchUserStories = async () => {
@@ -55,21 +56,25 @@ const StoryViewerPage = () => {
 
     useEffect(() => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
-
-        const step = (PROGRESS_INTERVAL / STORY_DURATION) * 100;
         
         progressTimer.current = setInterval(() => {
+            if (isPaused || showViewers) return;
+            
             setProgress(prev => {
-                if (prev >= 100) {
-                    handleNext();
-                    return 0;
-                }
+                if (prev >= 100) return 100;
                 return prev + step;
             });
         }, PROGRESS_INTERVAL);
 
         return () => clearInterval(progressTimer.current);
-    }, [currentIndex, loading, stories.length, isPaused, error, showViewers]);
+    }, [currentIndex, loading, stories.length, isPaused, error, showViewers, stories, step]);
+
+    // Separate effect to handle automatic transition when progress reaches 100%
+    useEffect(() => {
+        if (progress >= 100) {
+            handleNext();
+        }
+    }, [progress]);
 
     // Record view whenever a new story is displayed
     useEffect(() => {
@@ -173,6 +178,10 @@ const StoryViewerPage = () => {
     }
 
     const currentStory = stories[currentIndex];
+    
+    // Final safeguard before render
+    if (!currentStory) return null;
+
     const isOwnStory = currentStory.user?._id === currentUser?.id || currentStory.user === currentUser?.id;
 
     return (
@@ -249,19 +258,23 @@ const StoryViewerPage = () => {
                     )}
                 </div>
 
-                {/* Desktop Side Arrows (Subtle) */}
-                <button 
-                    onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                    className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
-                >
-                    <ChevronLeft size={48} />
-                </button>
-                <button 
-                    onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                    className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
-                >
-                    <ChevronRight size={48} />
-                </button>
+                {/* Desktop Side Arrows (Subtle) - Only show if multiple stories */}
+                {stories.length > 1 && (
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                        className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
+                    >
+                        <ChevronLeft size={48} />
+                    </button>
+                )}
+                {stories.length > 1 && (
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                        className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
+                    >
+                        <ChevronRight size={48} />
+                    </button>
+                )}
             </div>
 
             {/* Story Viewers Modal */}

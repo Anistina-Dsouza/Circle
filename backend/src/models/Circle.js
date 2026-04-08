@@ -202,10 +202,10 @@ circleSchema.pre('save', function (next) {
       .replace(/^-+|-+$/g, '');
   }
 
-  if (this.type === 'private' && !this.inviteCode) {
+  if (!this.inviteCode) {
     const timestamp = Date.now().toString(36);
     const random    = Math.random().toString(36).substring(2, 6);
-    const nameHash  = this.name.substring(0, 3).toUpperCase();
+    const nameHash  = (this.name || 'CIR').substring(0, 3).toUpperCase();
     this.inviteCode = `${nameHash}-${timestamp}-${random}`.toUpperCase();
   }
 

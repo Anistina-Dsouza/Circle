@@ -113,4 +113,19 @@ const adminAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { protect, auth, adminAuth };
+const optionalProtect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.id;
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
+module.exports = { protect, auth, adminAuth, optionalProtect };

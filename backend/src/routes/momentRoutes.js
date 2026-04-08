@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, optionalProtect } = require('../middleware/auth');
 const momentController = require('../controllers/momentController');
 
-// Public
-router.get('/user/:username', momentController.getUserMoments);
+// Public/Optional Auth
+router.get('/user/:username', optionalProtect, momentController.getUserMoments);
 
 // Protected
 router.use(protect);
