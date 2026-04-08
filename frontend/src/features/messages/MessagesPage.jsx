@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import MessagesSidebar from './components/MessagesSidebar';
 import ChatArea from './components/ChatArea';
+import { useLocation } from 'react-router-dom';
 
 const MessagesPage = () => {
-    const [selectedChat, setSelectedChat] = useState(1); // Default to first chat
+    const location = useLocation();
+    const [selectedChat, setSelectedChat] = useState(location.state?.selectedChat || null);
+
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-purple-500/30 flex flex-col">

@@ -48,10 +48,9 @@ const ConversationSchema = new mongoose.Schema({
 ConversationSchema.index({ 'participants.user': 1, lastActivity: -1 });
 
 // Blocks duplicate DMs — works because pre-save sorts the IDs
-ConversationSchema.index(
-  { 'participants.user': 1 },
-  { unique: true }
-);
+// Previously had a unique index here on participants.user but MongoDB indexes arrays per-element,
+// meaning a user could only ever be in ONE conversation globally. 
+// Now we rely on findOrCreateDirect to deduplicate.
 
 // =========== MIDDLEWARE ===========
 // Sort participant IDs before saving so [A,B] and [B,A] are treated

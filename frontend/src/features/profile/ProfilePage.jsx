@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import ProfileHeader from './components/ProfileHeader';
@@ -9,6 +9,7 @@ import FollowListModal from './components/FollowListModal'; // Make sure this im
 
 const ProfilePage = () => {
     const { username } = useParams();
+    const navigate = useNavigate();
     const baseUrl = import.meta.env.VITE_API_URL;
 
     const [user, setUser] = useState(null);
@@ -433,6 +434,22 @@ const handleModalFollowToggle = useCallback(async (targetUserId) => {
         setModalType(null);
     };
 
+    // Handle initialising or opening chat
+    const handleMessageClick = async (targetUserId) => {
+        if (!targetUserId || !loggedInUser.current) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${baseUrl}/api/dm/conversations`, 
+                { recipientId: targetUserId }, 
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const conversationId = res.data.conversation._id;
+            navigate('/messages', { state: { selectedChat: conversationId } });
+        } catch (error) {
+            console.error('Failed to initiate conversation:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0F0529] text-white font-sans">
@@ -484,6 +501,7 @@ const handleModalFollowToggle = useCallback(async (targetUserId) => {
                     isOwnProfile={isOwnProfile}
                     onFollowToggle={(userId) => handleProfileFollowToggle(userId)}     // For header button
                     onModalFollowToggle={handleModalFollowToggle}                      // For modals
+                    onMessageClick={() => handleMessageClick(headerUser._id)}          // For message button
                     followers={formattedFollowers}
                     following={formattedFollowing}
                 />
