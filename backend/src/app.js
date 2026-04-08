@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/adminRoutes');
 // const conversationRoutes = require('./routes/conversationRoutes'); 
 // const circleMessageRoutes = require('./routes/circleMessageRoutes'); // Import circle message routes
 const reportRoutes = require('./routes/reportRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 
 
 const app = express();
@@ -64,6 +65,7 @@ app.use('/api/admin', adminRoutes);
 // app.use('/api/conversations', conversationRoutes); // Route for conversations
 // app.use('/api/circlemessages', circleMessageRoutes); // Route for circle messages
 app.use('/api/reports', reportRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 
 // 404 handler
