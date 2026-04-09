@@ -10,8 +10,8 @@ const userRoutes = require('./routes/userRoutes');
 const circleRoutes = require('./routes/circleRoutes');
 const momentRoutes = require('./routes/momentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-//const conversationRoutes = require('./routes/conversationRoutes'); 
 const circleMessageRoutes = require('./routes/circleMessageRoutes'); // Import circle message routes
+const conversationRoutes = require('./routes/conversationRoutes'); 
 const reportRoutes = require('./routes/reportRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 
@@ -60,7 +60,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/moments', momentRoutes);
 app.use('/api/admin', adminRoutes);
-//app.use('/api/dm/conversations', conversationRoutes); 
+app.use('/api/dm/conversations', conversationRoutes); 
 app.use('/api/circlemessages', circleMessageRoutes); 
 app.use('/api/reports', reportRoutes);
 app.use('/api/announcements', announcementRoutes);

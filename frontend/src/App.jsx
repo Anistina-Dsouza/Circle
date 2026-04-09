@@ -25,7 +25,8 @@ import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
 import CircleDetails from './features/circles/pages/CircleDetailsPage';
-
+import MeetingsPage from './features/meetings/MeetingsPage';
+import ScheduleMeetingPage from './features/meetings/ScheduleMeetingPage';
 
 function App() {
   useEffect(() => {
@@ -61,6 +62,8 @@ function App() {
             <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
+            <Route path="/meetings/schedule" element={<ProtectedRoute><ScheduleMeetingPage /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
