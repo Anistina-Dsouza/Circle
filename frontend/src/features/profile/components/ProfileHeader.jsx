@@ -20,7 +20,8 @@ const ProfileHeader = ({
     onFollowToggle,           // For header button only
     onModalFollowToggle,      // NEW: For modal follows
     followers = [], 
-    following = [] 
+    following = [],
+    onMessageClick
 }) => {
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
@@ -68,7 +69,10 @@ const ProfileHeader = ({
                             {user.isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
                             <span>{user.isFollowing ? 'Following' : 'Follow'}</span>
                         </button>
-                        <button className="flex items-center space-x-2 px-7 py-2.5 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-purple-500/40 font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95">
+                        <button 
+                            onClick={onMessageClick}
+                            className="flex items-center space-x-2 px-7 py-2.5 rounded-full bg-[#1E1B3A] border border-white/10 hover:border-purple-500/40 font-semibold text-white transition-all duration-300 hover:scale-105 active:scale-95"
+                        >
                             <MessageSquare size={16} />
                             <span>Message</span>
                         </button>

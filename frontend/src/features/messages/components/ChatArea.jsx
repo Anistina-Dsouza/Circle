@@ -1,59 +1,160 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Smile, Phone, Video, MoreVertical } from 'lucide-react';
+import { io } from 'socket.io-client';
+import axios from 'axios';
 
-const activeChatData = {
-    id: 1,
-    user: 'Sasha Moon',
-    status: 'Active now',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-    messages: [
-        {
-            id: 1,
-            sender: 'them',
-            text: "Hey! I was thinking about the project timeline. Do you think we can wrap up the DM interface by Friday?",
-            time: '10:42 AM'
-        },
-        {
-            id: 2,
-            sender: 'me',
-            text: "Absolutely! Most of the components are ready. I'm just polishing the responsive states right now.",
-            time: '10:45 AM'
-        },
-        {
-            id: 3,
-            sender: 'them',
-            text: "That's great news! 🚀",
-            time: '10:46 AM'
-        },
-        {
-            id: 4,
-            sender: 'them',
-            text: "Are we still meeting at the Neon Bar later to celebrate the launch?",
-            time: '10:48 AM',
-            hasTail: true
-        },
-        {
-            id: 5,
-            sender: 'me',
-            text: "Yes, for sure. See you at 8 PM!",
-            time: '10:52 AM',
-            hasTail: true
-        }
-    ]
-};
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
 
 const ChatArea = ({ chatId }) => {
     const [inputText, setInputText] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [chatDetails, setChatDetails] = useState(null);
+    const messagesEndRef = useRef(null);
+    const socketRef = useRef(null);
 
-    // Find chat data based on ID - using mock data for now
-    const chat = activeChatData;
 
-    const handleSend = (e) => {
-        e.preventDefault();
-        if (!inputText.trim()) return;
-        console.log('Sending:', inputText);
-        setInputText('');
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    useEffect(() => {
+        if (!chatId) return;
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const [chatRes, msgRes] = await Promise.all([
+                    axios.get(`${BACKEND_URL}/api/dm/conversations/${chatId}`, { headers: { Authorization: `Bearer ${token}` } }),
+                    axios.get(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages`, { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+                setChatDetails(chatRes.data.conversation);
+                // Format messages from backend
+                const backendMessages = msgRes.data.messages || [];
+                const currentUserId = JSON.parse(localStorage.getItem('user'))?._id;
+                const formatted = backendMessages.map(msg => ({
+                    id: msg._id,
+                    sender: msg.sender?._id === currentUserId || msg.sender === currentUserId ? 'me' : 'them',
+                    text: msg.content?.text || '',
+                    time: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                }));
+                setMessages(formatted);
+            } catch (err) {
+                console.error("Failed to fetch chat data", err);
+            }
+        };
+        fetchData();
+    }, [chatId]);
+
+
+    useEffect(() => {
+        // Initialize socket connection
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+        socketRef.current = io(backendUrl);
+
+        // Once connected, join the conversation room
+        socketRef.current.on('connect', () => {
+            console.log('Connected to socket server');
+            if (chatId) {
+                socketRef.current.emit('join_conversation', chatId);
+            }
+        });
+
+        // Listen for new messages
+        socketRef.current.on('newMessage', (newMessage) => {
+             console.log('New message received via socket:', newMessage);
+             const currentUserId = JSON.parse(localStorage.getItem('user'))?._id;
+             const senderObj = newMessage.sender;
+             const senderId = senderObj?._id || senderObj;
+             // Only add if we didn't send it (or we can use it to replace the optimistic one)
+             if (senderId !== currentUserId) {
+                 const formattedMessage = {
+                     id: newMessage._id || Date.now(),
+                     sender: 'them',
+                     text: newMessage.content?.text || '',
+                     time: new Date(newMessage.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                 };
+                 setMessages((prev) => [...prev, formattedMessage]);
+             }
+        });
+
+        // Listen for updated messages
+        socketRef.current.on('messageUpdated', (updatedMessage) => {
+            setMessages((prev) => prev.map(msg => 
+                msg.id === updatedMessage._id 
+                ? { ...msg, text: updatedMessage.content?.text || msg.text } 
+                : msg
+            ));
+        });
+
+        return () => {
+            if (socketRef.current) {
+                if (chatId) {
+                    socketRef.current.emit('leave_conversation', chatId);
+                }
+                socketRef.current.disconnect();
+            }
+        };
+    }, [chatId]);
+
+    // Update whenever chat ID changes
+    useEffect(() => {
+        if (socketRef.current && socketRef.current.connected) {
+            socketRef.current.emit('join_conversation', chatId);
+        }
+    }, [chatId]);
+
+    const handleSend = async (e) => {
+        e.preventDefault();
+        if (!inputText.trim() || !chatId) return;
+        
+        const tempId = Date.now();
+        const textToSubmit = inputText.trim();
+        const newMsg = {
+            id: tempId,
+            sender: 'me',
+            text: textToSubmit,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        };
+        
+        // Optimistically add to state
+        setMessages((prev) => [...prev, newMsg]);
+        setInputText('');
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages`, {
+                content: { text: textToSubmit }
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Optionally update the tempId with the real ID
+            setMessages((prev) => prev.map(m => m.id === tempId ? { ...m, id: res.data.message._id } : m));
+        } catch (err) {
+            console.error("Failed to send message", err);
+            // Optionally remove the message or mark as failed
+        }
+    };
+
+    if (!chatId) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full bg-[#0a041c]">
+                <div className="text-gray-500 flex flex-col items-center">
+                    <MoreVertical size={48} className="mb-4 opacity-50" />
+                    <p>Select a conversation to start messaging</p>
+                </div>
+            </div>
+        );
+    }
+
+    const currentUserId = JSON.parse(localStorage.getItem('user'))?._id;
+    const otherParticipant = chatDetails?.participants?.find(p => p.user && p.user._id !== currentUserId)?.user;
+    const chatUser = otherParticipant?.displayName || otherParticipant?.username || 'Unknown User';
+    const chatAvatar = otherParticipant?.profilePic || 'https://via.placeholder.com/150';
+    const chatStatus = otherParticipant?.onlineStatus === 'online' ? 'Active now' : 'Offline';
 
     return (
         <div className="flex flex-col h-full bg-[#0a041c]">
@@ -62,15 +163,17 @@ const ChatArea = ({ chatId }) => {
                 <div className="flex items-center space-x-4">
                     <div className="relative">
                         <img
-                            src={chat.avatar}
-                            alt={chat.user}
+                            src={chatAvatar}
+                            alt={chatUser}
                             className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/20"
                         />
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0F0529]"></div>
+                        {otherParticipant?.onlineStatus === 'online' && (
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0F0529]"></div>
+                        )}
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg">{chat.user}</h3>
-                        <p className="text-xs text-purple-400 font-medium">{chat.status}</p>
+                        <h3 className="font-bold text-white text-lg">{chatUser}</h3>
+                        <p className="text-xs text-purple-400 font-medium">{chatStatus}</p>
                     </div>
                 </div>
 
@@ -85,7 +188,7 @@ const ChatArea = ({ chatId }) => {
                     <span className="text-xs font-bold text-gray-500 tracking-widest uppercase">Today</span>
                 </div>
 
-                {chat.messages.map((msg) => (
+                {messages.map((msg) => (
                     <div
                         key={msg.id}
                         className={`flex w-full ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
@@ -94,7 +197,7 @@ const ChatArea = ({ chatId }) => {
                             {/* Avatar Only for 'them' messages */}
                             {msg.sender === 'them' && (
                                 <img
-                                    src={chat.avatar}
+                                    src={chatAvatar}
                                     alt="Sender"
                                     className="w-8 h-8 rounded-full object-cover mb-6"
                                 />
@@ -117,6 +220,7 @@ const ChatArea = ({ chatId }) => {
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
