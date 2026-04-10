@@ -25,6 +25,9 @@ import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
 import CircleDetails from './features/circles/pages/CircleDetailsPage';
+import HostDashboard from './features/circles/pages/HostDashboardPage';
+import ManageParticipants from './features/circles/pages/ManageParticipantsPage';
+import CommunitySettings from './features/circles/pages/CommunitySettingsPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
 import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
@@ -66,17 +69,26 @@ function App() {
             <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/upcoming" element={<ProtectedRoute><UpcomingMeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/schedule" element={<ProtectedRoute><ScheduleMeetingPage /></ProtectedRoute>} />
+            
             <Route path="/meetings/history" element={<ProtectedRoute><MeetingHistoryPage /></ProtectedRoute>} />
             <Route path="/meetings/manage" element={<ProtectedRoute><ManageMeetingsPage /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
             <Route path="/circles/:slug" element={<ProtectedRoute><CircleDetails /></ProtectedRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/circles/:slug/manage" element={<ProtectedRoute><HostDashboard /></ProtectedRoute>} />
+            <Route path="/circles/:slug/manage/participants" element={<ProtectedRoute><ManageParticipants /></ProtectedRoute>} />
+            <Route path="/circles/:slug/manage/settings" element={<ProtectedRoute><CommunitySettings /></ProtectedRoute>} />
+
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
             <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
+            
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+            <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
+            <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
           </Routes>
         </main>
       </div>
