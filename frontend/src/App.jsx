@@ -29,7 +29,10 @@ import HostDashboard from './features/circles/pages/HostDashboardPage';
 import ManageParticipants from './features/circles/pages/ManageParticipantsPage';
 import CommunitySettings from './features/circles/pages/CommunitySettingsPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
+import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
+import MeetingHistoryPage from './features/meetings/pages/MeetingHistoryPage';
+import ManageMeetingsPage from './features/meetings/pages/ManageMeetingsPage';
 
 function App() {
   useEffect(() => {
@@ -60,9 +63,15 @@ function App() {
 
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+            <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
+            <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
             <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
+            <Route path="/meetings/upcoming" element={<ProtectedRoute><UpcomingMeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/schedule" element={<ProtectedRoute><ScheduleMeetingPage /></ProtectedRoute>} />
             
+            <Route path="/meetings/history" element={<ProtectedRoute><MeetingHistoryPage /></ProtectedRoute>} />
+            <Route path="/meetings/manage" element={<ProtectedRoute><ManageMeetingsPage /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
