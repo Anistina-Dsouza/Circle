@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import FeedNavbar from '../feed/components/FeedNavbar';
+import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Plus, MoreHorizontal, Video, Users, User, Download, CheckCircle2 } from 'lucide-react';
 
 // Static Mock Data
