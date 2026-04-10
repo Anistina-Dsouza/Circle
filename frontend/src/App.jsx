@@ -26,7 +26,8 @@ import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
 import CircleDetails from './features/circles/pages/CircleDetailsPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
-// import ScheduleMeetingPage from './features/meetings/ScheduleMeetingPage';
+
+
 
 function App() {
   useEffect(() => {
@@ -55,8 +56,6 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/messages" element={<Messages />} />
             <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
             <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
             <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
@@ -73,7 +72,6 @@ function App() {
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
             <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </main>
       </div>
