@@ -116,7 +116,7 @@ const CircleInviteModal = ({ isOpen, onClose, circle, isAdmin }) => {
                 <div className="px-6 py-4 border-b border-white/5">
                     <div className="flex items-center gap-1.5 mb-2">
                         <LinkIcon size={12} className="text-gray-500" />
-                        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Join Link</p>
+                        <p className="text-[11px] font-semibold text-gray-500 tracking-wider">Join Link</p>
                     </div>
                     <div className="flex items-center gap-2 bg-[#0F0529]/60 border border-white/10 rounded-2xl px-3 py-2.5">
                         <p className="flex-1 text-xs text-gray-300 truncate font-mono">{joinUrl}</p>

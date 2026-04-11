@@ -67,11 +67,11 @@ const HostDashboardPage = () => {
                             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                         </Link>
                         <div>
-                            <div className="flex items-center gap-2 text-[10px] font-black text-purple-500 uppercase tracking-[0.3em] mb-1">
+                            <div className="flex items-center gap-2 text-[10px] font-black text-purple-500 mb-1">
                                 <LayoutDashboard size={12} />
                                 <span>Host Control Center</span>
                             </div>
-                            <h1 className="text-3xl font-black text-white uppercase tracking-tight">
+                            <h1 className="text-3xl font-black text-white tracking-tight">
                                 {circle?.name || 'Loading Circle...'}
                             </h1>
                         </div>
@@ -132,8 +132,8 @@ const HostDashboardPage = () => {
             </div>
 
             {/* Global Footer Alignment */}
-            <footer className="w-full px-12 py-12 border-t border-white/5 text-[10px] text-gray-600 font-bold uppercase tracking-[0.4em] flex flex-col md:flex-row justify-between items-center bg-[#07011a]">
-                <div className="mb-4 md:mb-0">Circle Administrative Protocol • Established 2026</div>
+            <footer className="w-full px-12 py-12 border-t border-white/5 text-[10px] text-gray-600 font-bold flex flex-col md:flex-row justify-between items-center bg-[#07011a]">
+                <div>Secure Circle Administrative Portal • 2024 V1 Server</div>
                 <div className="flex gap-12">
                     <a href="#" className="hover:text-purple-400 transition-colors">Safety</a>
                     <a href="#" className="hover:text-purple-400 transition-colors">Nodes</a>

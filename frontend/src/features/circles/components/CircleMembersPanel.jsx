@@ -122,7 +122,7 @@ const CircleMembersPanel = ({ circle, slug }) => {
             {/* Active Members */}
             <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A]">
                 <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <h3 className="text-[10px] font-bold text-gray-400">
                         Active Members
                     </h3>
                     <Link

@@ -15,16 +15,16 @@ const DashboardStatCard = ({ label, value, icon: Icon, change, pulse }) => {
                 {/* Text grouped on the right */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between pointer-events-none">
-                        <h3 className="text-3xl font-black text-white tracking-tighter group-hover:text-purple-400 transition-colors duration-500">
+                        <h3 className="text-3xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors duration-500">
                             {value}
                         </h3>
                         {change && (
-                            <span className="text-[9px] font-black bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-md border border-purple-500/20 uppercase tracking-tighter shrink-0">
+                            <span className="text-[9px] font-black bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-md border border-purple-500/20 tracking-tight shrink-0">
                                 {change}
                             </span>
                         )}
                     </div>
-                    <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.15em] truncate">
+                    <p className="text-gray-500 text-[10px] font-bold tracking-tight truncate">
                         {label}
                     </p>
                 </div>
