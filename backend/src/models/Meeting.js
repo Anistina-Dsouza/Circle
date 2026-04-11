@@ -125,7 +125,7 @@ meetingSchema.pre('save', function(next) {
     }
   }
   
-  next();
+  // next();
 });
 
 // Instance methods
