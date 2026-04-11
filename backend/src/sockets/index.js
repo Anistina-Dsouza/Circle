@@ -23,7 +23,19 @@ const initializeSocket = (server) => {
             console.log(`User ${socket.id} left conversation ${conversationId}`);
         });
 
+        // Circle Rooms
+        socket.on('join_circle', (circleId) => {
+            socket.join(circleId);
+            console.log(`User ${socket.id} joined circle ${circleId}`);
+        });
+
+        socket.on('leave_circle', (circleId) => {
+            socket.leave(circleId);
+            console.log(`User ${socket.id} left circle ${circleId}`);
+        });
+
         // Add user to their personal room (for receiving notifications or new message events without having joined a specific conversation)
+
         socket.on('join_personal', (userId) => {
              socket.join(userId);
              console.log(`User ${socket.id} joined personal room ${userId}`);
