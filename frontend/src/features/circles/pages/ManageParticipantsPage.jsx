@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import { Users, ArrowLeft, Search, Loader2, Sparkles, UserCheck } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import ManagementTabs from '../components/management/ManagementTabs';
@@ -8,72 +9,162 @@ import JoinRequestItem from '../components/management/JoinRequestItem';
 
 const ManageParticipantsPage = () => {
     const { slug } = useParams();
+    const [circle, setCircle] = useState(null);
     const [activeTab, setActiveTab] = useState('members');
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const baseUrl = import.meta.env.VITE_API_URL;
 
-    // Mock initial data
-    const [members, setMembers] = useState([
-        { id: 1, name: 'Sarah Jenkins', role: 'member', joinedDate: '2 Oct 2024', avatar: 'https://i.pravatar.cc/150?u=sarah' },
-        { id: 2, name: 'Marcus King', role: 'moderator', joinedDate: '15 Sep 2024', avatar: 'https://i.pravatar.cc/150?u=marcus' },
-        { id: 3, name: 'Leo David', role: 'member', joinedDate: '20 Sep 2024', avatar: 'https://i.pravatar.cc/150?u=leo' },
-        { id: 4, name: 'Emma Wilson', role: 'member', joinedDate: '5 Oct 2024', avatar: 'https://i.pravatar.cc/150?u=emma' },
-        { id: 5, name: 'Alex Rivera', role: 'moderator', joinedDate: '1 Sep 2024', avatar: 'https://i.pravatar.cc/150?u=alex' },
-    ]);
-
-    const [requests, setRequests] = useState([
-        { id: 101, name: 'Olivia Chen', time: '2h ago', avatar: 'https://i.pravatar.cc/150?u=olivia', message: "Hey! I've been following your work for a while and would love to join the collective to learn and share." },
-        { id: 102, name: 'James Wilson', time: '5h ago', avatar: 'https://i.pravatar.cc/150?u=james', message: "I'm a UI/UX designer looking to collaborate on community projects." }
-    ]);
+    // Data state
+    const [members, setMembers] = useState([]);
+    const [requests, setRequests] = useState([]);
 
     useEffect(() => {
-        // Simulate loading
-        const timer = setTimeout(() => setLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, []);
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+                // 1. Fetch Circle to get ID
+                const circleRes = await axios.get(`${baseUrl}/api/circles/${slug}`, { headers });
+                
+                if (circleRes.data.success && circleRes.data.circle) {
+                    const circleData = circleRes.data.circle;
+                    setCircle(circleData);
+
+                    // 2. Fetch Members
+                    const membersRes = await axios.get(`${baseUrl}/api/circles/${circleData?._id}/members`, { headers });
+                    if (membersRes.data.success) {
+                        // Transform members to match UI needs
+                        const transformedMembers = membersRes.data.members.map(m => ({
+                            id: m.user?._id,
+                            name: m.user?.profile?.displayName || m.user?.username || 'Unknown User',
+                            username: m.user?.username,
+                            role: m.role,
+                            joinedDate: new Date(m.joinedAt).toLocaleDateString(),
+                            avatar: m.user?.profile?.profileImage
+                        }));
+                        setMembers(transformedMembers);
+                    }
+
+                    // 3. Fetch Requests
+                    const requestsRes = await axios.get(`${baseUrl}/api/circles/${circleData?._id}/pending-requests`, { headers });
+                    if (requestsRes.data.success) {
+                        const transformedRequests = requestsRes.data.pendingRequests.map(r => ({
+                            id: r._id,
+                            userId: r.user?._id,
+                            name: r.user?.profile?.displayName || r.user?.username || 'Unknown User',
+                            username: r.user?.username,
+                            time: new Date(r.requestedAt).toLocaleDateString(),
+                            avatar: r.user?.profile?.profileImage,
+                            message: r.introduction
+                        }));
+                        setRequests(transformedRequests);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch management data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [slug, baseUrl]);
 
     // Handlers
-    const handleApprove = (requestId) => {
-        const request = requests.find(r => r.id === requestId);
-        if (request) {
-            setRequests(prev => prev.filter(r => r.id !== requestId));
-            setMembers(prev => [...prev, {
-                id: request.id,
-                name: request.name,
-                role: 'member',
-                joinedDate: 'Just now',
-                avatar: request.avatar
-            }]);
+    const handleApprove = async (requestId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${baseUrl}/api/circles/${circle._id}/requests/${requestId}/approve`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                // Refresh data
+                const approvedRequest = requests.find(r => r.id === requestId);
+                setRequests(prev => prev.filter(r => r.id !== requestId));
+                // Add to members list locally for immediate feedback
+                if (approvedRequest) {
+                  setMembers(prev => [...prev, {
+                      id: approvedRequest.userId,
+                      name: approvedRequest.name,
+                      role: 'member',
+                      joinedDate: 'Just now',
+                      avatar: approvedRequest.avatar
+                  }]);
+                }
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to approve request');
         }
     };
 
-    const handleReject = (requestId) => {
-        setRequests(prev => prev.filter(r => r.id !== requestId));
+    const handleReject = async (requestId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${baseUrl}/api/circles/${circle._id}/requests/${requestId}/reject`, {
+                rejectionReason: 'Does not meet community guidelines'
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                setRequests(prev => prev.filter(r => r.id !== requestId));
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to reject request');
+        }
     };
 
     const handleKick = (memberId) => {
+        // SIMULATION ONLY per user request "no backend changes"
+        alert('Administrative Kick is simulated as there is no backend endpoint yet.');
         setMembers(prev => prev.filter(m => m.id !== memberId));
     };
 
-    const handleChangeRole = (memberId, newRole) => {
-        setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role: newRole } : m));
+    const handleChangeRole = async (memberId, newRole) => {
+        try {
+            const token = localStorage.getItem('token');
+            let res;
+            
+            if (newRole === 'moderator' || newRole === 'admin') {
+                res = await axios.post(`${baseUrl}/api/circles/${circle._id}/moderators`, { 
+                    userId: memberId,
+                    role: newRole 
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } else {
+                res = await axios.delete(`${baseUrl}/api/circles/${circle._id}/moderators/${memberId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
+
+            if (res.data.success) {
+                setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role: newRole } : m));
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to change role');
+        }
     };
 
     // Filtered lists
     const filteredMembers = members.filter(m => {
-        const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase());
-        if (activeTab === 'moderators') return matchesSearch && m.role === 'moderator';
+        const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             m.username?.toLowerCase().includes(searchQuery.toLowerCase());
+        if (activeTab === 'moderators') return matchesSearch && (m.role === 'moderator' || m.role === 'admin');
         return matchesSearch;
     });
 
     const filteredRequests = requests.filter(r => 
-        r.name.toLowerCase().includes(searchQuery.toLowerCase())
+        r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        r.username?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const counts = {
         requests: requests.length,
         members: members.length,
-        moderators: members.filter(m => m.role === 'moderator').length
+        moderators: members.filter(m => m.role === 'moderator' || m.role === 'admin').length
     };
 
     return (
