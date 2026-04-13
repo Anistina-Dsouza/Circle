@@ -17,33 +17,49 @@ const HostDashboardPage = () => {
     const { slug } = useParams();
     const [circle, setCircle] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState([]);
     const baseUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-        const fetchCircle = async () => {
+        const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`${baseUrl}/api/circles/${slug}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {}
-                });
-                if (res.data.success) {
-                    setCircle(res.data.circle);
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+                // 1. Fetch Circle Details
+                const circleRes = await axios.get(`${baseUrl}/api/circles/${slug}`, { headers });
+                
+                if (circleRes.data.success) {
+                    const circleData = circleRes.data.circle;
+                    setCircle(circleData);
+
+                    // 2. Fetch Pending Requests Count
+                    let pendingCount = 0;
+                    try {
+                        const pendingRes = await axios.get(`${baseUrl}/api/circles/${circleData._id}/pending-requests`, { headers });
+                        if (pendingRes.data.success) {
+                            pendingCount = pendingRes.data.stats.total;
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch pending requests:', err);
+                    }
+
+                    // 3. Construct Stats
+                    setStats([
+                        { label: 'Total Members', value: circleData?.stats?.memberCount || '0', icon: Users, color: 'text-purple-400' },
+                        { label: 'Moderators', value: circleData?.moderators?.length || '0', icon: Shield, color: 'text-purple-400' },
+                        { label: 'Pending Requests', value: pendingCount, icon: UserPlus, color: 'text-purple-400', pulse: pendingCount > 0 },
+                        { label: 'Meetings', value: circleData?.stats?.meetingCount || '0', icon: Clock, color: 'text-purple-400' },
+                    ]);
                 }
             } catch (err) {
-                console.error('Failed to fetch circle:', err);
+                console.error('Failed to fetch dashboard data:', err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchCircle();
+        fetchData();
     }, [slug, baseUrl]);
-
-    const stats = [
-        { label: 'Total Members', value: circle?.stats?.memberCount || '1,284', icon: Users, change: '+12%', color: 'text-purple-400' },
-        { label: 'Moderators', value: '12', icon: Shield, color: 'text-purple-400' },
-        { label: 'Pending Requests', value: '28', icon: UserPlus, color: 'text-purple-400', pulse: true },
-        { label: 'Upcoming Meetings', value: '4', icon: Clock, color: 'text-purple-400' },
-    ];
 
     const recentActivity = [
         { id: 1, user: 'Sarah Jenkins', action: "Joined 'Design Sync'", time: '2 mins ago', status: 'ACTIVE', avatar: 'https://i.pravatar.cc/150?u=sarah' },
