@@ -41,7 +41,7 @@ const PLACEHOLDER_MSGS = [
 const DateDivider = ({ date }) => (
     <div className="flex items-center gap-4 my-8">
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-4 py-1 rounded-full bg-white/5 border border-white/5">
+        <span className="text-[10px] font-bold text-gray-500 tracking-wide px-4 py-1 rounded-full bg-white/5 border border-white/5">
             {date}
         </span>
         <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/10 to-transparent" />
@@ -154,7 +154,7 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
             <div className="px-6 py-3 border-b border-white/5 bg-white/2 backdrop-blur-md flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Live Chat</span>
+                    <span className="text-xs font-bold text-gray-300 tracking-wide">Live Chat</span>
                 </div>
                 <div className="flex -space-x-2">
                     {[1,2,3].map(i => (

@@ -101,7 +101,7 @@ exports.markAsRead = async (req, res) => {
   )
 
   try {
-    getIo().to(req.params.conversationId).emit('messagesRead', { conversationId: req.params.conversationId, userId: req.user._id, lastMessageId });
+    getIo().to(req.params.conversationId).emit('messagesRead', { conversationId: req.params.conversationId, userId: req.userId, lastMessageId });
   } catch (err) {
     console.error('Socket error:', err);
   }

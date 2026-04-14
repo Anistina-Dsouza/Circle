@@ -19,9 +19,9 @@ const CircleCard = ({ circle }) => {
                         </div>
                     </div>
                     {(circle.isFeatured || circle.stats?.memberCount > 100) && (
-                        <span className="flex items-center space-x-1 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border border-white/10 bg-purple-500/10 text-purple-400 border-purple-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                            <span>{circle.stats?.memberCount > 1000 ? 'Popular' : 'Active'}</span>
+                        <span className="flex items-center space-x-1 px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 bg-purple-500/10 text-purple-400 border-purple-500/20">
+                            <Tag size={10} />
+                            <span>{circle.category || 'Community'}</span>
                         </span>
                     )}
                 </div>
