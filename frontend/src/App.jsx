@@ -25,6 +25,7 @@ import Circles from './features/circles/pages/CirclesPage';
 import CreateCircle from './features/circles/pages/CreateCirclePage';
 import JoinCommunity from './features/circles/pages/JoinCommunityPage';
 import CircleDetails from './features/circles/pages/CircleDetailsPage';
+
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
 import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
