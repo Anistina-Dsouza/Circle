@@ -2,39 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import PastMeetingRow from '../components/PastMeetingRow/PastMeetingRow';
-import { Plus, Settings, Trash2, Edit, Video, ArrowLeft } from 'lucide-react';
+import { Plus, Settings, Trash2, Edit, Video, ArrowLeft, Loader } from 'lucide-react';
 import meetingService from '../services/meetingService';
 
 const ManageMeetingsPage = () => {
     const navigate = useNavigate();
-    const [myMeetings, setMyMeetings] = useState([
-        {
-            id: 101,
-            title: 'Design Critique: New Branding',
-            circle: 'Circle Designers',
-            date: 'OCT 15, 2023',
-            time: '2:00 PM',
-            zoomId: '876 4321 9087',
-            passcode: '123456',
-            status: 'SCHEDULED'
-        },
-        {
-            id: 102,
-            title: 'Marketing Weekly Sync',
-            circle: 'Marketing Hub',
-            date: 'OCT 18, 2023',
-            time: '11:00 AM',
-            zoomId: '543 2211 0098',
-            passcode: '998877',
-            status: 'SCHEDULED'
-        }
-    ]);
+    const [myMeetings, setMyMeetings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const handleDelete = (id) => {
+    useEffect(() => {
+        const fetchHostMeetings = async () => {
+            try {
+                setLoading(true);
+                const res = await meetingService.getMyHostedMeetings();
+                if (res.success) {
+                    setMyMeetings(res.data);
+                }
+            } catch (err) {
+                console.error("Error fetching meetings:", err);
+                setError("Failed to load meetings.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHostMeetings();
+    }, []);
+
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this meeting? This will also remove it from Zoom.')) {
-            setMyMeetings(myMeetings.filter(m => m.id !== id));
-            // Actual API call: meetingService.deleteMeeting(id);
+            try {
+                await meetingService.deleteMeeting(id);
+                setMyMeetings(myMeetings.filter(m => m.id !== id && m._id !== id));
+            } catch (err) {
+                console.error("Failed to delete meeting", err);
+                alert("Failed to delete meeting");
+            }
         }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options).toUpperCase();
+    };
+
+    const formatTime = (dateString) => {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     };
 
     return (
@@ -65,9 +81,15 @@ const ManageMeetingsPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
-                    {myMeetings.length > 0 ? (
+                    {loading ? (
+                        <div className="flex justify-center items-center py-20 text-purple-400">
+                            <Loader className="animate-spin" size={32} />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-10 text-red-400">{error}</div>
+                    ) : myMeetings.length > 0 ? (
                         myMeetings.map((meeting) => (
-                            <div key={meeting.id} className="bg-[#1A0833] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:border-purple-500/20 transition-all shadow-xl group">
+                            <div key={meeting._id || meeting.id} className="bg-[#1A0833] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:border-purple-500/20 transition-all shadow-xl group">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-5 md:gap-6">
                                     <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform shrink-0">
                                         <Video size={28} />
@@ -75,30 +97,32 @@ const ManageMeetingsPage = () => {
                                     <div className="min-w-0">
                                         <h3 className="text-lg md:text-xl font-bold mb-1.5 text-white truncate">{meeting.title}</h3>
                                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-400">
-                                            <span className="text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-md">{meeting.circle}</span>
+                                            {meeting.circle && (
+                                                <>
+                                                    <span className="text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-md">
+                                                        {meeting.circle?.name || 'General Default'}
+                                                    </span>
+                                                    <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600"></div>
+                                                </>
+                                            )}
+                                            <span className="font-medium">{formatDate(meeting.startTime)} at {formatTime(meeting.startTime)}</span>
                                             <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600"></div>
-                                            <span className="font-medium">{meeting.date} at {meeting.time}</span>
-                                            <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600"></div>
-                                            <span className="font-mono bg-white/5 px-2 py-1 rounded text-[10px] tracking-wider uppercase opacity-80">ID: {meeting.zoomId}</span>
+                                            <span className="font-mono bg-white/5 px-2 py-1 rounded text-[10px] tracking-wider uppercase opacity-80">Zoom ID: {meeting.roomId || 'N/A'}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                                    <button className="flex-1 lg:flex-none bg-[#0F0529] border border-white/10 hover:border-white/30 text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-white/5">
-                                        <Edit size={16} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Edit</span>
-                                    </button>
                                     <button 
-                                        onClick={() => handleDelete(meeting.id)}
+                                        onClick={() => handleDelete(meeting._id || meeting.id)}
                                         className="flex-1 lg:flex-none bg-[#330808]/50 border border-red-500/20 hover:border-red-500/40 text-red-400 px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-[#330808]"
                                     >
                                         <Trash2 size={16} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Delete</span>
                                     </button>
-                                    <button className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95">
-                                        Start Meeting
-                                    </button>
+                                    <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer" className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center">
+                                        Start Zoom
+                                    </a>
                                 </div>
                             </div>
                         ))

@@ -1,5 +1,6 @@
 const Meeting = require('../models/Meeting');
 const Circle = require('../models/Circle');
+const zoomService = require('../services/zoomService');
 
 /**
  * @desc    Get meeting dashboard preview (hosted, upcoming, past)
@@ -32,16 +33,54 @@ exports.getDashboard = async (req, res) => {
       .sort({ endTime: -1 })
       .limit(5);
 
+    const isHost = await Circle.exists({
+      'members': {
+        $elemMatch: {
+          user: userId,
+          role: { $in: ['admin', 'moderator'] }
+        }
+      },
+      isActive: true
+    });
+
     res.status(200).json({
       success: true,
       data: {
         hosted,
         upcoming,
-        past
+        past,
+        canHost: !!isHost
       }
     });
   } catch (error) {
     console.error('Error in getDashboard:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get circles the user is allowed to schedule meetings in
+ * @route   GET /api/meetings/eligible-circles
+ * @access  Private
+ */
+exports.getEligibleCircles = async (req, res) => {
+  try {
+    const circles = await Circle.find({
+      'members': {
+        $elemMatch: {
+          user: req.user._id,
+          role: { $in: ['admin', 'moderator'] }
+        }
+      },
+      isActive: true
+    }).select('name _id');
+
+    res.status(200).json({
+      success: true,
+      data: circles
+    });
+  } catch (error) {
+    console.error('Error in getEligibleCircles:', error);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
@@ -59,10 +98,43 @@ exports.scheduleMeeting = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Title and startTime are required' });
     }
 
-    // TODO: Integrate actual Zoom API here
-    // Mock Zoom API response for now
-    const mockRoomId = Math.floor(100000000 + Math.random() * 900000000).toString(); // 9-digit zoom id
-    const mockMeetingLink = `https://zoom.us/j/${mockRoomId}`;
+    if (circle) {
+      const isCircleAdmin = await Circle.exists({
+        _id: circle,
+        'members': {
+          $elemMatch: {
+            user: req.user._id,
+            role: { $in: ['admin', 'moderator'] }
+          }
+        },
+        isActive: true
+      });
+      if (!isCircleAdmin) {
+        return res.status(403).json({ success: false, message: 'You must be a community host (admin or moderator) of this circle to schedule a meeting.' });
+      }
+    } else {
+      const isGeneralHost = await Circle.exists({
+        'members': {
+          $elemMatch: {
+            user: req.user._id,
+            role: { $in: ['admin', 'moderator'] }
+          }
+        },
+        isActive: true
+      });
+      if (!isGeneralHost) {
+        return res.status(403).json({ success: false, message: 'Only community hosts can create meetings.' });
+      }
+    }
+
+    // Create Zoom Meeting via Server-to-Server OAuth
+    const zoomMeeting = await zoomService.createMeeting({
+      title,
+      description,
+      startTime,
+      duration: scheduledDuration || 60,
+      password: settings?.requirePassword ? settings.password : undefined
+    });
     
     let endTime = new Date(startTime);
     endTime.setMinutes(endTime.getMinutes() + parseInt(scheduledDuration || 60, 10));
@@ -74,10 +146,13 @@ exports.scheduleMeeting = async (req, res) => {
       startTime,
       scheduledDuration: scheduledDuration || 60,
       endTime,
-      roomId: mockRoomId,
-      meetingLink: mockMeetingLink,
+      roomId: zoomMeeting.id,
+      meetingLink: zoomMeeting.joinUrl,
       status: 'scheduled',
-      settings
+      settings: {
+        ...settings,
+        password: zoomMeeting.password || settings?.password
+      }
     };
 
     if (circle) {
@@ -133,7 +208,13 @@ exports.deleteMeeting = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Meeting not found or you are not authorized' });
     }
     
-    // TODO: Delete meeting from Zoom via API if necessary
+    if (meeting.roomId) {
+      try {
+        await zoomService.deleteMeeting(meeting.roomId);
+      } catch (err) {
+        console.warn('Failed to delete meeting on Zoom side, deleting from local DB anyway:', err);
+      }
+    }
 
     await meeting.deleteOne();
     

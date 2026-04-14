@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const meetingController = require('../controllers/meetingController');
 
 // All meeting routes require authentication
-router.use(protect);
+router.use(auth);
 
 // =========== DASHBOARD ===========
 // GET /api/meetings/dashboard - Loads hosted + upcoming + past preview for MeetingsPage
 router.get('/dashboard', meetingController.getDashboard);
 
 // =========== SCHEDULE ===========
+// GET /api/meetings/eligible-circles - Circles user is admin/mod of
+router.get('/eligible-circles', meetingController.getEligibleCircles);
+
 // POST /api/meetings/schedule - Creates a Zoom meeting and saves to DB (ScheduleMeetingPage)
 router.post('/schedule', meetingController.scheduleMeeting);
 
