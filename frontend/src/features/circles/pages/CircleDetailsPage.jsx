@@ -34,7 +34,6 @@ const CircleDetailsPage = () => {
     const [circle,       setCircle]       = useState(null);
     const [loading,      setLoading]      = useState(true);
     const [error,        setError]        = useState(null);
-    const [messageInput, setMessageInput] = useState('');
     const [refreshKey,   setRefreshKey]   = useState(0);
 
     /* modal state */
@@ -236,8 +235,8 @@ const CircleDetailsPage = () => {
                         onPostSuccess={() => setRefreshKey(k => k + 1)}
                     />
                     <CircleChatArea
-                        messageInput={messageInput}
-                        setMessageInput={setMessageInput}
+                        circleId={circle._id}
+                        circleName={circle.name}
                     />
                 </div>
 

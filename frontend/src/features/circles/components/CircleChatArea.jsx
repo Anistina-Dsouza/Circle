@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Smile, Plus, MoreVertical, Heart, Reply } from 'lucide-react';
-
-/* ── placeholder messages ── */
+import { io } from 'socket.io-client';
+import axios from 'axios';
 const PLACEHOLDER_MSGS = [
     {
         id: 1,
@@ -131,8 +131,15 @@ const ChatMessage = ({ msg }) => {
 };
 
 /* ── main component ──────────────────────────────────── */
-const CircleChatArea = ({ messageInput, setMessageInput }) => {
+const CircleChatArea = ({ circleId, circleName }) => {
+    const [messageInput, setMessageInput] = useState('');
+    const [messages, setMessages] = useState([]);
     const endRef = useRef(null);
+    const socketRef = useRef(null);
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserId = currentUser._id || currentUser.id;
 
     const scrollToBottom = () => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,7 +147,123 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
 
     useEffect(() => {
         scrollToBottom();
-    }, []);
+    }, [messages]);
+
+    // Fetch messages
+    useEffect(() => {
+        if (!circleId) return;
+        const fetchMessages = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${backendUrl}/api/circlemessages/${circleId}/messages`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (res.data.messages) {
+                    const formatted = res.data.messages.map(msg => formatBackendMessage(msg, currentUserId));
+                    setMessages(formatted);
+                }
+            } catch (err) {
+                console.error("Failed to fetch circle messages", err);
+            }
+        };
+        fetchMessages();
+    }, [circleId, backendUrl, currentUserId]);
+
+    // Socket connection
+    useEffect(() => {
+        if (!circleId) return;
+
+        socketRef.current = io(backendUrl);
+
+        socketRef.current.on('connect', () => {
+            socketRef.current.emit('join_circle', circleId);
+        });
+
+        socketRef.current.on('newCircleMessage', (newMsg) => {
+            const senderId = newMsg.sender?._id || newMsg.sender;
+            if (senderId !== currentUserId) {
+                setMessages(prev => [...prev, formatBackendMessage(newMsg, currentUserId)]);
+            }
+        });
+
+        socketRef.current.on('circleMessageUpdated', (updatedMsg) => {
+            setMessages(prev => prev.map(msg => 
+                msg.id === updatedMsg._id 
+                ? formatBackendMessage(updatedMsg, currentUserId) 
+                : msg
+            ));
+        });
+
+        socketRef.current.on('circleMessageDeleted', ({ messageId }) => {
+            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.emit('leave_circle', circleId);
+                socketRef.current.disconnect();
+            }
+        };
+    }, [circleId, backendUrl, currentUserId]);
+
+    const formatBackendMessage = (msg, myUserId) => {
+        const senderId = msg.sender?._id || msg.sender;
+        const isMe = senderId === myUserId;
+        return {
+            id: msg._id || Date.now(),
+            name: msg.sender?.profile?.displayName || msg.sender?.username || 'Unknown',
+            time: new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: msg.content?.text || '',
+            reactions: msg.reactions?.map(r => ({ icon: r.emoji, count: r.users?.length || 1 })) || [],
+            avatar: msg.sender?.profile?.profileImage || `https://ui-avatars.com/api/?name=${msg.sender?.username || 'U'}&background=random`,
+            isMe,
+            date: new Date(msg.createdAt || Date.now()).toLocaleDateString()
+        };
+    };
+
+    const handleSend = async (e) => {
+        if (e) e.preventDefault();
+        const textToSubmit = messageInput.trim();
+        if (!textToSubmit || !circleId) return;
+
+        const tempId = Date.now();
+        const tempMsg = {
+            id: tempId,
+            name: currentUser.profile?.displayName || currentUser.username || 'You',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            text: textToSubmit,
+            reactions: [],
+            avatar: currentUser.profile?.profileImage || `https://ui-avatars.com/api/?name=${currentUser.username || 'U'}&background=random`,
+            isMe: true,
+            date: new Date().toLocaleDateString()
+        };
+
+        setMessages(prev => [...prev, tempMsg]);
+        setMessageInput('');
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${backendUrl}/api/circlemessages/${circleId}/messages`, {
+                content: { text: textToSubmit }
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Update tempId with real one
+            setMessages(prev => prev.map(m => m.id === tempId ? formatBackendMessage(res.data.message, currentUserId) : m));
+        } catch (err) {
+            console.error("Failed to send message", err);
+        }
+    };
+
+    // Group messages by date
+    const groupedMessages = messages.reduce((acc, msg) => {
+        if (!acc[msg.date]) acc[msg.date] = [];
+        acc[msg.date].push(msg);
+        return acc;
+    }, {});
+
 
     return (
         <div
@@ -150,11 +273,11 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
                 minHeight: '520px'
             }}
         >
-            {/* Chat header area (optional, could show "Community Chat" or something) */}
+            {/* Chat header area */}
             <div className="px-6 py-3 border-b border-white/5 bg-white/2 backdrop-blur-md flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Live Chat</span>
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{circleName || 'Live Chat'}</span>
                 </div>
                 <div className="flex -space-x-2">
                     {[1,2,3].map(i => (
@@ -168,12 +291,20 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar scroll-smooth">
-                <DateDivider date="Today" />
-
-                {PLACEHOLDER_MSGS.map(msg => (
-                    <ChatMessage key={msg.id} msg={msg} />
-                ))}
-
+                {Object.keys(groupedMessages).length === 0 ? (
+                    <div className="flex justify-center mt-10 text-gray-500">
+                        No messages yet. Start the conversation!
+                    </div>
+                ) : (
+                    Object.entries(groupedMessages).map(([date, msgs]) => (
+                        <div key={date}>
+                            <DateDivider date={date} />
+                            {msgs.map(msg => (
+                                <ChatMessage key={msg.id} msg={msg} />
+                            ))}
+                        </div>
+                    ))
+                )}
                 <div ref={endRef} className="h-4" />
             </div>
 
@@ -188,7 +319,7 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
                         type="text"
                         value={messageInput}
                         onChange={e => setMessageInput(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && messageInput.trim()) { setMessageInput(''); } }}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend(e); } }}
                         placeholder="Share something with the circle..."
                         className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2"
                     />
@@ -200,7 +331,7 @@ const CircleChatArea = ({ messageInput, setMessageInput }) => {
 
                         <button
                             disabled={!messageInput.trim()}
-                            onClick={() => { if (messageInput.trim()) setMessageInput(''); }}
+                            onClick={handleSend}
                             className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-900/40 disabled:opacity-30 disabled:grayscale hover:scale-105 active:scale-95 transition-all"
                         >
                             <Send size={18} />
