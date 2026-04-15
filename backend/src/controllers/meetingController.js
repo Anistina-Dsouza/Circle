@@ -252,18 +252,24 @@ exports.deleteMeeting = async (req, res) => {
 exports.getUpcomingMeetings = async (req, res) => {
   try {
     const now = new Date();
+    const { circleId } = req.query;
     
-    // Get all circles the user is a member of
-    const userCircles = await Circle.find({ 'members.user': req.user._id }).select('_id');
-    const circleIds = userCircles.map(c => c._id);
-
-    const meetings = await Meeting.find({
-      startTime: { $gte: now },
-      $or: [
+    let query = { startTime: { $gte: now } };
+    
+    if (circleId) {
+      query.circle = circleId;
+    } else {
+      // Get all circles the user is a member of
+      const userCircles = await Circle.find({ 'members.user': req.user._id }).select('_id');
+      const circleIds = userCircles.map(c => c._id);
+      
+      query.$or = [
         { 'participants.user': req.user._id },
         { circle: { $in: circleIds } }
-      ]
-    })
+      ];
+    }
+
+    const meetings = await Meeting.find(query)
       .populate('host', 'username profile.displayName profile.profileImage')
       .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 });
@@ -341,6 +347,52 @@ exports.getMeetingById = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in getMeetingById:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update RSVP status for a meeting
+ * @route   PUT /api/meetings/:id/rsvp
+ * @access  Private
+ */
+exports.updateRSVP = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    // Only support going/not going mapped to accepted/declined right now
+    if (!['accepted', 'declined'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid RSVP status' });
+    }
+
+    const meeting = await Meeting.findById(req.params.id);
+    if (!meeting) {
+      return res.status(404).json({ success: false, message: 'Meeting not found' });
+    }
+
+    const userId = req.user._id;
+
+    // Check if user is already a participant
+    const isParticipant = meeting.participants.some(p => p.user.toString() === userId.toString());
+
+    if (isParticipant) {
+      await meeting.updateParticipantStatus(userId, status);
+    } else {
+      await meeting.addParticipant(userId, status);
+    }
+
+    // Return the updated meeting populated so UI can update smoothly
+    const updatedMeeting = await Meeting.findById(req.params.id)
+      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('circle', 'name slug coverImage')
+      .populate('participants.user', 'username profile.displayName profile.profileImage');
+
+    res.status(200).json({
+      success: true,
+      data: updatedMeeting
+    });
+  } catch (error) {
+    console.error('Error in updateRSVP:', error);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Users, Calendar, ChevronRight, MessageCircle } from 'lucide-react';
+import meetingService from '../../meetings/services/meetingService';
+import RSVPButton from '../../meetings/components/RSVPButton';
 
 const DEFAULT_AVATAR = 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg';
 
@@ -55,38 +57,88 @@ const MemberRow = ({ m }) => {
 };
 
 /* ───────── upcoming meeting card ───────── */
-const MeetingCard = ({ time, title, desc, accent, members, showRsvp }) => (
-    <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
-        <p className={`text-[11px] font-bold mb-1 ${accent}`}>{time}</p>
-        <p className="text-white font-semibold text-sm mb-1">{title}</p>
-        {desc && <p className="text-gray-500 text-[11px] leading-relaxed mb-3">{desc}</p>}
-        {members?.length > 0 && (
-            <div className="flex items-center gap-1 mb-3">
-                {members.slice(0, 3).map((m, i) => (
-                    <img
-                        key={i}
-                        src={getMemberPic(m.user || {})}
-                        alt=""
-                        className="w-5 h-5 rounded-full object-cover border border-[#12082A] -ml-1 first:ml-0"
-                    />
-                ))}
-            </div>
-        )}
-        <button className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-            showRsvp
-                ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500'
-                : 'border border-violet-500/30 text-violet-400 hover:bg-violet-500/10'
-        }`}>
-            <Calendar size={11} />
-            RSVP Now
-        </button>
-    </div>
-);
+const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
+    const time = new Date(meeting.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const members = meeting.participants || [];
+    const acceptedMembers = members.filter(m => m.status === 'accepted' || m.status === 'attended');
+    
+    // Find initial status for current user
+    const userParticipant = members.find(m => {
+        const pId = m.user?._id || m.user;
+        return pId?.toString() === currentUserId?.toString();
+    });
+    const initialStatus = userParticipant ? userParticipant.status : 'invited';
+
+    const handleStatusChange = (updatedMeeting) => {
+        if (onMeetingUpdated) {
+            onMeetingUpdated(updatedMeeting);
+        }
+    };
+
+    return (
+        <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
+            <p className="text-[11px] font-bold mb-1 text-violet-400">{time}</p>
+            <p className="text-white font-semibold text-sm mb-1">{meeting.title}</p>
+            {meeting.description && <p className="text-gray-500 text-[11px] leading-relaxed mb-4">{meeting.description}</p>}
+            
+            {/* Social Context / Avatars */}
+            {acceptedMembers.length > 0 && (
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center -space-x-2">
+                        {acceptedMembers.slice(0, 3).map((m, i) => (
+                            <img
+                                key={m._id || i}
+                                src={getMemberPic(m.user)}
+                                alt=""
+                                className="w-6 h-6 rounded-full object-cover border-2 border-[#12082A] relative z-10"
+                            />
+                        ))}
+                    </div>
+                    <p className="text-[10px] text-gray-400">
+                        <span className="font-semibold text-gray-300">{getMemberName(acceptedMembers[0].user)}</span>
+                        {acceptedMembers.length > 1 && ` and ${acceptedMembers.length - 1} other${acceptedMembers.length - 1 > 1 ? 's' : ''}`} going
+                    </p>
+                </div>
+            )}
+            
+            <RSVPButton 
+                meetingId={meeting._id} 
+                initialStatus={initialStatus} 
+                onStatusChange={handleStatusChange} 
+            />
+        </div>
+    );
+};
 
 /* ───────── main panel ───────── */
 const CircleMembersPanel = ({ circle, slug }) => {
     const membersList = (circle?.members || []).slice(0, 5);
     const totalCount  = circle?.stats?.memberCount || 0;
+
+    const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserId = loggedInUser?._id;
+
+    const [upcomingMeetings, setUpcomingMeetings] = useState([]);
+    const [loadingMeetings, setLoadingMeetings] = useState(true);
+
+    useEffect(() => {
+        if (circle?._id) {
+            const fetchMeetings = async () => {
+                try {
+                    setLoadingMeetings(true);
+                    const res = await meetingService.getUpcomingMeetings(circle._id);
+                    if (res?.success) {
+                        setUpcomingMeetings(res.data || []);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch upcoming meetings for circle:', error);
+                } finally {
+                    setLoadingMeetings(false);
+                }
+            };
+            fetchMeetings();
+        }
+    }, [circle?._id]);
 
     return (
         <aside className="w-64 shrink-0 flex flex-col gap-4 sticky top-24 self-start">
@@ -102,20 +154,22 @@ const CircleMembersPanel = ({ circle, slug }) => {
                     </span>
                 </div>
                 <div className="px-4 pb-4 space-y-3">
-                    <MeetingCard
-                        time="4:00 PM"
-                        title="Weekly Design Sync"
-                        desc="Discussing the Q3 roadmap and component audit."
-                        accent="text-violet-400"
-                        members={circle?.members}
-                        showRsvp
-                    />
-                    <MeetingCard
-                        time="6:30 PM"
-                        title="Portfolio Critiques"
-                        accent="text-fuchsia-400"
-                        showRsvp={false}
-                    />
+                    {loadingMeetings ? (
+                        <p className="text-xs text-center text-gray-500 py-4">Loading meetings...</p>
+                    ) : upcomingMeetings.length > 0 ? (
+                        upcomingMeetings.map((meeting) => (
+                            <MeetingCard
+                                key={meeting._id}
+                                meeting={meeting}
+                                currentUserId={currentUserId}
+                                onMeetingUpdated={(updatedMeeting) => {
+                                    setUpcomingMeetings(prev => prev.map(m => m._id === updatedMeeting._id ? updatedMeeting : m));
+                                }}
+                            />
+                        ))
+                    ) : (
+                        <p className="text-xs text-center text-gray-500 py-4">No upcoming meetings</p>
+                    )}
                 </div>
             </div>
 
