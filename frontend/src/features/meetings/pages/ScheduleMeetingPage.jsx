@@ -50,6 +50,12 @@ const ScheduleMeetingPage = () => {
             const dateTimeString = `${formData.date}T${formData.time}:00`;
             const startTime = new Date(dateTimeString).toISOString();
 
+            if (new Date(dateTimeString) < new Date()) {
+                setError("Meeting date and time cannot be set in the past.");
+                setLoading(false);
+                return;
+            }
+
             const payload = {
                 title: formData.title,
                 description: formData.description,
@@ -149,6 +155,7 @@ const ScheduleMeetingPage = () => {
                                     type="date"
                                     className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors invert-calendar-icon"
                                     value={formData.date}
+                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                     required
                                 />

@@ -16,20 +16,32 @@ exports.getDashboard = async (req, res) => {
       .sort({ startTime: 1 })
       .limit(3);
 
+    const userCircles = await Circle.find({ 'members.user': userId }).select('_id');
+    const circleIds = userCircles.map(c => c._id);
+
     const upcoming = await Meeting.find({ 
-      'participants.user': userId, 
       startTime: { $gte: now },
-      host: { $ne: userId } // exclude those already in hosted
+      host: { $ne: userId }, // exclude those already in hosted
+      $or: [
+        { 'participants.user': userId },
+        { circle: { $in: circleIds } }
+      ]
     })
       .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 })
       .limit(5);
 
     const past = await Meeting.find({
-      $or: [{ host: userId }, { 'participants.user': userId }],
-      endTime: { $lt: now }
+      endTime: { $lt: now },
+      $or: [
+        { host: userId }, 
+        { 'participants.user': userId },
+        { circle: { $in: circleIds } }
+      ]
     })
       .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('circle', 'name slug coverImage')
       .sort({ endTime: -1 })
       .limit(5);
 
@@ -96,6 +108,10 @@ exports.scheduleMeeting = async (req, res) => {
     
     if (!title || !startTime) {
       return res.status(400).json({ success: false, message: 'Title and startTime are required' });
+    }
+
+    if (new Date(startTime) < new Date()) {
+      return res.status(400).json({ success: false, message: 'Meeting date and time cannot be in the past.' });
     }
 
     if (circle) {
