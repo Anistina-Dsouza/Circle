@@ -12,9 +12,9 @@ const DashboardActivityTable = ({ activities }) => {
                         <div className="p-2 bg-purple-500/10 rounded-lg">
                             <Activity size={20} className="text-purple-500" />
                         </div>
-                        <h2 className="text-xl font-black uppercase tracking-tight">Recent Activity</h2>
+                        <h2 className="text-xl font-black tracking-tight">Recent Activity</h2>
                     </div>
-                    <button className="text-[10px] font-black text-gray-500 hover:text-purple-400 uppercase tracking-[0.2em] transition-colors">Full Logs</button>
+                    <button className="text-[10px] font-black text-gray-500 hover:text-purple-400 tracking-wide transition-colors">Full Logs</button>
                 </div>
 
                 <div className="space-y-1">
@@ -33,7 +33,7 @@ const DashboardActivityTable = ({ activities }) => {
                                 <p className="text-[11px] text-gray-500 group-hover/item:text-gray-400 transition-colors">{item.action}</p>
                             </div>
                             <div className="text-right shrink-0">
-                                <p className="text-[9px] font-bold text-gray-600 uppercase mb-1 tracking-wider">{item.time}</p>
+                                <p className="text-[9px] font-bold text-gray-600 mb-1 tracking-wide">{item.time}</p>
                                 <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
                                     item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' :
                                     item.status === 'NEW' ? 'bg-purple-500/10 text-purple-400' :

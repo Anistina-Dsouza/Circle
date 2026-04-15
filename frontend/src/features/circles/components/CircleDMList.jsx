@@ -15,7 +15,7 @@ const CircleDMList = ({ members = [] }) => {
 
     return (
         <aside className="w-52 shrink-0 flex flex-col gap-1 sticky top-24 self-start">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 px-2">
+            <p className="text-[10px] font-bold text-gray-500 mb-2 px-2">
                 Members
             </p>
 
