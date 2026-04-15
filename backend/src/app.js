@@ -14,6 +14,7 @@ const circleMessageRoutes = require('./routes/circleMessageRoutes'); // Import c
 const conversationRoutes = require('./routes/conversationRoutes'); 
 const reportRoutes = require('./routes/reportRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const meetingRoutes = require('./routes/meetingRoutes');
 
 
 const app = express();
@@ -64,6 +65,7 @@ app.use('/api/dm/conversations', conversationRoutes);
 app.use('/api/circlemessages', circleMessageRoutes); 
 app.use('/api/reports', reportRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/meetings', meetingRoutes);
 
 
 // 404 handler
