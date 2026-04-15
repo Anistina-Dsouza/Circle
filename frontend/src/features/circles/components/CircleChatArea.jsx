@@ -41,7 +41,7 @@ const PLACEHOLDER_MSGS = [
 const DateDivider = ({ date }) => (
     <div className="flex items-center gap-4 my-8">
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-4 py-1 rounded-full bg-white/5 border border-white/5">
+        <span className="text-[10px] font-bold text-gray-500 tracking-wide px-4 py-1 rounded-full bg-white/5 border border-white/5">
             {date}
         </span>
         <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/10 to-transparent" />

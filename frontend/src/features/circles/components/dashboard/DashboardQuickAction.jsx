@@ -13,7 +13,7 @@ const DashboardQuickAction = ({ to, icon: Icon, title, description, variant = 'd
                     <Icon size={24} />
                 </div>
                 <div>
-                    <h4 className="font-bold text-lg text-white group-hover:tracking-wide transition-all uppercase tracking-tight">{title}</h4>
+                    <h4 className="font-bold text-lg text-white group-hover:tracking-wide transition-all tracking-tight">{title}</h4>
                     <p className="text-sm text-white/70">{description}</p>
                 </div>
                 <ChevronRight size={20} className="ml-auto text-white group-hover:translate-x-1 transition-all" />
@@ -33,7 +33,7 @@ const DashboardQuickAction = ({ to, icon: Icon, title, description, variant = 'd
                     <Icon size={24} />
                 </div>
                 <div>
-                    <h4 className="font-bold text-lg text-white group-hover:text-purple-400 transition-colors uppercase tracking-tight">{title}</h4>
+                    <h4 className="font-bold text-lg text-white group-hover:text-purple-400 transition-colors tracking-tight">{title}</h4>
                     <p className="text-sm text-gray-500">{description}</p>
                 </div>
                 <ChevronRight size={20} className="ml-auto text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all" />

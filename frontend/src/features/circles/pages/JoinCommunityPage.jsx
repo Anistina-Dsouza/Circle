@@ -201,8 +201,8 @@ const JoinCommunityPage = () => {
                                 {/* Glow */}
                                 <div className="absolute inset-0 rounded-full shadow-[0_0_40px_rgba(139,92,246,0.4)] -z-10" />
                                 {/* Type Badge */}
-                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-700 to-fuchsia-600 text-white text-[9px] font-bold px-4 py-1 rounded-full tracking-widest uppercase border-2 border-[#100535] whitespace-nowrap">
-                                    {circle.type?.toUpperCase() || 'COMMUNITY'}
+                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-700 to-fuchsia-600 text-white text-[9px] font-bold px-4 py-1 rounded-full border-2 border-[#100535] whitespace-nowrap">
+                                    {circle.type || 'Community'}
                                 </div>
                             </div>
 
