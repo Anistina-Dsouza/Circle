@@ -111,23 +111,44 @@ const JoinCommunityPage = () => {
 
     if (loading || redirecting) {
         return (
-            <div className="min-h-screen bg-[#0F0529] flex flex-col items-center justify-center relative">
-                {/* Background Glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
-                
-                {successMsg && (
-                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-3 rounded-2xl flex items-center gap-3">
-                            <CheckCircle2 size={20} />
-                            <span className="font-bold text-sm tracking-wide">{successMsg}</span>
+            <div className="min-h-screen bg-[#0F0529] text-white font-sans">
+                <FeedNavbar />
+                <div className="max-w-3xl mx-auto px-6 py-10 animate-pulse">
+                    {/* Back Link Skeleton */}
+                    <div className="h-5 w-32 bg-white/5 rounded-lg mb-8" />
+
+                    {/* Main Card Skeleton */}
+                    <div className="rounded-3xl overflow-hidden border border-[#2A1550] bg-[#16093A]">
+                        <div className="h-1 w-full bg-white/10" />
+                        <div className="grid md:grid-cols-5">
+                            {/* Left Panel Skeleton */}
+                            <div className="md:col-span-2 flex flex-col items-center justify-center px-8 py-10 text-center border-b md:border-b-0 md:border-r border-[#2A1550] bg-black/20">
+                                <div className="w-28 h-28 rounded-full bg-white/10 mb-8" />
+                                <div className="h-6 w-3/4 bg-white/10 rounded-lg mb-3" />
+                                <div className="h-3 w-1/2 bg-white/5 rounded-lg mb-6" />
+                                <div className="h-4 w-32 bg-white/5 rounded-full" />
+                            </div>
+
+                            {/* Right Panel Skeleton */}
+                            <div className="md:col-span-3 px-8 py-10 space-y-6">
+                                <div className="space-y-2">
+                                    <div className="h-6 w-1/2 bg-white/10 rounded-lg" />
+                                    <div className="h-3 w-full bg-white/5 rounded-lg" />
+                                    <div className="h-3 w-3/4 bg-white/5 rounded-lg" />
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="h-4 w-40 bg-white/10 rounded-lg" />
+                                    <div className="h-40 w-full bg-black/30 rounded-2xl border border-white/5" />
+                                </div>
+                                <div className="h-16 w-full bg-white/5 rounded-2xl" />
+                                <div className="space-y-3">
+                                    <div className="h-12 w-full bg-white/10 rounded-2xl" />
+                                    <div className="h-10 w-full bg-white/5 rounded-2xl" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
-                
-                <Loader2 className="w-12 h-12 text-violet-500 animate-spin mb-4 relative z-10" />
-                <p className="text-gray-400 font-medium relative z-10">
-                    {redirecting ? 'Entering Community...' : 'Locating Community...'}
-                </p>
+                </div>
             </div>
         );
     }
