@@ -120,7 +120,7 @@ const ManageMeetingsPage = () => {
                                         <Trash2 size={16} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Delete</span>
                                     </button>
-                                    <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer" className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center">
+                                    <a href={meeting.startLink || meeting.meetingLink} target="_blank" rel="noopener noreferrer" className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center">
                                         Start Zoom
                                     </a>
                                 </div>

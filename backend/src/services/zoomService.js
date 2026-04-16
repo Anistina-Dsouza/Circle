@@ -86,6 +86,7 @@ class ZoomService {
       return {
         id: response.data.id.toString(),
         joinUrl: response.data.join_url,
+        startUrl: response.data.start_url,
         password: response.data.password
       };
     } catch (error) {

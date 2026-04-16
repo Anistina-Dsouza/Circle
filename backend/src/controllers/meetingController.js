@@ -164,6 +164,7 @@ exports.scheduleMeeting = async (req, res) => {
       endTime,
       roomId: zoomMeeting.id,
       meetingLink: zoomMeeting.joinUrl,
+      startLink: zoomMeeting.startUrl,
       status: 'scheduled',
       settings: {
         ...settings,

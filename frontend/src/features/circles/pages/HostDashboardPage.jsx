@@ -12,12 +12,15 @@ import DashboardStatCard from '../components/dashboard/DashboardStatCard';
 import DashboardQuickAction from '../components/dashboard/DashboardQuickAction';
 import DashboardActivityTable from '../components/dashboard/DashboardActivityTable';
 import DashboardSchedule from '../components/dashboard/DashboardSchedule';
+import meetingService from '../../meetings/services/meetingService';
 
 const HostDashboardPage = () => {
     const { slug } = useParams();
     const [circle, setCircle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState([]);
+    const [upcomingMeetings, setUpcomingMeetings] = useState([]);
+    const [recentActivity, setRecentActivity] = useState([]);
     const baseUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
@@ -44,13 +47,64 @@ const HostDashboardPage = () => {
                         console.error('Failed to fetch pending requests:', err);
                     }
 
-                    // 3. Construct Stats
+                    // 3. Fetch Meetings
+                    let fetchedMeetings = [];
+                    try {
+                        const meetingsRes = await meetingService.getUpcomingMeetings(circleData._id);
+                        if (meetingsRes.success) {
+                            fetchedMeetings = meetingsRes.data;
+                            setUpcomingMeetings(fetchedMeetings);
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch upcoming meetings:', err);
+                    }
+
+                    // 4. Construct Stats
                     setStats([
                         { label: 'Total Members', value: circleData?.stats?.memberCount || '0', icon: Users, color: 'text-purple-400' },
                         { label: 'Moderators', value: circleData?.moderators?.length || '0', icon: Shield, color: 'text-purple-400' },
                         { label: 'Pending Requests', value: pendingCount, icon: UserPlus, color: 'text-purple-400', pulse: pendingCount > 0 },
                         { label: 'Meetings', value: circleData?.stats?.meetingCount || '0', icon: Clock, color: 'text-purple-400' },
                     ]);
+                    
+                    // 5. Synthesize Activities
+                    const activities = [];
+                    (circleData.members || []).forEach(m => {
+                        activities.push({
+                            id: `join_${m.user._id}`,
+                            user: m.user.displayName || m.user.username,
+                            action: `Joined '${circleData.name}'`,
+                            timestamp: new Date(m.joinedAt).getTime(),
+                            status: 'ACTIVE',
+                            avatar: m.user.profilePic || 'https://i.pravatar.cc/150?u=default'
+                        });
+                    });
+                    
+                    fetchedMeetings.forEach(mtg => {
+                        activities.push({
+                            id: `mtg_${mtg._id}`,
+                            user: mtg.host?.displayName || mtg.host?.username || 'Host',
+                            action: `Scheduled meeting: ${mtg.title}`,
+                            timestamp: new Date(mtg.createdAt || mtg.startTime).getTime(),
+                            status: 'NEW',
+                            avatar: mtg.host?.profilePic || 'https://i.pravatar.cc/150?u=meeting'
+                        });
+                    });
+
+                    activities.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    const formattedActivities = activities.slice(0, 10).map(act => {
+                        const mins = Math.floor((new Date() - new Date(act.timestamp)) / 60000);
+                        let timeStr;
+                        if (mins < 0) timeStr = `Starts tightly`; // Using tightly as placeholder, but for creations it's past
+                        else if (mins < 60) timeStr = `${mins} mins ago`;
+                        else if (mins < 1440) timeStr = `${Math.floor(mins / 60)} hours ago`;
+                        else timeStr = `${Math.floor(mins / 1440)} days ago`;
+
+                        return { ...act, time: timeStr || 'Just now' };
+                    });
+
+                    setRecentActivity(formattedActivities);
                 }
             } catch (err) {
                 console.error('Failed to fetch dashboard data:', err);
@@ -61,11 +115,8 @@ const HostDashboardPage = () => {
         fetchData();
     }, [slug, baseUrl]);
 
-    const recentActivity = [
-        { id: 1, user: 'Sarah Jenkins', action: "Joined 'Design Sync'", time: '2 mins ago', status: 'ACTIVE', avatar: 'https://i.pravatar.cc/150?u=sarah' },
-        { id: 2, user: 'Marcus King', action: 'Shared a new resource', time: '14 mins ago', status: 'NEW', avatar: 'https://i.pravatar.cc/150?u=marcus' },
-        { id: 3, user: 'Leo David', action: "Left 'Weekly Retro'", time: '42 mins ago', status: 'CLOSED', avatar: 'https://i.pravatar.cc/150?u=leo' }
-    ];
+    const displayedMembers = circle?.members?.slice(0, 4) || [];
+    const remainingMembersCount = Math.max((circle?.stats?.memberCount || circle?.members?.length || 0) - 4, 0);
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans flex flex-col selection:bg-purple-500/30">
@@ -95,10 +146,20 @@ const HostDashboardPage = () => {
 
                     <div className="hidden md:flex items-center gap-3">
                         <div className="flex -space-x-3">
-                            {[1,2,3,4].map(i => (
-                                <img key={i} className="w-8 h-8 rounded-full border-2 border-[#0F0529] object-cover" src={`https://i.pravatar.cc/150?u=${i+10}`} alt="" />
+                            {displayedMembers.map((m, i) => (
+                                <img 
+                                    key={m.user._id || i} 
+                                    className="w-8 h-8 rounded-full border-2 border-[#0F0529] object-cover bg-white/10" 
+                                    src={m.user.profilePic || 'https://i.pravatar.cc/150?u=default'} 
+                                    alt={m.user.username} 
+                                    title={m.user.displayName || m.user.username} 
+                                />
                             ))}
-                            <div className="w-8 h-8 rounded-full border-2 border-[#0F0529] bg-[#1A1140] flex items-center justify-center text-[10px] font-bold text-purple-400">+12</div>
+                            {remainingMembersCount > 0 && (
+                                <div className="w-8 h-8 rounded-full border-2 border-[#0F0529] bg-[#1A1140] flex items-center justify-center text-[10px] font-bold text-purple-400">
+                                    +{remainingMembersCount}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -142,7 +203,7 @@ const HostDashboardPage = () => {
 
                     {/* Schedule Sidebar */}
                     <div className="lg:col-span-1">
-                        <DashboardSchedule />
+                        <DashboardSchedule meetings={upcomingMeetings} />
                     </div>
                 </div>
             </div>
