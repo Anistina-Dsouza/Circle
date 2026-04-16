@@ -2,7 +2,7 @@ import React from 'react';
 import FeedNavbar from './components/FeedNavbar';
 import FeedHeader from './components/FeedHeader';
 import CreateStoryBar from './components/CreateStoryBar';
-import StoriesBar from './components/StoriesBar';
+import StoriesBar, { DiscoverGrid } from './components/StoriesBar';
 import FeedGrid from './components/FeedGrid';
 import MyCirclesPanel from '../circles/components/MyCirclesPanel';
 
@@ -26,7 +26,12 @@ const FeedPage = () => {
                     <div className="flex-1 min-w-0">
                         <CreateStoryBar onPostSuccess={handleRefresh} />
                         <StoriesBar key={`stories-${refreshKey}`} onPostSuccess={handleRefresh} />
+                        
+                        {/* Highlights/Feed Section */}
                         <FeedGrid key={`feed-${refreshKey}`} />
+
+                        {/* Snapchat Style Discover Grid */}
+                        <DiscoverGrid key={`discover-${refreshKey}`} />
                     </div>
 
                     {/* Right: My Circles panel (hidden on small screens) */}

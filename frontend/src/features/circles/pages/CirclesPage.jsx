@@ -26,7 +26,7 @@ const CirclesPage = () => {
     const fetchCircles = useCallback(async (category = 'All Categories', search = '', pageNum = 1, shouldAppend = false) => {
         setLoading(true);
         setError(null);
-        if (!shouldAppend) setCircles([]); // Clear existing circles while loading new ones
+        if (!shouldAppend) setCircles([]); 
 
         try {
             const params = new URLSearchParams();
@@ -101,9 +101,16 @@ const CirclesPage = () => {
                 )}
 
                 {loading && circles.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p className="text-gray-400 font-medium">Loading circles...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="aspect-[4/5] bg-white/5 rounded-[3rem] animate-pulse overflow-hidden p-8 border border-white/5">
+                                <div className="h-3/4 w-full bg-white/10 rounded-[2rem] mb-6" />
+                                <div className="space-y-3">
+                                    <div className="h-4 w-2/3 bg-white/10 rounded" />
+                                    <div className="h-3 w-1/2 bg-white/5 rounded" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <>
@@ -154,6 +161,5 @@ const CirclesPage = () => {
         </div>
     );
 };
-
 
 export default CirclesPage;

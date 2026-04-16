@@ -92,8 +92,71 @@ const MeetingsPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0F0529] font-sans flex items-center justify-center">
-                <Loader className="animate-spin text-purple-500" size={48} />
+            <div className="min-h-screen bg-[#0F0529] text-white font-sans">
+                <FeedNavbar />
+                <main className="max-w-6xl mx-auto px-6 py-8">
+                    {/* Header Skeleton */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12 animate-pulse">
+                        <div className="space-y-3">
+                            <div className="h-10 w-64 bg-white/10 rounded-xl" />
+                            <div className="h-4 w-48 bg-white/5 rounded-lg" />
+                        </div>
+                        <div className="h-12 w-40 bg-white/10 rounded-xl" />
+                    </div>
+
+                    {/* Latest Meeting Row Skeleton */}
+                    <div className="mb-12 animate-pulse">
+                        <div className="h-8 w-48 bg-white/10 rounded-lg mb-6" />
+                        <div className="h-40 w-full bg-[#1A1140]/50 rounded-[2.5rem] border border-white/5 p-8 flex flex-col lg:flex-row items-center justify-between gap-8">
+                            <div className="flex items-center gap-6 w-full lg:w-auto">
+                                <div className="w-16 h-16 rounded-2xl bg-white/10 hidden sm:block" />
+                                <div className="space-y-3 flex-1">
+                                    <div className="h-4 w-32 bg-white/10 rounded-full" />
+                                    <div className="h-8 w-64 bg-white/10 rounded-xl" />
+                                    <div className="h-4 w-40 bg-white/5 rounded-lg" />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-10">
+                                <div className="flex -space-x-3">
+                                    {[1,2,3].map(j => <div key={j} className="w-10 h-10 rounded-full bg-white/5 border-2 border-[#0F0529]" />)}
+                                </div>
+                                <div className="h-12 w-40 bg-white/10 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Upcoming Grid Skeleton */}
+                    <div className="space-y-6 animate-pulse">
+                        <div className="flex justify-between">
+                            <div className="h-8 w-40 bg-white/10 rounded-lg" />
+                            <div className="h-4 w-24 bg-white/5 rounded-lg" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-white/5 rounded-2xl p-6 border border-white/5 min-h-[300px] flex flex-col">
+                                    <div className="flex justify-between items-start mb-10">
+                                        <div className="h-5 w-24 bg-white/10 rounded-full" />
+                                        <div className="h-5 w-5 bg-white/10 rounded" />
+                                    </div>
+                                    <div className="h-8 w-3/4 bg-white/10 rounded-xl mb-4" />
+                                    <div className="space-y-3 mb-10">
+                                        <div className="h-4 w-32 bg-white/5 rounded" />
+                                        <div className="h-4 w-40 bg-white/5 rounded" />
+                                    </div>
+                                    <div className="mt-auto">
+                                        <div className="flex justify-between mb-6">
+                                            <div className="h-6 w-20 bg-white/10 rounded" />
+                                            <div className="flex -space-x-2">
+                                                {[1,2,3].map(j => <div key={j} className="w-8 h-8 rounded-full bg-white/5 border-2 border-[#0F0529]" />)}
+                                            </div>
+                                        </div>
+                                        <div className="h-12 w-full bg-white/10 rounded-lg" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </main>
             </div>
         )
     }

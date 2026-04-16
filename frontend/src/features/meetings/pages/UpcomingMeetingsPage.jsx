@@ -17,11 +17,8 @@ const UpcomingMeetingsPage = () => {
                 setLoading(true);
                 const res = await meetingService.getUpcomingMeetings();
                 if (res.success && res.data) {
-                    // Map API data to standard Card format
                     const mappedData = res.data.map(m => {
                         const dateObj = new Date(m.startTime);
-                        
-                        // Fake attendees for UI placeholder unless we populate participants array.
                         const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
                         const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
 
@@ -59,7 +56,7 @@ const UpcomingMeetingsPage = () => {
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans">
-            <FeedNavbar activePage="Meetings" />
+            <FeedNavbar />
 
             <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -95,8 +92,38 @@ const UpcomingMeetingsPage = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center py-20 text-purple-500">
-                        <Loader className="animate-spin" size={32} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="bg-white/5 rounded-2xl p-6 border border-white/5 animate-pulse min-h-[320px] flex flex-col">
+                                <div className="flex justify-between items-start mb-10">
+                                    <div className="h-5 w-24 bg-white/10 rounded-full" />
+                                    <div className="h-5 w-5 bg-white/10 rounded" />
+                                </div>
+                                <div className="h-8 w-3/4 bg-white/10 rounded-xl mb-4" />
+                                <div className="space-y-3 mb-10">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-white/5 rounded shadow-inner" />
+                                        <div className="h-4 w-32 bg-white/5 rounded" />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-white/5 rounded shadow-inner" />
+                                        <div className="h-4 w-40 bg-white/5 rounded" />
+                                    </div>
+                                </div>
+                                <div className="mt-auto">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="space-y-2">
+                                            <div className="h-3 w-12 bg-white/5 rounded" />
+                                            <div className="h-6 w-20 bg-white/10 rounded" />
+                                        </div>
+                                        <div className="flex -space-x-2">
+                                            {[1,2,3].map(j => <div key={j} className="w-8 h-8 rounded-full bg-white/5 border-2 border-[#0F0529]" />)}
+                                        </div>
+                                    </div>
+                                    <div className="w-full h-12 bg-white/10 rounded-lg" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : filteredMeetings.length === 0 ? (
                     <div className="text-center py-20 border-2 border-dashed border-white/10 rounded-3xl">
@@ -108,7 +135,6 @@ const UpcomingMeetingsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredMeetings.map((meeting) => (
                             <div key={meeting.id} className="group cursor-pointer" onClick={(e) => {
-                                // Add link routing logic inside the click
                                 if (meeting.meetingLink) {
                                     window.open(meeting.meetingLink, '_blank');
                                 }
@@ -117,7 +143,6 @@ const UpcomingMeetingsPage = () => {
                             </div>
                         ))}
                         
-                        {/* Placeholder for more */}
                         <div className="border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center p-12 text-center group hover:bg-white/[0.02] transition-all">
                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 mb-4 group-hover:scale-110 transition-transform">
                                 <Calendar size={24} />
