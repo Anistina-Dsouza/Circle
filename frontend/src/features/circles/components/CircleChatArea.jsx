@@ -139,6 +139,7 @@ const CircleChatArea = ({ circle }) => {
                 });
 
                 if (res.data.messages) {
+                    // console.log("messages - ", res.data.messages);
                     const formatted = res.data.messages.map(msg => formatBackendMessage(msg, currentUserId));
                     setMessages(formatted);
                 }
