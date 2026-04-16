@@ -62,6 +62,9 @@ const meetingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  startLink: {
+    type: String
+  },
   
   // Settings
   settings: {

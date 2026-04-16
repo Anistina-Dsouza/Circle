@@ -1,74 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import UpcomingMeetingCard from '../components/UpcomingMeetingCard/UpcomingMeetingCard';
-import { ArrowLeft, Calendar, Search } from 'lucide-react';
-
-// Static Mock Data (Same as main page for consistency)
-const UPCOMING_MEETINGS = [
-    {
-        id: 1,
-        title: 'Q4 Product Strategy Sync',
-        circle: 'Product Circle',
-        host: 'Alex Riviera',
-        date: 'OCT 24',
-        time: '10:00 AM',
-        attendees: [
-            'https://i.pravatar.cc/150?u=1',
-            'https://i.pravatar.cc/150?u=2',
-            'https://i.pravatar.cc/150?u=3'
-        ],
-        plusCount: 12,
-        isZoom: true
-    },
-    {
-        id: 2,
-        title: 'Developer Experience Workshop',
-        circle: 'Engineering Circle',
-        host: 'Sarah Chen',
-        date: 'OCT 25',
-        time: '2:30 PM',
-        attendees: [
-            'https://i.pravatar.cc/150?u=4',
-            'https://i.pravatar.cc/150?u=5'
-        ],
-        plusCount: 45,
-        isZoom: true
-    },
-    {
-        id: 3,
-        title: 'Community Town Hall',
-        circle: 'Community Circle',
-        host: 'Marc Wilson',
-        date: 'OCT 26',
-        time: '5:00 PM',
-        attendees: [
-            'https://i.pravatar.cc/150?u=6',
-            'https://i.pravatar.cc/150?u=7',
-            'https://i.pravatar.cc/150?u=8',
-            'https://i.pravatar.cc/150?u=9'
-        ],
-        plusCount: 89,
-        isZoom: false
-    },
-    {
-        id: 4,
-        title: 'Design System Governance',
-        circle: 'Design Circle',
-        host: 'Elena Rodriguez',
-        date: 'OCT 27',
-        time: '11:00 AM',
-        attendees: [
-            'https://i.pravatar.cc/150?u=12',
-            'https://i.pravatar.cc/150?u=13'
-        ],
-        plusCount: 5,
-        isZoom: true
-    }
-];
+import { ArrowLeft, Calendar, Search, Loader } from 'lucide-react';
+import meetingService from '../services/meetingService';
 
 const UpcomingMeetingsPage = () => {
     const navigate = useNavigate();
+    const [meetings, setMeetings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const fetchMeetings = async () => {
+            try {
+                setLoading(true);
+                const res = await meetingService.getUpcomingMeetings();
+                if (res.success && res.data) {
+                    // Map API data to standard Card format
+                    const mappedData = res.data.map(m => {
+                        const dateObj = new Date(m.startTime);
+                        
+                        // Fake attendees for UI placeholder unless we populate participants array.
+                        const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
+                        const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
+
+                        return {
+                            id: m._id,
+                            status: 'UPCOMING',
+                            statusColor: 'bg-purple-500/20 text-purple-300',
+                            title: m.title,
+                            circle: m.circle?.name || 'General Community',
+                            host: m.host?.profile?.displayName || m.host?.username || 'Unknown',
+                            dateLabel: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
+                            time: dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+                            attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
+                            plusCount: plusCount,
+                            btnColor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]',
+                            meetingLink: m.meetingLink
+                        };
+                    });
+                    setMeetings(mappedData);
+                }
+            } catch (err) {
+                console.error("Failed to load upcoming meetings", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMeetings();
+    }, []);
+
+    const filteredMeetings = meetings.filter(m => 
+        m.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        m.circle.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans">
@@ -100,27 +87,46 @@ const UpcomingMeetingsPage = () => {
                         <input 
                             type="text" 
                             placeholder="Search by title or circle..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:border-white/30 transition-all text-sm font-medium"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {UPCOMING_MEETINGS.map((meeting) => (
-                        <div key={meeting.id} className="group">
-                             <UpcomingMeetingCard meeting={meeting} />
-                        </div>
-                    ))}
-                    
-                    {/* Placeholder for more */}
-                    <div className="border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center p-12 text-center group hover:bg-white/[0.02] transition-all">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 mb-4 group-hover:scale-110 transition-transform">
-                            <Calendar size={24} />
-                        </div>
-                        <h3 className="text-white/40 font-bold mb-1">More sessions coming soon</h3>
-                        <p className="text-white/20 text-xs">Stay tuned for more updates from your circles</p>
+                {loading ? (
+                    <div className="flex justify-center py-20 text-purple-500">
+                        <Loader className="animate-spin" size={32} />
                     </div>
-                </div>
+                ) : filteredMeetings.length === 0 ? (
+                    <div className="text-center py-20 border-2 border-dashed border-white/10 rounded-3xl">
+                        <Calendar size={48} className="mx-auto text-white/20 mb-4" />
+                        <h3 className="text-xl font-bold text-gray-400 mb-2">No upcoming meetings found</h3>
+                        <p className="text-gray-500">Looks like your schedule is clear.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredMeetings.map((meeting) => (
+                            <div key={meeting.id} className="group cursor-pointer" onClick={(e) => {
+                                // Add link routing logic inside the click
+                                if (meeting.meetingLink) {
+                                    window.open(meeting.meetingLink, '_blank');
+                                }
+                            }}>
+                                <UpcomingMeetingCard meeting={meeting} />
+                            </div>
+                        ))}
+                        
+                        {/* Placeholder for more */}
+                        <div className="border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center p-12 text-center group hover:bg-white/[0.02] transition-all">
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 mb-4 group-hover:scale-110 transition-transform">
+                                <Calendar size={24} />
+                            </div>
+                            <h3 className="text-white/40 font-bold mb-1">More sessions coming soon</h3>
+                            <p className="text-white/20 text-xs">Stay tuned for more updates from your circles</p>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );

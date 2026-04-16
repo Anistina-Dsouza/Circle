@@ -1,7 +1,14 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
 
-const DashboardSchedule = () => {
+const DashboardSchedule = ({ meetings = [] }) => {
+    const today = new Date();
+    const todaysMeetings = meetings.filter(m => {
+        const d = new Date(m.startTime);
+        return d.getDate() === today.getDate() && 
+               d.getMonth() === today.getMonth() && 
+               d.getFullYear() === today.getFullYear();
+    });
     return (
         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-[32px] p-8 hover:border-purple-500/30 transition-all duration-500 relative overflow-hidden group h-full flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -15,35 +22,38 @@ const DashboardSchedule = () => {
                 </div>
 
                 <div className="flex-1 space-y-8">
-                    <div className="flex gap-5 group/item cursor-pointer">
-                        <div className="text-center min-w-[45px] p-2 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-purple-500/30 transition-colors">
-                            <p className="text-xl font-black leading-none text-white">14</p>
-                            <p className="text-[9px] font-bold text-purple-400 tracking-wide mt-1">Oct</p>
+                    {todaysMeetings.length > 0 ? (
+                        todaysMeetings.slice(0, 3).map((mtg, i) => {
+                            const d = new Date(mtg.startTime);
+                            const day = d.getDate();
+                            const month = d.toLocaleString('en-US', { month: 'short' });
+                            const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                            const privacy = mtg.settings?.requirePassword ? 'Private' : 'Public';
+                            
+                            return (
+                                <div key={mtg._id || i} className="flex gap-5 group/item cursor-pointer">
+                                    <div className="text-center min-w-[45px] p-2 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-purple-500/30 transition-colors">
+                                        <p className="text-xl font-black leading-none text-white">{day}</p>
+                                        <p className="text-[9px] font-bold text-purple-400 tracking-wide mt-1">{month}</p>
+                                    </div>
+                                    <div className="space-y-1 py-1">
+                                        <p className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors truncate tracking-tight">
+                                            {mtg.title}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold tracking-wide">
+                                            <span>{time}</span>
+                                            <span className="w-1 h-1 bg-gray-700 rounded-full" />
+                                            <span className="text-purple-500/70">{privacy}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-xs font-bold text-gray-500 tracking-wide">No meetings today.</p>
                         </div>
-                        <div className="space-y-1 py-1">
-                            <p className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors truncate tracking-tight">Product Strategy 2.0</p>
-                            <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold tracking-wide">
-                                <span>14:00</span>
-                                <span className="w-1 h-1 bg-gray-700 rounded-full" />
-                                <span className="text-purple-500/70">Private</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-5 group/item cursor-pointer">
-                        <div className="text-center min-w-[45px] p-2 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-purple-500/30 transition-colors">
-                            <p className="text-xl font-black leading-none text-white">14</p>
-                            <p className="text-[9px] font-bold text-purple-400 tracking-wide mt-1">Oct</p>
-                        </div>
-                        <div className="space-y-1 py-1">
-                            <p className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors truncate tracking-tight">Community Townhall</p>
-                            <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold tracking-wide">
-                                <span>17:30</span>
-                                <span className="w-1 h-1 bg-gray-700 rounded-full" />
-                                <span className="text-purple-500/70">Public</span>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <button className="mt-10 w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-gray-500 hover:text-white hover:bg-purple-600/10 hover:border-purple-500/40 transition-all tracking-wide shadow-lg">
