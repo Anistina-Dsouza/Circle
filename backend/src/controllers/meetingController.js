@@ -27,7 +27,7 @@ exports.getDashboard = async (req, res) => {
         { circle: { $in: circleIds } }
       ]
     })
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 })
       .limit(5);
@@ -40,7 +40,7 @@ exports.getDashboard = async (req, res) => {
         { circle: { $in: circleIds } }
       ]
     })
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
       .sort({ endTime: -1 })
       .limit(5);
@@ -218,6 +218,36 @@ exports.getMyMeetings = async (req, res) => {
 };
 
 /**
+ * @desc    Start a meeting dynamically
+ * @route   PUT /api/meetings/:id/start
+ * @access  Private
+ */
+exports.startMeeting = async (req, res) => {
+  try {
+    const meeting = await Meeting.findOne({ _id: req.params.id, host: req.user._id });
+    
+    if (!meeting) {
+      return res.status(404).json({ success: false, message: 'Meeting not found or you are not authorized' });
+    }
+    
+    meeting.status = 'live';
+    meeting.startTime = new Date();
+    await meeting.save();
+    
+    // Add host as an attended participant
+    await meeting.updateParticipantStatus(req.user._id, 'attended');
+    
+    res.status(200).json({
+      success: true,
+      data: meeting
+    });
+  } catch (error) {
+    console.error('Error in startMeeting:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/**
  * @desc    Delete a meeting
  * @route   DELETE /api/meetings/:id
  * @access  Private
@@ -276,7 +306,7 @@ exports.getUpcomingMeetings = async (req, res) => {
     }
 
     const meetings = await Meeting.find(query)
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 });
 
@@ -309,7 +339,7 @@ exports.getMeetingHistory = async (req, res) => {
 
     const total = await Meeting.countDocuments(query);
     const meetings = await Meeting.find(query)
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
       .sort({ endTime: -1 })
       .skip(startIndex)
@@ -339,9 +369,9 @@ exports.getMeetingHistory = async (req, res) => {
 exports.getMeetingById = async (req, res) => {
   try {
     const meeting = await Meeting.findById(req.params.id)
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
-      .populate('participants.user', 'username profile.displayName profile.profileImage');
+      .populate('participants.user', 'username displayName profilePic');
 
     if (!meeting) {
       return res.status(404).json({ success: false, message: 'Meeting not found' });
@@ -389,9 +419,9 @@ exports.updateRSVP = async (req, res) => {
 
     // Return the updated meeting populated so UI can update smoothly
     const updatedMeeting = await Meeting.findById(req.params.id)
-      .populate('host', 'username profile.displayName profile.profileImage')
+      .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage')
-      .populate('participants.user', 'username profile.displayName profile.profileImage');
+      .populate('participants.user', 'username displayName profilePic');
 
     res.status(200).json({
       success: true,
@@ -418,6 +448,7 @@ exports.getCircleMeetings = async (req, res) => {
       startTime: { $gte: now }
     })
       .populate('host', 'username displayName profilePic')
+      .populate('participants.user', 'username displayName profilePic')
       .sort({ startTime: 1 })
       .limit(10);
 

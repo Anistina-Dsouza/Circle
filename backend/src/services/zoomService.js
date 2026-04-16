@@ -69,9 +69,10 @@ class ZoomService {
           settings: {
             host_video: true,
             participant_video: true,
-            join_before_host: false,
+            join_before_host: true,
+            jbh_time: 0,
             mute_upon_entry: true,
-            waiting_room: true,
+            waiting_room: false,
             approval_type: 0 // Automatically approve
           }
         },

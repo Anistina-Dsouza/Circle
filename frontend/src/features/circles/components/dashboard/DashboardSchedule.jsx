@@ -2,13 +2,6 @@ import React from 'react';
 import { Calendar } from 'lucide-react';
 
 const DashboardSchedule = ({ meetings = [] }) => {
-    const today = new Date();
-    const todaysMeetings = meetings.filter(m => {
-        const d = new Date(m.startTime);
-        return d.getDate() === today.getDate() && 
-               d.getMonth() === today.getMonth() && 
-               d.getFullYear() === today.getFullYear();
-    });
     return (
         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-[32px] p-8 hover:border-purple-500/30 transition-all duration-500 relative overflow-hidden group h-full flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -18,12 +11,12 @@ const DashboardSchedule = ({ meetings = [] }) => {
                     <div className="p-2 bg-purple-500/10 rounded-lg">
                         <Calendar size={20} className="text-purple-500" />
                     </div>
-                    <h2 className="text-xl font-black tracking-tight">Upcoming Today</h2>
+                    <h2 className="text-xl font-black tracking-tight">Upcoming Meetings</h2>
                 </div>
 
                 <div className="flex-1 space-y-8">
-                    {todaysMeetings.length > 0 ? (
-                        todaysMeetings.slice(0, 3).map((mtg, i) => {
+                    {meetings.length > 0 ? (
+                        meetings.slice(0, 5).map((mtg, i) => {
                             const d = new Date(mtg.startTime);
                             const day = d.getDate();
                             const month = d.toLocaleString('en-US', { month: 'short' });
@@ -51,7 +44,7 @@ const DashboardSchedule = ({ meetings = [] }) => {
                         })
                     ) : (
                         <div className="flex items-center justify-center h-full">
-                            <p className="text-xs font-bold text-gray-500 tracking-wide">No meetings today.</p>
+                            <p className="text-xs font-bold text-gray-500 tracking-wide">No upcoming meetings.</p>
                         </div>
                     )}
                 </div>
