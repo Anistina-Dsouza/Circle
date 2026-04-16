@@ -37,4 +37,7 @@ router.get('/history', meetingController.getMeetingHistory);
 // GET /api/meetings/:id - Single meeting detail (join redirect)
 router.get('/:id', meetingController.getMeetingById);
 
+// PUT /api/meetings/:id/rsvp - Update RSVP status
+router.put('/:id/rsvp', meetingController.updateRSVP);
+
 module.exports = router;

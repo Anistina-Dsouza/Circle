@@ -10,9 +10,10 @@ const meetingService = {
         return response.data;
     },
 
-    // Fetch all upcoming meetings
-    getUpcomingMeetings: async () => {
-        const response = await axios.get(`${API_URL}/meetings/upcoming`);
+    // Fetch all upcoming meetings or for a specific circle
+    getUpcomingMeetings: async (circleId = null) => {
+        const url = circleId ? `${API_URL}/meetings/upcoming?circleId=${circleId}` : `${API_URL}/meetings/upcoming`;
+        const response = await axios.get(url);
         return response.data;
     },
 
@@ -43,6 +44,12 @@ const meetingService = {
     // Delete a meeting
     deleteMeeting: async (id) => {
         const response = await axios.delete(`${API_URL}/meetings/${id}`);
+        return response.data;
+    },
+
+    // Update RSVP Status
+    updateRSVP: async (id, status) => {
+        const response = await axios.put(`${API_URL}/meetings/${id}/rsvp`, { status });
         return response.data;
     }
 };

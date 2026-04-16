@@ -18,32 +18,38 @@ const DashboardActivityTable = ({ activities }) => {
                 </div>
 
                 <div className="space-y-1">
-                    {activities.map((item) => (
-                        <div key={item.id} className="group/item flex items-center gap-4 py-4 px-4 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/5">
-                            <div className="relative">
-                                <img 
-                                    src={item.avatar} 
-                                    alt="" 
-                                    className="w-11 h-11 rounded-full border-2 border-white/5 group-hover/item:border-purple-500/50 transition-colors object-cover" 
-                                />
-                                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#1A1140] rounded-full" />
+                    {activities.length > 0 ? (
+                        activities.map((item) => (
+                            <div key={item.id} className="group/item flex items-center gap-4 py-4 px-4 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/5">
+                                <div className="relative">
+                                    <img 
+                                        src={item.avatar} 
+                                        alt="" 
+                                        className="w-11 h-11 rounded-full border-2 border-white/5 group-hover/item:border-purple-500/50 transition-colors object-cover" 
+                                    />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#1A1140] rounded-full" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors">{item.user}</h4>
+                                    <p className="text-[11px] text-gray-500 group-hover/item:text-gray-400 transition-colors">{item.action}</p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-[9px] font-bold text-gray-600 mb-1 tracking-wide">{item.time}</p>
+                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                                        item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' :
+                                        item.status === 'NEW' ? 'bg-purple-500/10 text-purple-400' :
+                                        'bg-red-500/10 text-red-400'
+                                    }`}>
+                                        {item.status}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors">{item.user}</h4>
-                                <p className="text-[11px] text-gray-500 group-hover/item:text-gray-400 transition-colors">{item.action}</p>
-                            </div>
-                            <div className="text-right shrink-0">
-                                <p className="text-[9px] font-bold text-gray-600 mb-1 tracking-wide">{item.time}</p>
-                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
-                                    item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' :
-                                    item.status === 'NEW' ? 'bg-purple-500/10 text-purple-400' :
-                                    'bg-red-500/10 text-red-400'
-                                }`}>
-                                    {item.status}
-                                </span>
-                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-8">
+                            <p className="text-xs font-bold text-gray-500">No recent activity.</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>
