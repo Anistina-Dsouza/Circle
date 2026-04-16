@@ -42,6 +42,21 @@ const ManageMeetingsPage = () => {
         }
     };
 
+    const handleStartZoom = async (meeting) => {
+        try {
+            // Update backend status to 'live'
+            await meetingService.startMeeting(meeting._id || meeting.id);
+            // Mark it live locally
+            setMyMeetings(prev => prev.map(m => (m._id === meeting._id || m.id === meeting.id) ? { ...m, status: 'live' } : m));
+            // Launch Zoom
+            window.open(meeting.startLink || meeting.meetingLink, '_blank');
+        } catch (err) {
+            console.error("Failed to start meeting", err);
+            // Fallback: still attempt to open if backend fails sporadically
+            window.open(meeting.startLink || meeting.meetingLink, '_blank');
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return '';
         const options = { month: 'short', day: 'numeric', year: 'numeric' };
@@ -120,9 +135,12 @@ const ManageMeetingsPage = () => {
                                         <Trash2 size={16} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Delete</span>
                                     </button>
-                                    <a href={meeting.startLink || meeting.meetingLink} target="_blank" rel="noopener noreferrer" className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center">
-                                        Start Zoom
-                                    </a>
+                                    <button 
+                                        onClick={() => handleStartZoom(meeting)}
+                                        className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center"
+                                    >
+                                        {meeting.status === 'live' ? 'Rejoin Zoom' : 'Start Zoom'}
+                                    </button>
                                 </div>
                             </div>
                         ))

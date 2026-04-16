@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, Calendar, ChevronRight, MessageCircle, AlertCircle } from 'lucide-react';
+import { Users, Calendar, ChevronRight, MessageCircle, AlertCircle, Video } from 'lucide-react';
 import meetingService from '../../meetings/services/meetingService';
 import RSVPButton from '../../meetings/components/RSVPButton';
 
@@ -104,6 +104,16 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
                 initialStatus={initialStatus} 
                 onStatusChange={handleStatusChange} 
             />
+            
+            {meeting.status === 'live' && (
+                <button 
+                    onClick={() => window.open(meeting.meetingLink, '_blank')}
+                    className="w-full mt-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-400 hover:to-emerald-500 shadow-lg shadow-green-900/20"
+                >
+                    <Video size={13} />
+                    Join Now
+                </button>
+            )}
         </div>
     );
 };
@@ -125,7 +135,7 @@ const CircleMembersPanel = ({ circle, slug }) => {
             const fetchMeetings = async () => {
                 try {
                     setLoadingMeetings(true);
-                    const res = await meetingService.getUpcomingMeetings(circle._id);
+                    const res = await meetingService.getCircleMeetings(circle._id);
                     if (res?.success) {
                         setUpcomingMeetings(res.data || []);
                     }
