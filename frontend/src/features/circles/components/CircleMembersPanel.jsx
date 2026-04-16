@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Users, Calendar, ChevronRight, MessageCircle } from 'lucide-react';
+import axios from 'axios';
+import { Users, Calendar, ChevronRight, MessageCircle, AlertCircle } from 'lucide-react';
 import meetingService from '../../meetings/services/meetingService';
 import RSVPButton from '../../meetings/components/RSVPButton';
 
@@ -26,25 +27,22 @@ const MemberRow = ({ m }) => {
 
     return (
         <div className="flex items-center gap-3 group">
-            {/* Avatar → profile */}
             <Link to={`/profile/${uname}`} className="relative shrink-0">
                 <img
                     src={pic}
                     alt={name}
-                    className="w-9 h-9 rounded-full object-cover group-hover:ring-2 group-hover:ring-violet-500/50 transition-all"
+                    className="w-9 h-9 rounded-full object-cover group-hover:ring-2 group-hover:ring-violet-500/50 transition-all text-xs"
                 />
                 <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#12082A] ${dotColor}`} />
             </Link>
 
-            {/* Name + role → profile */}
             <Link to={`/profile/${uname}`} className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors truncate">
                     {name}
                 </p>
-                <p className="text-[11px] text-gray-600 capitalize">{m.role}</p>
+                <p className="text-[11px] text-gray-600 capitalize font-medium">{m.role}</p>
             </Link>
 
-            {/* DM button → messages */}
             <button
                 onClick={() => navigate(`/messages?user=${uname}`)}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition-all"
@@ -114,6 +112,7 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
 const CircleMembersPanel = ({ circle, slug }) => {
     const membersList = (circle?.members || []).slice(0, 5);
     const totalCount  = circle?.stats?.memberCount || 0;
+    const baseUrl = import.meta.env.VITE_API_URL;
 
     const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserId = loggedInUser?._id;
@@ -141,21 +140,25 @@ const CircleMembersPanel = ({ circle, slug }) => {
     }, [circle?._id]);
 
     return (
-        <aside className="w-64 shrink-0 flex flex-col gap-4 sticky top-24 self-start">
+        <aside className="w-72 shrink-0 flex flex-col gap-4 sticky top-24 self-start">
 
             {/* Upcoming Meetings */}
-            <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A]">
+            <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A] min-h-[140px] flex flex-col">
                 <div className="flex items-center justify-between px-5 pt-5 pb-3">
                     <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         Upcoming Meetings
                     </h3>
-                    <span className="text-[9px] font-bold text-white bg-violet-600 px-2.5 py-1 rounded-full tracking-wider">
-                        TODAY
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                        <span className="text-[9px] font-bold text-gray-400">UPCOMING</span>
+                    </div>
                 </div>
-                <div className="px-4 pb-4 space-y-3">
+                <div className="px-4 pb-4 space-y-3 flex-1 overflow-y-auto max-h-[350px] custom-scrollbar">
                     {loadingMeetings ? (
-                        <p className="text-xs text-center text-gray-500 py-4">Loading meetings...</p>
+                        <div className="flex flex-col items-center justify-center py-10">
+                            <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mb-2" />
+                            <p className="text-[10px] text-gray-600">Gathering sessions...</p>
+                        </div>
                     ) : upcomingMeetings.length > 0 ? (
                         upcomingMeetings.map((meeting) => (
                             <MeetingCard
@@ -168,7 +171,13 @@ const CircleMembersPanel = ({ circle, slug }) => {
                             />
                         ))
                     ) : (
-                        <p className="text-xs text-center text-gray-500 py-4">No upcoming meetings</p>
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="w-10 h-10 bg-white/2 rounded-full flex items-center justify-center mb-3 text-gray-700">
+                                <Calendar size={18} strokeWidth={1} />
+                            </div>
+                            <p className="text-[11px] text-gray-500 font-medium">No meetings scheduled</p>
+                            <p className="text-[9px] text-gray-700 max-w-[120px] mt-1 italic">The host hasn't posted any future sessions yet.</p>
+                        </div>
                     )}
                 </div>
             </div>
@@ -176,8 +185,8 @@ const CircleMembersPanel = ({ circle, slug }) => {
             {/* Active Members */}
             <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A]">
                 <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                    <h3 className="text-[10px] font-bold text-gray-400">
-                        Active Members
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        Active Citizens
                     </h3>
                     <Link
                         to={`/circles/${slug}/members`}

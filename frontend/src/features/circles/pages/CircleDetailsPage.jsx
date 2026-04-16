@@ -130,7 +130,7 @@ const CircleDetailsPage = () => {
     );
 
     /* ── render ─────────────────────────────────────────────  */
-    const coverSrc       = circle.coverImage?.startsWith('http') ? circle.coverImage : DEFAULT_COVER;
+    const coverSrc       = (circle.coverImage && circle.coverImage.length > 5) ? circle.coverImage : DEFAULT_COVER;
     const onlineCount = (circle.members || []).filter(m => m.user?.onlineStatus?.status === 'online').length;
     const onlineDisplay = formatCount(Math.max(onlineCount, 0));
 
@@ -151,7 +151,7 @@ const CircleDetailsPage = () => {
                     {/* Avatar + info */}
                     <div className="flex items-end gap-5">
                         <div className="w-24 h-24 rounded-full border-4 border-[#0F0529] overflow-hidden shadow-2xl shadow-violet-900/40 shrink-0">
-                            <img src={coverSrc} alt={circle.name} className="w-full h-full object-cover" />
+                            <img src={circle.profilePic || coverSrc} alt={circle.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="pb-1">
                             <h1 className="text-2xl font-extrabold text-white leading-tight mb-1.5">
@@ -223,10 +223,7 @@ const CircleDetailsPage = () => {
             </div>
 
             {/* 3-COLUMN BODY */}
-            <div className="max-w-[1400px] w-full mx-auto px-6 pb-10 flex gap-5 flex-1 items-start">
-
-                {/* LEFT: members DM list */}
-                <CircleDMList members={circle.members} />
+            <div className="max-w-[1400px] w-full mx-auto px-6 pb-10 flex gap-10 flex-1 items-start">
 
                 {/* CENTER: stories + chat */}
                 <div className="flex-1 min-w-0 flex flex-col gap-4">
@@ -235,8 +232,7 @@ const CircleDetailsPage = () => {
                         onPostSuccess={() => setRefreshKey(k => k + 1)}
                     />
                     <CircleChatArea
-                        circleId={circle._id}
-                        circleName={circle.name}
+                        circle={circle}
                     />
                 </div>
 

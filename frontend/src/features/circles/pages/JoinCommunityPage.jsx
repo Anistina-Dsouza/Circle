@@ -302,7 +302,7 @@ const JoinCommunityPage = () => {
                 {/* Admin Link */}
                 <p className="mt-8 text-center text-sm text-gray-600">
                     Are you an admin?{' '}
-                    <Link to="/admin/communities" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+                    <Link to={`/circles/${slug}/manage/participants`} className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
                         Manage join requests here
                     </Link>
                 </p>

@@ -104,9 +104,11 @@ const MyCirclesPanel = () => {
                                         <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-violet-500/20 group-hover:border-violet-500/50 transition-colors">
                                             <img
                                                 src={
-                                                    circle.coverImage?.startsWith('http')
-                                                        ? circle.coverImage
-                                                        : 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png'
+                                                    (circle.profilePic && circle.profilePic !== '')
+                                                        ? circle.profilePic
+                                                        : (circle.coverImage && circle.coverImage !== '')
+                                                            ? circle.coverImage
+                                                            : 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png'
                                                 }
                                                 alt={circle.name}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

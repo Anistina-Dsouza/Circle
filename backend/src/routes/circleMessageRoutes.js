@@ -13,7 +13,7 @@ router.put('/:circleId/messages/:messageId', circleMessageController.updateMessa
 router.delete('/:circleId/messages/:messageId', circleMessageController.deleteMessage);
 
 // Message Reactions
-router.post('/:circleId/messages/:messageId/reactions', circleMessageController.toggleReaction);
+router.post('/:circleId/messages/:messageId/react', circleMessageController.toggleReaction);
 
 // Mark as Read
 router.post('/:circleId/messages/read', circleMessageController.markAsRead);

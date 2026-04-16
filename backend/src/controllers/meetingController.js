@@ -178,6 +178,11 @@ exports.scheduleMeeting = async (req, res) => {
 
     const meeting = await Meeting.create(meetingData);
     
+    // Increment meeting count for circle dashboard stats
+    if (circle) {
+      await Circle.findByIdAndUpdate(circle, { $inc: { 'stats.meetingCount': 1 } });
+    }
+
     // Add host as accepted participant automatically
     await meeting.addParticipant(req.user._id, 'accepted');
 
@@ -394,6 +399,34 @@ exports.updateRSVP = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in updateRSVP:', error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get upcoming meetings for a specific circle
+ * @route   GET /api/meetings/circle/:circleId
+ * @access  Private
+ */
+exports.getCircleMeetings = async (req, res) => {
+  try {
+    const { circleId } = req.params;
+    const now = new Date();
+
+    const meetings = await Meeting.find({
+      circle: circleId,
+      startTime: { $gte: now }
+    })
+      .populate('host', 'username displayName profilePic')
+      .sort({ startTime: 1 })
+      .limit(10);
+
+    res.status(200).json({
+      success: true,
+      data: meetings
+    });
+  } catch (error) {
+    console.error('Error in getCircleMeetings:', error);
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };

@@ -66,14 +66,28 @@ const CommunitySettingsPage = () => {
         fetchCircle();
     }, [slug, baseUrl]);
 
+    const handleUpdateBanner = () => {
+        const url = prompt("Enter the URL for the community banner (cover image):", formData.coverImage);
+        if (url !== null) {
+            setFormData({ ...formData, coverImage: url });
+        }
+    };
+
+    const handleUpdateIcon = () => {
+        const url = prompt("Enter the URL for the community icon:", formData.profileImage);
+        if (url !== null) {
+            setFormData({ ...formData, profileImage: url });
+        }
+    };
+
     const handleSave = async () => {
         setSaving(true);
         try {
             const token = localStorage.getItem('token');
-            // Sending allowMemberPosts and allowMemberInvites to existing settings field
             const res = await axios.put(`${baseUrl}/api/circles/${circle._id}`, {
                 description: formData.description,
                 coverImage: formData.coverImage,
+                profilePic: formData.profileImage, // formData.profileImage is currently used for the icon URL
                 settings: formData.settings
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -156,10 +170,16 @@ const CommunitySettingsPage = () => {
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                    <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all active:scale-90">
+                                    <button 
+                                        onClick={handleUpdateBanner}
+                                        className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all active:scale-90"
+                                    >
                                         <Camera size={20} />
                                     </button>
-                                    <button className="p-3 bg-purple-600/80 backdrop-blur-md rounded-full text-white hover:bg-purple-600 transition-all active:scale-90 shadow-xl shadow-purple-900/40">
+                                    <button 
+                                        onClick={handleUpdateBanner}
+                                        className="p-3 bg-purple-600/80 backdrop-blur-md rounded-full text-white hover:bg-purple-600 transition-all active:scale-90 shadow-xl shadow-purple-900/40"
+                                    >
                                         <UploadCloud size={20} />
                                     </button>
                                 </div>
@@ -179,14 +199,20 @@ const CommunitySettingsPage = () => {
                                         className="w-full h-full object-cover rounded-[28px]"
                                     />
                                 </div>
-                                <button className="absolute -bottom-2 -right-2 p-2.5 bg-purple-600 rounded-2xl text-white shadow-lg shadow-purple-900/40 border border-[#0F0529] hover:scale-110 transition-transform active:scale-95">
+                                <button 
+                                    onClick={handleUpdateIcon}
+                                    className="absolute -bottom-2 -right-2 p-2.5 bg-purple-600 rounded-2xl text-white shadow-lg shadow-purple-900/40 border border-[#0F0529] hover:scale-110 transition-transform active:scale-95"
+                                >
                                     <Camera size={14} />
                                 </button>
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-sm font-bold text-white mb-1">Community Icon</h4>
                                 <p className="text-xs text-gray-500 leading-relaxed mb-3">This icon appears in the sidebar and chat list. Recommended: Square high-res image.</p>
-                                <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-gray-400 hover:text-white hover:border-white/20 transition-all">
+                                <button 
+                                    onClick={() => setFormData({...formData, profileImage: ''})}
+                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-gray-400 hover:text-white hover:border-white/20 transition-all"
+                                >
                                     Remove Icon
                                 </button>
                             </div>

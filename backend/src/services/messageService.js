@@ -26,7 +26,7 @@ const getMessages = async (conversationId, userId, { before, limit }) => {
     .limit(limit)
     .populate('sender', 'username displayName profilePic onlineStatus')
     .populate('replyTo', 'content contentType sender isDeleted');
-
+  
   // Return in chronological order for frontend chat
   //  window (oldest first)
   return messages.reverse();
