@@ -24,6 +24,9 @@ router.get('/my', meetingController.getMyMeetings);
 // DELETE /api/meetings/:id - Host deletes their meeting from DB + Zoom (ManageMeetingsPage)
 router.delete('/:id', meetingController.deleteMeeting);
 
+// PUT /api/meetings/:id/start - Host sets meeting to live dynamically (ManageMeetingsPage)
+router.put('/:id/start', meetingController.startMeeting);
+
 // =========== BROWSE ===========
 // GET /api/meetings/upcoming - All upcoming meetings in user's circles (UpcomingMeetingsPage)
 router.get('/upcoming', meetingController.getUpcomingMeetings);
