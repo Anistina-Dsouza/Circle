@@ -28,6 +28,7 @@ import CircleDetails from './features/circles/pages/CircleDetailsPage';
 import HostDashboard from './features/circles/pages/HostDashboardPage';
 import ManageParticipants from './features/circles/pages/ManageParticipantsPage';
 import CommunitySettings from './features/circles/pages/CommunitySettingsPage';
+import CircleMembers from './features/circles/pages/CircleMembersPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
 import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
@@ -77,6 +78,7 @@ function App() {
             <Route path="/circles/:slug" element={<ProtectedRoute><CircleDetails /></ProtectedRoute>} />
             <Route path="/circles/:slug/manage" element={<ProtectedRoute><HostDashboard /></ProtectedRoute>} />
             <Route path="/circles/:slug/manage/participants" element={<ProtectedRoute><ManageParticipants /></ProtectedRoute>} />
+            <Route path="/circles/:slug/members" element={<ProtectedRoute><CircleMembers /></ProtectedRoute>} />
             <Route path="/circles/:slug/manage/settings" element={<ProtectedRoute><CommunitySettings /></ProtectedRoute>} />
 
             <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

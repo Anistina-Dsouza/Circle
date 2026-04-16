@@ -17,11 +17,11 @@ const getMessages = async (circleId, userId, { before, limit = 30 }) => {
     .find(query)
     .sort({ _id: -1 })        // newest first from DB
     .limit(limit)
-    .populate('sender', 'username profile.displayName profilePic onlineStatus')
+    .populate('sender', 'username displayName profilePic onlineStatus')
     .populate({
       path:   'replyTo',
       select: 'content contentType sender isDeleted',
-      populate: { path: 'sender', select: 'username profile.displayName' }
+      populate: { path: 'sender', select: 'username displayName' }
     })
     .lean()                   // plain JS objects — faster
 
@@ -46,8 +46,8 @@ const createMessage = async ({ circleId, sender, content, contentType, replyTo, 
 
   // Populate references
   await message.populate([
-    { path: 'sender', select: 'username profile.displayName profile.profileImage onlineStatus' },
-    { path: 'replyTo', select: 'content contentType sender isDeleted', populate: { path: 'sender', select: 'username profile.displayName' } }
+    { path: 'sender', select: 'username displayName profilePic onlineStatus' },
+    { path: 'replyTo', select: 'content contentType sender isDeleted', populate: { path: 'sender', select: 'username displayName' } }
   ]);
 
   return message;
@@ -68,7 +68,7 @@ const updateMessage = async (messageId, userId, text) => {
   message.isEdited = true;
 
   await message.save();
-  await message.populate('sender', 'username profile.displayName profile.profileImage onlineStatus');
+  await message.populate('sender', 'username displayName profilePic onlineStatus');
   return message;
 };
 
