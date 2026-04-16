@@ -189,7 +189,7 @@ exports.getCircleBySlug = async (req, res) => {
 exports.updateCircle = async (req, res) => {
   try {
       console.log("updateCircle - req.body - ",req.body);
-    const { description, coverImage, settings } = req.body;
+    const { description, coverImage, profilePic, settings } = req.body;
     const circle = await Circle.findById(req.params.circleId);
     
     if (!circle || !circle.isActive) {
@@ -223,6 +223,7 @@ exports.updateCircle = async (req, res) => {
     
     if (description !== undefined) circle.description = description;
     if (coverImage) circle.coverImage = coverImage;
+    if (profilePic) circle.profilePic = profilePic;
     if (settings) circle.settings = { ...circle.settings, ...settings };
     
     await circle.save();
@@ -366,7 +367,7 @@ exports.getCircleMembers = async (req, res) => {
       .select('members')
       .populate({
         path: 'members.user',
-        select: 'username profile.displayName profile.profileImage stats.followerCount onlineStatus'
+        select: 'username displayName profilePic stats.followerCount onlineStatus'
       });
     
     if (!circle) {

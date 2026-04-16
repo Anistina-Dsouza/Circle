@@ -19,7 +19,11 @@ const circleSchema = new mongoose.Schema({
   },
   coverImage: {
     type: String,
-    default: 'default_circle.png'
+    default: 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop'
+  },
+  profilePic: {
+    type: String,
+    default: 'https://cdn-icons-png.flaticon.com/512/2102/2102633.png'
   },
   category: {
     type: String,
@@ -135,10 +139,9 @@ const circleSchema = new mongoose.Schema({
     rejectionReason: String
   }],
 
-  // Stats
   stats: {
     memberCount:  { type: Number, default: 0 },
-    messageCount: { type: Number, default: 0 },   // ← already existed, now actually used
+    messageCount: { type: Number, default: 0 },
     flashCount:   { type: Number, default: 0 },
     meetingCount: { type: Number, default: 0 }
   },
@@ -311,6 +314,11 @@ circleSchema.methods.markRead = function (userId, messageId) {
     member.lastReadMessage = messageId;
     member.lastReadAt      = new Date();
   }
+  return this.save();
+};
+
+circleSchema.methods.incrementMeetingCount = function () {
+  this.stats.meetingCount += 1;
   return this.save();
 };
 
