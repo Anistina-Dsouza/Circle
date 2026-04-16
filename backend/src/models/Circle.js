@@ -19,7 +19,7 @@ const circleSchema = new mongoose.Schema({
   },
   coverImage: {
     type: String,
-    default: 'default_circle.png'
+    default: 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg'
   },
   category: {
     type: String,
@@ -137,16 +137,16 @@ const circleSchema = new mongoose.Schema({
 
   // Stats
   stats: {
-    memberCount:  { type: Number, default: 0 },
+    memberCount: { type: Number, default: 0 },
     messageCount: { type: Number, default: 0 },   // ← already existed, now actually used
-    flashCount:   { type: Number, default: 0 },
+    flashCount: { type: Number, default: 0 },
     meetingCount: { type: Number, default: 0 }
   },
 
   // Settings
   settings: {
-    allowMemberPosts:    { type: Boolean, default: true },
-    allowMemberInvites:  { type: Boolean, default: true },
+    allowMemberPosts: { type: Boolean, default: true },
+    allowMemberInvites: { type: Boolean, default: true },
     requirePostApproval: { type: Boolean, default: false },
 
     // ── CHAT ADDITION ──────────────────────────────────────
@@ -176,11 +176,11 @@ const circleSchema = new mongoose.Schema({
   // ── END CHAT ADDITION ─────────────────────────────────────
 
   // Status
-  isActive:   { type: Boolean, default: true,  index: true },
+  isActive: { type: Boolean, default: true, index: true },
   isFeatured: { type: Boolean, default: false, index: true }
 }, {
   timestamps: true,
-  toJSON:   { virtuals: true },
+  toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
@@ -204,8 +204,8 @@ circleSchema.pre('save', function (next) {
 
   if (!this.inviteCode) {
     const timestamp = Date.now().toString(36);
-    const random    = Math.random().toString(36).substring(2, 6);
-    const nameHash  = (this.name || 'CIR').substring(0, 3).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6);
+    const nameHash = (this.name || 'CIR').substring(0, 3).toUpperCase();
     this.inviteCode = `${nameHash}-${timestamp}-${random}`.toUpperCase();
   }
 
@@ -283,9 +283,9 @@ circleSchema.methods.removeModerator = function (userId) {
 };
 
 circleSchema.methods.isModerator = function (userId) {
-  const isCreator    = this.creator.toString() === userId.toString();
+  const isCreator = this.creator.toString() === userId.toString();
   const inModerators = this.moderators.some(m => m.user.toString() === userId.toString());
-  const isMemberMod  = this.members.some(m =>
+  const isMemberMod = this.members.some(m =>
     m.user.toString() === userId.toString() &&
     ['admin', 'moderator'].includes(m.role)
   );
@@ -297,7 +297,7 @@ circleSchema.methods.isModerator = function (userId) {
 // Call this every time a new CircleMessage is saved
 // Usage: await circle.updateLastMessage(message._id)
 circleSchema.methods.updateLastMessage = function (messageId) {
-  this.lastMessage  = messageId;
+  this.lastMessage = messageId;
   this.lastActivity = new Date();
   this.stats.messageCount += 1;
   return this.save();
@@ -309,7 +309,7 @@ circleSchema.methods.markRead = function (userId, messageId) {
   const member = this.members.find(m => m.user.toString() === userId.toString());
   if (member) {
     member.lastReadMessage = messageId;
-    member.lastReadAt      = new Date();
+    member.lastReadAt = new Date();
   }
   return this.save();
 };
