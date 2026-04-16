@@ -160,6 +160,7 @@ const CircleChatArea = ({ circleId, circleName }) => {
                 });
 
                 if (res.data.messages) {
+                    // console.log("messages - ", res.data.messages);
                     const formatted = res.data.messages.map(msg => formatBackendMessage(msg, currentUserId));
                     setMessages(formatted);
                 }
@@ -210,13 +211,14 @@ const CircleChatArea = ({ circleId, circleName }) => {
     const formatBackendMessage = (msg, myUserId) => {
         const senderId = msg.sender?._id || msg.sender;
         const isMe = senderId === myUserId;
+        // console.log("here - ",msg.sender)
         return {
             id: msg._id || Date.now(),
             name: msg.sender?.profile?.displayName || msg.sender?.username || 'Unknown',
             time: new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             text: msg.content?.text || '',
             reactions: msg.reactions?.map(r => ({ icon: r.emoji, count: r.users?.length || 1 })) || [],
-            avatar: msg.sender?.profile?.profileImage || `https://ui-avatars.com/api/?name=${msg.sender?.username || 'U'}&background=random`,
+            avatar: msg.sender?.profilePic || `https://ui-avatars.com/api/?name=${msg.sender?.username || 'U'}&background=random`,
             isMe,
             date: new Date(msg.createdAt || Date.now()).toLocaleDateString()
         };
@@ -299,9 +301,10 @@ const CircleChatArea = ({ circleId, circleName }) => {
                     Object.entries(groupedMessages).map(([date, msgs]) => (
                         <div key={date}>
                             <DateDivider date={date} />
-                            {msgs.map(msg => (
-                                <ChatMessage key={msg.id} msg={msg} />
-                            ))}
+                            {msgs.map(msg => {
+                                // console.log(msg);
+                                return <ChatMessage key={msg.id} msg={msg} />;
+                            })}
                         </div>
                     ))
                 )}

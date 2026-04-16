@@ -17,7 +17,7 @@ const getMessages = async (circleId, userId, { before, limit = 30 }) => {
     .find(query)
     .sort({ _id: -1 })        // newest first from DB
     .limit(limit)
-    .populate('sender', 'username profile.displayName profile.profileImage onlineStatus')
+    .populate('sender', 'username profile.displayName profilePic onlineStatus')
     .populate({
       path:   'replyTo',
       select: 'content contentType sender isDeleted',
