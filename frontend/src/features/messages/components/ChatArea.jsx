@@ -186,7 +186,7 @@ const ChatArea = ({ chatId }) => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 custom-scrollbar">
                 <div className="flex justify-center mb-8">
                     <span className="text-xs font-bold text-gray-500 tracking-widest uppercase">Today</span>
                 </div>
