@@ -10,10 +10,10 @@ const MessagesPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-[#0F0529] text-white font-sans selection:bg-purple-500/30 flex flex-col">
+        <div className="h-screen bg-[#0F0529] text-white font-sans selection:bg-purple-500/30 flex flex-col overflow-hidden">
             <FeedNavbar activePage="Messages" />
 
-            <main className="flex-1 max-w-7xl mx-auto w-full flex h-[calc(100vh-80px)] overflow-hidden">
+            <main className="flex-1 max-w-7xl mx-auto w-full flex overflow-hidden">
                 {/* Sidebar */}
                 <div className="w-full md:w-1/3 border-r border-white/5 h-full">
                     <MessagesSidebar selectedChat={selectedChat} onSelectChat={setSelectedChat} />
