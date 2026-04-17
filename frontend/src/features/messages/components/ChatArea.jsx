@@ -53,7 +53,10 @@ const ChatArea = ({ chatId }) => {
     useEffect(() => {
         // Initialize socket connection
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-        socketRef.current = io(backendUrl);
+        const token = localStorage.getItem('token');
+        socketRef.current = io(backendUrl, {
+            auth: { token }
+        });
 
         // Once connected, join the conversation room
         socketRef.current.on('connect', () => {
@@ -154,7 +157,7 @@ const ChatArea = ({ chatId }) => {
     const otherParticipant = chatDetails?.participants?.find(p => p.user && p.user._id !== currentUserId)?.user;
     const chatUser = otherParticipant?.displayName || otherParticipant?.username || 'Unknown User';
     const chatAvatar = otherParticipant?.profilePic || 'https://via.placeholder.com/150';
-    const chatStatus = otherParticipant?.onlineStatus === 'online' ? 'Active now' : 'Offline';
+    const chatStatus = otherParticipant?.onlineStatus?.status === 'online' ? 'Active now' : 'Offline';
 
     return (
         <div className="flex flex-col h-full bg-[#0a041c]">
@@ -167,7 +170,7 @@ const ChatArea = ({ chatId }) => {
                             alt={chatUser}
                             className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/20"
                         />
-                        {otherParticipant?.onlineStatus === 'online' && (
+                        {otherParticipant?.onlineStatus?.status === 'online' && (
                             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0F0529]"></div>
                         )}
                     </div>

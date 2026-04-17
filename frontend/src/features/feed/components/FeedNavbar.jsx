@@ -43,7 +43,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
 
         delete axios.defaults.headers.common['Authorization'];
 
-        navigate('/login');
+        window.location.href = '/login';
     };
 
     const NavItem = ({ icon: Icon, label, to, active }) => (

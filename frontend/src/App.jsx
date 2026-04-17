@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import Login from './features/auth/Login/LoginPage';
 import Signup from './features/auth/Signup/SignupPage';
 import ForgotPassword from './features/auth/ForgotPassword/ForgotPasswordPage';
@@ -49,6 +50,31 @@ function App() {
       }
     );
     return () => axios.interceptors.response.eject(interceptor);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    let socket;
+    
+    if (token) {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      socket = io(backendUrl, {
+        auth: { token }
+      });
+      
+      socket.on('connect', () => {
+        // Automatically handled by backend to join personal room and mark online
+        console.log('Global presence socket connected');
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('Global presence socket disconnected');
+      });
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
   }, []);
 
   return (

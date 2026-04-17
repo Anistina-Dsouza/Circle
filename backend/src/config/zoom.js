@@ -11,6 +11,7 @@ const getZoomAccessToken = async () => {
         const clientId = process.env.ZOOM_CLIENT_ID;
         const clientSecret = process.env.ZOOM_CLIENT_SECRET;
 
+        
         if (!accountId || !clientId || !clientSecret) {
             throw new Error('Zoom API credentials are not fully configured in environment variables.');
         }
