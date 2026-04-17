@@ -29,7 +29,7 @@ const register = async (req, res) => {
       password,
       displayName: name || finalUsername,
       onlineStatus: {
-        status: 'online',
+        status: 'offline',
         lastSeen: new Date()
       }
 
@@ -98,9 +98,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate token
     const token = generateToken(user._id);
-    user.onlineStatus.status = 'online';
     user.onlineStatus.lastSeen = new Date();
     await user.save();
     // Send response

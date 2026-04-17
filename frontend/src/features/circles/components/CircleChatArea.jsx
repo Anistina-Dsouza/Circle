@@ -154,7 +154,10 @@ const CircleChatArea = ({ circle }) => {
     useEffect(() => {
         if (!circleId) return;
 
-        socketRef.current = io(backendUrl);
+        const token = localStorage.getItem('token');
+        socketRef.current = io(backendUrl, {
+            auth: { token }
+        });
 
         socketRef.current.on('connect', () => {
             socketRef.current.emit('join_circle', circleId);

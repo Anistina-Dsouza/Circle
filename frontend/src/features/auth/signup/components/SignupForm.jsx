@@ -122,7 +122,7 @@ const SignupForm = () => {
               //  alert('🎉 Registration successful!');
 
                 // Redirect to dashboard
-                navigate('/feed');
+                window.location.href = '/feed';
             }
         } catch (error) {
             console.error('Registration error:', error);

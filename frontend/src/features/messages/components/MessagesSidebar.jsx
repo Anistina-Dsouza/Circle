@@ -66,7 +66,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                         const otherParticipant = chat.participants?.find(p => p.user && p.user._id !== currentUserId)?.user;
                         const chatName = otherParticipant?.displayName || otherParticipant?.username || 'Unknown User';
                         const avatar = otherParticipant?.profilePic || 'https://via.placeholder.com/150';
-                        const online = otherParticipant?.onlineStatus === 'online';
+                        const online = otherParticipant?.onlineStatus?.status === 'online';
                         const id = chat._id;
                         const lastMessage = chat.lastMessage?.content?.text || 'No messages yet';
                         const time = chat.lastActivity ? new Date(chat.lastActivity).toLocaleDateString() : '';
