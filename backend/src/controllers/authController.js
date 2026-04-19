@@ -2,8 +2,7 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
-const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const register = async (req, res) => {
   try {
     const { username, email, password, name } = req.body;
@@ -256,16 +255,19 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const axios = require('axios');
+
 const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID,
+    
+    // Fetch profile from Google using the access token
+    const googleResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
     });
     
-    const payload = ticket.getPayload();
-    const { email, name, picture, sub } = payload;
+    const { email, name, picture, sub } = googleResponse.data;
+
     
     // Check if user already exists
     let user = await User.findOne({ email });
