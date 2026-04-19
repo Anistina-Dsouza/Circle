@@ -2,7 +2,8 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const register = async (req, res) => {
   try {
     const { username, email, password, name } = req.body;
@@ -255,11 +256,80 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub } = payload;
+    
+    // Check if user already exists
+    let user = await User.findOne({ email });
+    
+    if (!user) {
+      // Create a dynamic username
+      const usernameBase = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000);
+      
+      user = await User.create({
+        username: usernameBase,
+        email,
+        displayName: name,
+        profilePic: picture,
+        authProvider: 'google',
+        googleId: sub,
+        onlineStatus: {
+          status: 'online',
+          lastSeen: new Date()
+        }
+      });
+    } else {
+      // Update any Google ID fields if they used normal login previously
+      if (!user.googleId) {
+        user.googleId = sub;
+        if (user.authProvider === 'local') {
+           user.authProvider = 'google';
+        }
+      }
+      user.onlineStatus.status = 'online';
+      user.onlineStatus.lastSeen = new Date();
+      await user.save();
+    }
+    
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    const jwtToken = generateToken(user._id);
+
+    res.json({
+      success: true,
+      token: jwtToken,
+      user
+    });
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to authenticate with Google'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleLogin
 };
