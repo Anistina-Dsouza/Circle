@@ -11,9 +11,24 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
 
     useEffect(() => {
         loadUserData();
+
+        const handleSocketConnected = () => {
+            setUser(prev => prev ? { ...prev, onlineStatus: { ...prev.onlineStatus, status: 'online' } } : prev);
+        };
+        const handleSocketDisconnected = () => {
+            setUser(prev => prev ? { ...prev, onlineStatus: { ...prev.onlineStatus, status: 'offline' } } : prev);
+        };
+
+        window.addEventListener('socketConnected', handleSocketConnected);
+        window.addEventListener('socketDisconnected', handleSocketDisconnected);
+
+        return () => {
+            window.removeEventListener('socketConnected', handleSocketConnected);
+            window.removeEventListener('socketDisconnected', handleSocketDisconnected);
+        };
     }, []);
 
-    const loadUserData = () => {
+    const loadUserData = async () => {
         try {
             const token = localStorage.getItem('token');
             const userData = localStorage.getItem('user');
@@ -21,10 +36,20 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
             if (token && userData) {
                 const parsedUser = JSON.parse(userData);
                 setUser(parsedUser);
-
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-                console.log("User loaded in navbar:", parsedUser);
+                // Fetch fresh data from backend to ensure real-time online status
+                const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                try {
+                    const response = await axios.get(`${baseUrl}/api/auth/me`);
+                    if (response.data.success) {
+                        setUser(response.data.user);
+                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                    }
+                } catch (err) {
+                    console.error('Could not refresh user data:', err);
+                }
+
             } else {
                 navigate('/login');
             }

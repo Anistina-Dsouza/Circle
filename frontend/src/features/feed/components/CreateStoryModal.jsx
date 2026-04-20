@@ -11,6 +11,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const [loading, setLoading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState('');
     const [uploadMode, setUploadMode] = useState('device'); // 'device' or 'link'
+    const [mediaFile, setMediaFile] = useState(null);
     
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
@@ -30,6 +31,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setMediaFile(file);
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
             setMediaUrl(url); 
@@ -38,6 +40,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     };
 
     const handleUrlChange = (url) => {
+        setMediaFile(null);
         setMediaUrl(url);
         setPreviewUrl(url);
         // detection
@@ -49,7 +52,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     };
 
     const handlePostStory = async () => {
-        if (!mediaUrl) {
+        if (!mediaUrl && !mediaFile) {
             alert('Please upload an image or video first');
             return;
         }
@@ -57,17 +60,34 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${baseUrl}/api/moments`, {
-                media: {
-                    url: mediaUrl,
-                    type: mediaType
-                },
-                caption,
-                duration,
-                audience: isPublic ? 'public' : 'followers'
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            let response;
+
+            if (uploadMode === 'device' && mediaFile) {
+                const formData = new FormData();
+                formData.append('media', mediaFile);
+                formData.append('caption', caption);
+                formData.append('duration', duration);
+                formData.append('audience', isPublic ? 'public' : 'followers');
+                
+                response = await axios.post(`${baseUrl}/api/moments`, formData, {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            } else {
+                response = await axios.post(`${baseUrl}/api/moments`, {
+                    media: {
+                        url: mediaUrl,
+                        type: mediaType
+                    },
+                    caption,
+                    duration,
+                    audience: isPublic ? 'public' : 'followers'
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
 
             if (response.data.success) {
                 onClose();
