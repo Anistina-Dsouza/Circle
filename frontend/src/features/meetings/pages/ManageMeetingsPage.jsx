@@ -128,14 +128,15 @@ const ManageMeetingsPage = () => {
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                                    <button 
+                                    <button
                                         onClick={() => handleDelete(meeting._id || meeting.id)}
                                         className="flex-1 lg:flex-none bg-[#330808]/50 border border-red-500/20 hover:border-red-500/40 text-red-400 px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-[#330808]"
                                     >
                                         <Trash2 size={16} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Delete</span>
                                     </button>
-                                    <button 
+                                    <button
+
                                         onClick={() => handleStartZoom(meeting)}
                                         className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center"
                                     >
