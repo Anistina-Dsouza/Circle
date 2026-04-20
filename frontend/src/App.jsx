@@ -90,11 +90,6 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
-            <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
-            <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
