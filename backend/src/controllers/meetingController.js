@@ -310,9 +310,21 @@ exports.getUpcomingMeetings = async (req, res) => {
       .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 });
 
+    const currentUserId = req.user._id.toString();
+
+    // Strip startLink from response for non-hosts (security critical)
+    const safeMeetings = meetings.map(m => {
+      const obj = m.toObject ? m.toObject() : { ...m };
+      const hostId = obj.host?._id?.toString() || obj.host?.toString();
+      if (hostId !== currentUserId) {
+        delete obj.startLink;
+      }
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      data: meetings
+      data: safeMeetings
     });
   } catch (error) {
     console.error('Error in getUpcomingMeetings:', error);
@@ -442,6 +454,7 @@ exports.getCircleMeetings = async (req, res) => {
   try {
     const { circleId } = req.params;
     const now = new Date();
+    const currentUserId = req.user._id.toString();
 
     const meetings = await Meeting.find({
       circle: circleId,
@@ -452,9 +465,19 @@ exports.getCircleMeetings = async (req, res) => {
       .sort({ startTime: 1 })
       .limit(10);
 
+    // Strip startLink from response for non-hosts (security critical)
+    const safeMeetings = meetings.map(m => {
+      const obj = m.toObject();
+      const isHost = obj.host?._id?.toString() === currentUserId || obj.host?.toString() === currentUserId;
+      if (!isHost) {
+        delete obj.startLink;
+      }
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      data: meetings
+      data: safeMeetings
     });
   } catch (error) {
     console.error('Error in getCircleMeetings:', error);
