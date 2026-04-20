@@ -203,9 +203,13 @@ exports.scheduleMeeting = async (req, res) => {
  */
 exports.getMyMeetings = async (req, res) => {
   try {
-    const meetings = await Meeting.find({ host: req.user._id })
+    const now = new Date();
+    const meetings = await Meeting.find({ 
+      host: req.user._id,
+      endTime: { $gte: now }
+    })
       .populate('circle', 'name slug coverImage')
-      .sort({ startTime: -1 });
+      .sort({ startTime: 1 });
 
     res.status(200).json({
       success: true,
