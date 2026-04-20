@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Smile, Plus, Heart, Reply, X } from 'lucide-react';
+import { Send, Smile, Plus, Heart, Reply, X, ChevronDown } from 'lucide-react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
@@ -114,7 +114,10 @@ const CircleChatArea = ({ circle }) => {
     const [messages, setMessages] = useState([]);
     const [replyingTo, setReplyingTo] = useState(null);
     const endRef = useRef(null);
+    const scrollRef = useRef(null);
     const socketRef = useRef(null);
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const [hasNewMessages, setHasNewMessages] = useState(false);
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -122,7 +125,44 @@ const CircleChatArea = ({ circle }) => {
 
     const scrollToBottom = () => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setHasNewMessages(false);
     };
+
+    const handleScroll = () => {
+        const element = scrollRef.current;
+        if (!element) return;
+        
+        const { scrollTop, scrollHeight, clientHeight } = element;
+        // Check internal scroll distance from bottom
+        const distance = scrollHeight - scrollTop - clientHeight;
+        if (distance > 100) {
+            setShowScrollButton(true);
+        } else {
+            setShowScrollButton(false);
+            setHasNewMessages(false); // Clear notification if we reach bottom manually
+        }
+    };
+
+    useEffect(() => {
+        const element = scrollRef.current;
+        if (element) {
+            element.addEventListener('scroll', handleScroll);
+            return () => element.removeEventListener('scroll', handleScroll);
+        }
+    }, []);
+
+    // Also listen to window scroll as a fallback
+    useEffect(() => {
+        const handleWindowScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollButton(true);
+            } else if (scrollRef.current && scrollRef.current.scrollHeight - scrollRef.current.scrollTop - scrollRef.current.clientHeight < 50) {
+                setShowScrollButton(false);
+            }
+        };
+        window.addEventListener('scroll', handleWindowScroll);
+        return () => window.removeEventListener('scroll', handleWindowScroll);
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
@@ -167,6 +207,12 @@ const CircleChatArea = ({ circle }) => {
             const senderId = newMsg.sender?._id || newMsg.sender;
             if (senderId !== currentUserId) {
                 setMessages(prev => [...prev, formatBackendMessage(newMsg, currentUserId)]);
+                
+                // If user is currently scrolled up, show the red notification dot
+                const element = scrollRef.current;
+                if (element && element.scrollHeight - element.scrollTop - element.clientHeight > 150) {
+                    setHasNewMessages(true);
+                }
             }
         });
 
@@ -297,7 +343,8 @@ const CircleChatArea = ({ circle }) => {
             className="flex-1 flex flex-col rounded-3xl border border-[#2A1550] overflow-hidden shadow-2xl relative"
             style={{
                 background: 'linear-gradient(160deg, #12082A 0%, #1A0D40 100%)',
-                minHeight: '520px'
+                height: 'calc(100vh - 380px)',
+                minHeight: '450px'
             }}
         >
             {/* Chat header area */}
@@ -326,7 +373,11 @@ const CircleChatArea = ({ circle }) => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar scroll-smooth">
+            <div 
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar scroll-smooth"
+            >
                 {Object.keys(groupedMessages).length === 0 ? (
                     <div className="flex justify-center mt-10 text-gray-500">
                         No messages yet. Start the conversation!
@@ -348,6 +399,20 @@ const CircleChatArea = ({ circle }) => {
                 )}
                 <div ref={endRef} className="h-4" />
             </div>
+
+            {/* Scroll to latest button */}
+            {showScrollButton && (
+                <button
+                    onClick={scrollToBottom}
+                    className="fixed bottom-10 right-10 md:right-24 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[9999] flex items-center justify-center group"
+                    title="Go to latest messages"
+                >
+                    <ChevronDown size={28} className="group-hover:translate-y-0.5 transition-transform" />
+                    {hasNewMessages && (
+                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#12082A] animate-pulse" />
+                    )}
+                </button>
+            )}
 
             {/* Input bar area */}
             <div className="p-6 bg-gradient-to-t from-[#12082A] to-transparent">
