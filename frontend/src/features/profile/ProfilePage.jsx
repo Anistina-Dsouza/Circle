@@ -5,8 +5,7 @@ import FeedNavbar from '../feed/components/FeedNavbar';
 import ProfileHeader from './components/ProfileHeader';
 import ActiveStories from './components/ActiveStories';
 //import { useAuth } from '../../';
-import FollowListModal from './components/FollowListModal'; // Make sure this import exists
-
+import FollowListModal from './components/FollowListModal'; 
 const ProfilePage = () => {
     const { username } = useParams();
     const navigate = useNavigate();
@@ -23,7 +22,7 @@ const ProfilePage = () => {
     
     // Modal states
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalType, setModalType] = useState(null); // 'followers' or 'following'
+    const [modalType, setModalType] = useState(null); 
 
     // Use ref to track if component is mounted
     const isMounted = useRef(true);
@@ -454,12 +453,46 @@ const handleModalFollowToggle = useCallback(async (targetUserId) => {
         return (
             <div className="min-h-screen bg-[#0F0529] text-white font-sans">
                 <FeedNavbar />
-                <div className="flex items-center justify-center h-[calc(100vh-80px)]">
-                    <div className="text-center">
-                        <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-gray-400">Loading profile...</p>
+                <main className="max-w-5xl mx-auto px-6 py-8 flex flex-col items-center">
+                    {/* Header Skeleton - Center Aligned */}
+                    <div className="w-full flex flex-col items-center text-center pt-10 pb-6 animate-pulse">
+                        {/* Avatar Skeleton */}
+                        <div className="w-32 h-32 rounded-full bg-white/10 border-4 border-white/5 mb-6" />
+                        
+                        {/* Name & Bio Skeleton */}
+                        <div className="h-8 w-48 bg-white/10 rounded-xl mb-3" />
+                        <div className="h-4 w-64 bg-white/5 rounded-lg mb-8" />
+                        
+                        {/* Buttons Skeleton */}
+                        <div className="flex items-center space-x-3 mb-10">
+                            <div className="h-10 w-32 bg-white/10 rounded-full" />
+                            <div className="h-10 w-32 bg-white/10 rounded-full" />
+                        </div>
+                        
+                        {/* Stats Row Skeleton */}
+                        <div className="flex items-center space-x-4 w-full max-w-lg mb-12">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="flex-1 h-24 bg-[#1E1B3A] border border-white/5 rounded-2xl flex flex-col items-center justify-center space-y-2">
+                                    <div className="h-6 w-10 bg-white/10 rounded" />
+                                    <div className="h-2 w-16 bg-white/5 rounded" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+
+                    {/* Stories Grid Skeleton */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="aspect-[4/5] bg-white/5 rounded-[3rem] animate-pulse overflow-hidden p-8 border border-white/5">
+                                <div className="h-3/4 w-full bg-white/10 rounded-[2rem] mb-6" />
+                                <div className="space-y-3">
+                                    <div className="h-4 w-2/3 bg-white/10 rounded" />
+                                    <div className="h-3 w-1/2 bg-white/5 rounded" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </main>
             </div>
         );
     }

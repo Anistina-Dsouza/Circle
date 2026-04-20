@@ -97,7 +97,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center space-x-2 shrink-0">
+                <div className="flex items-center gap-3 shrink-0 ml-4 pr-1">
                     <div className="relative">
                         <button 
                             onClick={() => setShowUrlInput(!showUrlInput)}

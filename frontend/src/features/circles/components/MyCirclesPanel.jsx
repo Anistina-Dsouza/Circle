@@ -72,8 +72,16 @@ const MyCirclesPanel = () => {
                             </Link>
                         </div>
                     ) : loading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <Loader2 size={20} className="text-violet-500 animate-spin" />
+                        <div className="space-y-3 px-1 py-1">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="flex items-center gap-3 px-3 py-2 animate-pulse">
+                                    <div className="w-9 h-9 rounded-xl bg-white/5 shrink-0" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-3 w-2/3 bg-white/5 rounded" />
+                                        <div className="h-2 w-1/3 bg-white/5 rounded" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : error ? (
                         <p className="text-center text-xs text-red-400 py-6">{error}</p>

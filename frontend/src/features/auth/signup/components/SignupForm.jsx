@@ -7,6 +7,8 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+import { useGoogleLogin } from '@react-oauth/google';
+
 const SignupForm = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +21,36 @@ const SignupForm = () => {
     const [selectedInterests, setSelectedInterests] = useState([]);
     const [errors, setErrors] = useState({});
     const [serverError, setServerError] = useState('');
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsLoading(true);
+            setServerError('');
+            try {
+                const response = await axios.post('/api/auth/google', { token: tokenResponse.access_token });
+                
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+                if (response.data.user.role === 'admin') {
+                    window.location.href = '/admin';
+                } else {
+                    window.location.href = '/feed';
+                }
+            } catch (error) {
+                console.error('Google Auth error:', error);
+                setServerError(error.response?.data?.message || 'Google Signup Failed.');
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: () => {
+            setServerError('Google Signup was cancelled or failed.');
+        }
+    });
 
     useEffect(() => {
         axios.defaults.baseURL = API_URL;
@@ -122,7 +154,7 @@ const SignupForm = () => {
                 //  alert('🎉 Registration successful!');
 
                 // Redirect to dashboard
-                navigate('/feed');
+                window.location.href = '/feed';
             }
         } catch (error) {
             console.error('Registration error:', error);
@@ -163,6 +195,8 @@ const SignupForm = () => {
                     {/* Google Auth Button */}
                     <button
                         type="button"
+                        disabled={isLoading}
+                        onClick={() => handleGoogleLogin()}
                         className="w-full flex items-center justify-center space-x-3 bg-white hover:bg-white/90 text-black font-semibold py-3 rounded-xl transition-all"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">

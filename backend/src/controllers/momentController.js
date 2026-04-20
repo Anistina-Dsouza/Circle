@@ -58,13 +58,34 @@ exports.getFeed = async (req, res) => {
       isActive: true
     })
       .sort({ createdAt: -1 })
-      .limit(50) // Increased limit for global public stories
+      .limit(50)
       .populate('user', 'username displayName profilePic')
       .populate('viewers', 'username displayName profilePic');
 
+    // Separate followed stories from discover stories
+    const followingMoments = [];
+    const discoverMoments = [];
+    const seenUsers = new Set();
+
+    moments.forEach(m => {
+      if (!m.user) return;
+      const uid = m.user._id.toString();
+      const isFriend = followingIds.some(id => id.toString() === uid);
+      
+      if (isFriend) {
+        if (!seenUsers.has(uid)) {
+          followingMoments.push(m);
+          seenUsers.add(uid);
+        }
+      } else {
+        discoverMoments.push(m);
+      }
+    });
+
     res.json({
       success: true,
-      moments
+      followingMoments,
+      discoverMoments
     });
 
   } catch (error) {

@@ -5,10 +5,41 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+import { useGoogleLogin } from '@react-oauth/google';
+
 const LoginForm = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setLoading(true);
+            setServerError('');
+            try {
+                const response = await axios.post('/api/auth/google', { token: tokenResponse.access_token });
+                
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+                if (response.data.user.role === 'admin') {
+                    window.location.href = '/admin';
+                } else {
+                    window.location.href = '/feed';
+                }
+            } catch (error) {
+                console.error('Google Auth error:', error);
+                setServerError(error.response?.data?.message || 'Google Authentication Failed.');
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            setServerError('Google Login was cancelled or failed.');
+        }
+    });
 
     useEffect(() => {
         axios.defaults.baseURL = API_URL;
@@ -62,9 +93,9 @@ const LoginForm = () => {
             axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
             if (response.data.user.role === 'admin') {
-                navigate('/admin');
+                window.location.href = '/admin';
             } else {
-                navigate('/feed');
+                window.location.href = '/feed';
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -103,6 +134,7 @@ const LoginForm = () => {
                     {/* Google Login Button */}
                     <button
                         type="button"
+                        onClick={() => handleGoogleLogin()}
                         className="w-full flex items-center justify-center space-x-3 bg-white hover:bg-white/90 text-black font-semibold py-3 rounded-xl transition-all"
                         disabled={loading}
                     >

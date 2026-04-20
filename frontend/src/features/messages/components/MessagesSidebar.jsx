@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Filter } from 'lucide-react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -24,6 +25,48 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
         };
         fetchConversations();
     }, []);
+
+    useEffect(() => {
+        if (conversations.length === 0) return;
+
+        const token = localStorage.getItem('token');
+        const socket = io(BACKEND_URL, {
+            auth: { token }
+        });
+
+        socket.on('connect', () => {
+            // Join all conversation rooms so the sidebar can receive updates for them
+            conversations.forEach(chat => {
+                socket.emit('join_conversation', chat._id);
+            });
+        });
+
+        socket.on('newMessage', (newMessage) => {
+            setConversations(prev => {
+                const chatIndex = prev.findIndex(c => c._id === newMessage.conversationId);
+                if (chatIndex === -1) return prev; // If it's a completely new unseen conversation, we'd ideally fetch it, but skipping for now
+
+                const updatedChats = [...prev];
+                const updatedChat = { ...updatedChats[chatIndex] };
+                
+                updatedChat.lastMessage = newMessage;
+                updatedChat.lastActivity = newMessage.createdAt || Date.now();
+
+                // Remove from current position and unshift to top
+                updatedChats.splice(chatIndex, 1);
+                updatedChats.unshift(updatedChat);
+
+                return updatedChats;
+            });
+        });
+
+        return () => {
+            if (socket) {
+                conversations.forEach(chat => socket.emit('leave_conversation', chat._id));
+                socket.disconnect();
+            }
+        };
+    }, [conversations.length]); // Re-bind only if the total count changes (naive but works for loaded chats)
     return (
         <div className="h-full flex flex-col bg-[#0F0529]">
             {/* Header */}
@@ -54,7 +97,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 custom-scrollbar">
                 {loading ? (
                     <div className="text-gray-400 text-center py-4">Loading...</div>
                 ) : conversations.length === 0 ? (
@@ -66,7 +109,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                         const otherParticipant = chat.participants?.find(p => p.user && p.user._id !== currentUserId)?.user;
                         const chatName = otherParticipant?.displayName || otherParticipant?.username || 'Unknown User';
                         const avatar = otherParticipant?.profilePic || 'https://via.placeholder.com/150';
-                        const online = otherParticipant?.onlineStatus === 'online';
+                        const online = otherParticipant?.onlineStatus?.status === 'online';
                         const id = chat._id;
                         const lastMessage = chat.lastMessage?.content?.text || 'No messages yet';
                         const time = chat.lastActivity ? new Date(chat.lastActivity).toLocaleDateString() : '';

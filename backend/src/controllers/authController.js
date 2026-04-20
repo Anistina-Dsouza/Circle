@@ -29,7 +29,7 @@ const register = async (req, res) => {
       password,
       displayName: name || finalUsername,
       onlineStatus: {
-        status: 'online',
+        status: 'offline',
         lastSeen: new Date()
       }
 
@@ -98,9 +98,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate token
     const token = generateToken(user._id);
-    user.onlineStatus.status = 'online';
     user.onlineStatus.lastSeen = new Date();
     await user.save();
     // Send response
@@ -257,11 +255,83 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const axios = require('axios');
+
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    // Fetch profile from Google using the access token
+    const googleResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    const { email, name, picture, sub } = googleResponse.data;
+
+    
+    // Check if user already exists
+    let user = await User.findOne({ email });
+    
+    if (!user) {
+      // Create a dynamic username
+      const usernameBase = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000);
+      
+      user = await User.create({
+        username: usernameBase,
+        email,
+        displayName: name,
+        profilePic: picture,
+        authProvider: 'google',
+        googleId: sub,
+        onlineStatus: {
+          status: 'online',
+          lastSeen: new Date()
+        }
+      });
+    } else {
+      // Update any Google ID fields if they used normal login previously
+      if (!user.googleId) {
+        user.googleId = sub;
+        if (user.authProvider === 'local') {
+           user.authProvider = 'google';
+        }
+      }
+      user.onlineStatus.status = 'online';
+      user.onlineStatus.lastSeen = new Date();
+      await user.save();
+    }
+    
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    const jwtToken = generateToken(user._id);
+
+    res.json({
+      success: true,
+      token: jwtToken,
+      user
+    });
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to authenticate with Google'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleLogin
 };
