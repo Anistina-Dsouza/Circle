@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link as LinkIcon, Send, Plus, Loader2, CheckCircle2, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Link as LinkIcon, Send, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 
 const CreateStoryBar = ({ onPostSuccess }) => {
@@ -10,21 +10,33 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     const [status, setStatus] = useState('idle'); // idle, success, error
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [tempUrl, setTempUrl] = useState('');
+    const [mediaFile, setMediaFile] = useState(null);
+    const fileInputRef = useRef(null);
 
     const profilePic = user?.profilePic;
     const baseUrl = import.meta.env.VITE_API_URL;
 
     const handleUrlSubmit = () => {
         if (tempUrl.trim()) {
+            setMediaFile(null);
             setMediaUrl(tempUrl.trim());
             setShowUrlInput(false);
             setTempUrl('');
         }
     };
 
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setMediaFile(file);
+            setMediaUrl(URL.createObjectURL(file));
+            setShowUrlInput(false);
+        }
+    };
+
     const handlePostStory = async () => {
-        if (!mediaUrl) {
-            alert('Please provide an image URL for your story');
+        if (!mediaUrl && !mediaFile) {
+            alert('Please provide an image URL or file for your story');
             setShowUrlInput(true);
             return;
         }
@@ -33,21 +45,39 @@ const CreateStoryBar = ({ onPostSuccess }) => {
         setStatus('idle');
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${baseUrl}/api/moments`, {
-                media: {
-                    url: mediaUrl,
-                    type: 'image' 
-                },
-                caption,
-                duration: 24,
-                audience: 'public'
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            let response;
+
+            if (mediaFile) {
+                const formData = new FormData();
+                formData.append('media', mediaFile);
+                formData.append('caption', caption);
+                formData.append('duration', 24);
+                formData.append('audience', 'public');
+                
+                response = await axios.post(`${baseUrl}/api/moments`, formData, {
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            } else {
+                response = await axios.post(`${baseUrl}/api/moments`, {
+                    media: {
+                        url: mediaUrl,
+                        type: 'image' 
+                    },
+                    caption,
+                    duration: 24,
+                    audience: 'public'
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
 
             if (response.data.success) {
                 setCaption('');
                 setMediaUrl('');
+                setMediaFile(null);
                 setStatus('success');
                 
                 // Soft refresh
@@ -98,10 +128,24 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 shrink-0 ml-4 pr-1">
-                    <div className="relative">
+                    <div className="relative flex items-center gap-2">
+                        <button 
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`p-3 transition-all rounded-full ${mediaFile ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            title="Upload Image"
+                        >
+                            <ImageIcon size={24} />
+                        </button>
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            onChange={handleFileSelect} 
+                            className="hidden" 
+                            accept="image/*,video/*"
+                        />
                         <button 
                             onClick={() => setShowUrlInput(!showUrlInput)}
-                            className={`p-3 transition-all rounded-full ${showUrlInput || mediaUrl ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            className={`p-3 transition-all rounded-full ${(!mediaFile && mediaUrl) || showUrlInput ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                             title="Add Image URL"
                         >
                             <LinkIcon size={24} />
@@ -174,10 +218,10 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                     </div>
                     <div className="flex flex-col flex-1 overflow-hidden">
                         <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Image Attached</span>
-                        <span className="text-[9px] text-gray-400 truncate pr-4">{mediaUrl}</span>
+                        <span className="text-[9px] text-gray-400 truncate pr-4">{mediaFile ? mediaFile.name : mediaUrl}</span>
                     </div>
                     <button 
-                        onClick={() => setMediaUrl('')}
+                        onClick={() => { setMediaUrl(''); setMediaFile(null); }}
                         className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors"
                     >
                         <X size={18} />

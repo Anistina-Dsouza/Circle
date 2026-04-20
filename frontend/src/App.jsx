@@ -65,10 +65,12 @@ function App() {
       socket.on('connect', () => {
         // Automatically handled by backend to join personal room and mark online
         console.log('Global presence socket connected');
+        window.dispatchEvent(new Event('socketConnected'));
       });
       
       socket.on('disconnect', () => {
         console.log('Global presence socket disconnected');
+        window.dispatchEvent(new Event('socketDisconnected'));
       });
     }
 
