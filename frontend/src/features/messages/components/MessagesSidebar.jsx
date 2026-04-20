@@ -264,13 +264,22 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                         >
                                             {chatName}
                                         </h3>
-                                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${selectedChat === id ? 'text-violet-300' : 'text-gray-600'}`}>
-                                            {timeStr}
-                                        </span>
+                                        <div className="flex flex-col items-end gap-1.5">
+                                            <span className={`text-[10px] font-bold uppercase tracking-tighter ${selectedChat === id ? 'text-violet-300' : 'text-gray-600'}`}>
+                                                {timeStr}
+                                            </span>
+                                            {chat.unreadCount > 0 && (
+                                                <div className="bg-violet-500 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30 animate-in zoom-in-50 duration-300">
+                                                    {chat.unreadCount}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className={`text-xs truncate ${selectedChat === id ? 'text-violet-200/60' : 'text-gray-500'}`}>
-                                        {lastMessage}
-                                    </p>
+                                    <div className="flex justify-between items-center pr-1">
+                                        <p className={`text-xs truncate max-w-[180px] ${selectedChat === id ? 'text-violet-200/60' : 'text-gray-500'}`}>
+                                            {lastMessage}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
