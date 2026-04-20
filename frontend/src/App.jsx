@@ -30,6 +30,7 @@ import HostDashboard from './features/circles/pages/HostDashboardPage';
 import ManageParticipants from './features/circles/pages/ManageParticipantsPage';
 import CommunitySettings from './features/circles/pages/CommunitySettingsPage';
 import CircleMembers from './features/circles/pages/CircleMembersPage';
+import NotificationsPage from './features/notifications/pages/NotificationsPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
 import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
@@ -109,6 +110,7 @@ function App() {
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
             <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
             
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
             <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />

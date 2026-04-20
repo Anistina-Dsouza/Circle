@@ -132,10 +132,13 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                         />
                     </div>
 
-                    <button className="text-gray-400 hover:text-white transition-colors relative">
+                    <Link 
+                        to="/notifications" 
+                        className={`transition-colors relative ${activePage === 'Notifications' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    >
                         <Bell size={24} />
                         <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0F0529]"></span>
-                    </button>
+                    </Link>
 
                     {user ? (
                         <>

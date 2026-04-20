@@ -223,11 +223,11 @@ const ChatArea = ({ chatId }) => {
                     </div>
                     
                     <h2 className="text-3xl font-black text-white mb-4 tracking-tight">
-                        Your Personal Space
+                        Welcome to your Inner Circle
                     </h2>
                     
-                    <p className="text-gray-400 max-w-sm leading-relaxed mb-8">
-                        Select one of your existing circles or direct messages to start chatting with your friends.
+                    <p className="text-gray-400 max-w-md leading-relaxed mb-8">
+                        Stay connected with your favorite people. Select a conversation from the sidebar to dive back into your messages, or start a new chat with someone special.
                     </p>
                     
                     <div className="flex gap-2">

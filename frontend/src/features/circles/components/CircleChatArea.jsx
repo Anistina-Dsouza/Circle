@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Smile, Plus, Heart, Reply, X, ChevronDown } from 'lucide-react';
+import { Send, Smile, Heart, Reply, X, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera } from 'lucide-react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
@@ -116,8 +116,19 @@ const CircleChatArea = ({ circle }) => {
     const endRef = useRef(null);
     const scrollRef = useRef(null);
     const socketRef = useRef(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [activeEmojiCategory, setActiveEmojiCategory] = useState('smileys');
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [hasNewMessages, setHasNewMessages] = useState(false);
+    const emojiPickerRef = useRef(null);
+
+    const emojiCategories = [
+        { id: 'smileys', icon: <Smile size={16} />, emojis: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😮‍💨', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😶‍🌫️', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '😵‍💫', '🤐', '🥴', '🤢', '🤮', '🤧', '🤨', '🧐'] },
+        { id: 'hearts', icon: <HeartIcon size={16} />, emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆒', '🆓', 'ℹ️', '🆔', 'Ⓜ️', '🆕', '🆖', '🆗', '🆙', '🆚', '🈁', '🈂️', '🈚', '🈯', '🈲'] },
+        { id: 'food', icon: <Coffee size={16} />, emojis: ['🍎', '🍏', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌽', '🥕', '🫑', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🦴', '🌭', '🍔', '🍟', '🍕', '🥪', '🥙', '🧆', '🌮', '🌯', '🍛', '🍜', '🍲', '🍱', '🍣', '🍤', '🍿', '🥟', '🍳', '🥡', '🍚', '🍙', '🍘', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯'] },
+        { id: 'activities', icon: <Music size={16} />, emojis: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🎱', '🎳', '🏏', '🏑', '🏒', '🏓', '🏸', '🥊', '🥋', '🥅', '⛳', '⛸️', '🎣', '🤿', '🎿', '🏂', '🛷', '🛼', '🎯', '🪀', '🪁', '🎮', '🕹️', '🎰', '🎲', '🧩', '🧸', '🪅', '🪆', '🎨', '🖼️', '🧵', '🪡', '🧶', '🎬', '🎤', '🎧', '📻', '🎸', '🎹', '🎺', '🎻', '🪕', '🥁', '🪘', '🎷'] },
+        { id: 'objects', icon: <Camera size={16} />, emojis: ['⌚', '📱', '📲', '💻', '⌨️', '🖱️', '🖨️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋', '🔌', '💡', '🔦', '🕯️', '🧱', '🪜', '🧯', '🛢️', '💸', '💵', '💴', '💶', '💷', '🪙', '💰', '💳', '💎', '⚖️', '🦯', '🛒', '🚬', '⚰️', '⚱️', '🪦', '🧿', '🔮', '🧿', '🧿'] }
+    ];
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -152,6 +163,16 @@ const CircleChatArea = ({ circle }) => {
     }, []);
 
     // Also listen to window scroll as a fallback
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+                setShowEmojiPicker(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     useEffect(() => {
         const handleWindowScroll = () => {
             if (window.scrollY > 300) {
@@ -434,9 +455,8 @@ const CircleChatArea = ({ circle }) => {
                 )}
 
                 <div className="flex items-center gap-3 bg-[#0F0529]/80 border border-[#2A1550] rounded-2xl px-4 py-2 hover:border-violet-500/30 transition-all group/input focus-within:ring-2 focus-within:ring-violet-500/20 shadow-inner backdrop-blur-md">
-                    <button className="p-2 text-gray-500 hover:text-violet-400 hover:bg-violet-500/10 rounded-xl transition-all shrink-0">
-                        <Plus size={20} />
-                    </button>
+                    
+
 
                     <input
                         type="text"
@@ -447,10 +467,59 @@ const CircleChatArea = ({ circle }) => {
                         className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2"
                     />
 
-                    <div className="flex items-center gap-1 shrink-0">
-                        <button className="p-2 text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10 rounded-xl transition-all">
+                    <div className="flex items-center gap-1 shrink-0 relative" ref={emojiPickerRef}>
+                         <button 
+                            type="button" 
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            className={`p-2 transition-colors rounded-xl ${showEmojiPicker ? 'text-violet-400 bg-violet-400/10' : 'text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10'}`}
+                        >
                             <Smile size={20} />
                         </button>
+
+                        {showEmojiPicker && (
+                            <div className="absolute bottom-full right-0 mb-4 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl z-[100] w-72 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+                                {/* WhatsApp style category tabs */}
+                                <div className="flex bg-black/20 p-1">
+                                    {emojiCategories.map(cat => (
+                                        <button
+                                            key={cat.id}
+                                            type="button"
+                                            onClick={() => setActiveEmojiCategory(cat.id)}
+                                            className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-all ${activeEmojiCategory === cat.id ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-500 hover:bg-white/5'}`}
+                                        >
+                                            {cat.icon}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                {/* Emoji Grid */}
+                                <div className="p-4 max-h-56 overflow-y-auto custom-scrollbar grid grid-cols-6 gap-3 bg-[#12082A]">
+                                    {emojiCategories.find(cat => cat.id === activeEmojiCategory).emojis.map((emoji, idx) => (
+                                        <button
+                                            key={`${emoji}-${idx}`}
+                                            type="button"
+                                            onClick={() => {
+                                                setMessageInput(prev => prev + emoji);
+                                            }}
+                                            className="text-2xl hover:scale-125 transition-transform active:scale-90 flex items-center justify-center"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="px-4 py-2 border-t border-white/5 bg-black/10 flex justify-between items-center text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <span>{activeEmojiCategory}</span>
+                                    <button 
+                                        onClick={() => setShowEmojiPicker(false)}
+                                        className="text-violet-400 hover:text-violet-300"
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                         <button
                             disabled={!messageInput.trim()}
@@ -459,7 +528,6 @@ const CircleChatArea = ({ circle }) => {
                         >
                             <Send size={18} />
                         </button>
-                    </div>
                 </div>
             </div>
         </div>
