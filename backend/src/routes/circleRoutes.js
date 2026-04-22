@@ -38,6 +38,7 @@ router.post('/:circleId/requests/:requestId/reject', circleController.rejectJoin
 // =========== MODERATION ===========
 router.post('/:circleId/moderators', circleController.addModerator);
 router.delete('/:circleId/moderators/:userId', circleController.removeModerator);
+router.delete('/:circleId/members/:userId', circleController.removeMember);
 
 // =========== INVITES ===========
 router.post('/:circleId/generate-invite', circleController.generateInviteCode);
