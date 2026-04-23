@@ -59,12 +59,6 @@ const useFollowData = (username) => {
                 const followers = extractData(followersRes);
                 const following = extractData(followingRes);
 
-                console.log('Extracted data:', { 
-                    followers, 
-                    following,
-                    followersCount: followers.length,
-                    followingCount: following.length 
-                });
 
                 // Check if current user is in the followers list
                 let isFollowing = false;
@@ -83,12 +77,7 @@ const useFollowData = (username) => {
                     });
                 }
 
-                console.log('Follow check:', {
-                    currentUserId: currentUser?._id,
-                    profileUsername: username,
-                    followersCount: followers.length,
-                    isFollowing
-                });
+                
 
                 setFollowData({
                     followers,
@@ -129,7 +118,6 @@ const useFollowData = (username) => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            console.log('Follow response:', response.data);
             
             // Create a new follower object
             const newFollower = {
@@ -169,7 +157,6 @@ const useFollowData = (username) => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            console.log('Unfollow response:', response.data);
             
             // Remove current user from followers list
             setFollowData(prev => ({

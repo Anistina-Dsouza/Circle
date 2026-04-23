@@ -487,6 +487,63 @@ exports.removeModerator = async (req, res) => {
   }
 };
 
+// =========== REMOVE MEMBER (KICK USER) ===========
+exports.removeMember = async (req, res) => {
+  try {
+    const { circleId, userId } = req.params;
+    
+    const circle = await Circle.findById(circleId);
+    
+    if (!circle || !circle.isActive) {
+      return res.status(404).json({ error: 'Circle not found' });
+    }
+    
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    const targetMember = circle.members.find(m => m.user.toString() === userId);
+    
+    if (!targetMember) {
+        return res.status(404).json({ error: 'Member not found in circle' });
+    }
+    
+    // Permission checks
+    if (circle.creator.toString() !== req.userId) {
+        if (requesterRole !== 'admin' && requesterRole !== 'moderator') {
+            return res.status(403).json({ error: 'Only admins or moderators can remove members' });
+        }
+        
+        if (targetMember.role === 'admin') {
+            return res.status(403).json({ error: 'Cannot remove an admin' });
+        }
+        
+        if (requesterRole === 'moderator' && targetMember.role === 'moderator') {
+            return res.status(403).json({ error: 'Moderator cannot remove another moderator' });
+        }
+    }
+    
+    if (circle.creator.toString() === userId) {
+        return res.status(403).json({ error: 'Cannot remove the creator' });
+    }
+    
+    await circle.removeMember(userId);
+    
+    circle.moderators = circle.moderators.filter(m => m.user.toString() !== userId);
+    await circle.save();
+    
+    await User.findByIdAndUpdate(userId, {
+      $inc: { 'stats.circleCount': -1 }
+    });
+    
+    res.json({
+      success: true,
+      message: 'Member removed successfully'
+    });
+    
+  } catch (error) {
+    console.error('Remove member error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // =========== GENERATE INVITE CODE ===========
 exports.generateInviteCode = async (req, res) => {
   try {

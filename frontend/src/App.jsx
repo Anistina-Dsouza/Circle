@@ -30,6 +30,7 @@ import HostDashboard from './features/circles/pages/HostDashboardPage';
 import ManageParticipants from './features/circles/pages/ManageParticipantsPage';
 import CommunitySettings from './features/circles/pages/CommunitySettingsPage';
 import CircleMembers from './features/circles/pages/CircleMembersPage';
+import NotificationsPage from './features/notifications/pages/NotificationsPage';
 import MeetingsPage from './features/meetings/pages/MeetingsPage';
 import UpcomingMeetingsPage from './features/meetings/pages/UpcomingMeetingsPage';
 import ScheduleMeetingPage from './features/meetings/pages/ScheduleMeetingPage';
@@ -65,10 +66,12 @@ function App() {
       socket.on('connect', () => {
         // Automatically handled by backend to join personal room and mark online
         console.log('Global presence socket connected');
+        window.dispatchEvent(new Event('socketConnected'));
       });
       
       socket.on('disconnect', () => {
         console.log('Global presence socket disconnected');
+        window.dispatchEvent(new Event('socketDisconnected'));
       });
     }
 
@@ -88,16 +91,13 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
-            <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
-            <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
             <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/meetings" element={<ProtectedRoute><MeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/upcoming" element={<ProtectedRoute><UpcomingMeetingsPage /></ProtectedRoute>} />
             <Route path="/meetings/schedule" element={<ProtectedRoute><ScheduleMeetingPage /></ProtectedRoute>} />
+            <Route path="/meetings/history" element={<ProtectedRoute><MeetingHistoryPage /></ProtectedRoute>} />
+            <Route path="/meetings/manage" element={<ProtectedRoute><ManageMeetingsPage /></ProtectedRoute>} />
             <Route path="/circles" element={<ProtectedRoute><Circles /></ProtectedRoute>} />
             <Route path="/circles/create" element={<ProtectedRoute><CreateCircle /></ProtectedRoute>} />
             <Route path="/circles/:slug/join" element={<ProtectedRoute><JoinCommunity /></ProtectedRoute>} />
@@ -112,6 +112,7 @@ function App() {
             <Route path="/explore" element={<ProtectedRoute><ExploreUsersPage /></ProtectedRoute>} />
             <Route path="/stories/:username" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
             
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
             <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />

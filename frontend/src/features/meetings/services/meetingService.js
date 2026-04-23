@@ -43,6 +43,12 @@ const meetingService = {
         return response.data;
     },
 
+    // Get meeting by ID
+    getMeetingById: async (id) => {
+        const response = await axiosInstance.get(`${API_URL}/meetings/${id}`);
+        return response.data;
+    },
+
     // Create a new meeting (Integrated with Zoom on Backend)
     createMeeting: async (meetingData) => {
         const response = await axiosInstance.post(`${API_URL}/meetings/schedule`, meetingData);

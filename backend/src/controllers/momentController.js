@@ -1,19 +1,43 @@
 const Moment = require('../models/Moment');
 const User = require('../models/User');
 const Follow = require('../models/Follow');
+const cloudinary = require('../utils/cloudinary');
 
 // =========== CREATE MOMENT ===========
 exports.createMoment = async (req, res) => {
   try {
-    const { media, caption, duration, audience, visibleTo } = req.body;
+    let { media, caption, duration, audience, visibleTo } = req.body;
 
-    if (!media || !media?.url) {
-      return res.status(400).json({ error: 'Media is required' });
+    let mediaData = null;
+
+    if (req.file) {
+      // Local image/video upload via Cloudinary stream
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "auto", folder: "circle/moments" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      const result = await uploadPromise;
+      mediaData = {
+        url: result.secure_url,
+        type: result.resource_type === 'video' ? 'video' : 'image'
+      };
+    } else if (media && media.url) {
+      // Direct URL provided
+      mediaData = media;
+    } else {
+      return res.status(400).json({ error: 'Media (file or url) is required' });
     }
 
     const moment = await Moment.create({
       user: req.userId,
-      media,
+      media: mediaData,
       caption,
       duration: duration || 24,
       audience: audience || 'public',
@@ -31,6 +55,7 @@ exports.createMoment = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Error creating moment:', error);
     res.status(500).json({ error: error.message });
   }
 };

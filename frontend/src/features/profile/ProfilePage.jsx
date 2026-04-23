@@ -72,12 +72,6 @@ const ProfilePage = () => {
             const [userRes, storiesRes, followersRes, followingRes, currentUserFollowingRes] = results;
 
             if (!isMounted.current) return;
-            console.log('Raw API Responses:', {
-                user: userRes.data,
-                stories: storiesRes.data.moments,
-                followers: followersRes.data,
-                following: followingRes.data
-            });
 
             const extractArray = (response) => {
                 if (!response?.data) return [];

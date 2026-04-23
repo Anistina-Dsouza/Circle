@@ -134,7 +134,6 @@ const EditProfilePage = () => {
                 }
             });
 
-            console.log('Sending update:', updateData);
 
             const response = await axios.put(
                 `${baseUrl}/api/users/profile`,
@@ -147,7 +146,6 @@ const EditProfilePage = () => {
                 }
             );
 
-            console.log('Update response:', response.data);
 
             if (response.data.success) {
                 // Update local storage with new user data
