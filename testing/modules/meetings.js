@@ -22,6 +22,24 @@ async function testMeetingsFlow(driver, baseUrl, meetingCreated) {
         await sleep(2000);
         await driver.executeScript("arguments[0].click();", rsvpBtn);
         console.log("✅ RSVP: Marked as 'Going'.");
+        await sleep(2000);
+        
+        console.log("Edge Case: Toggling RSVP status...");
+        const notGoingBtnXpath = "//button[contains(.,'Not Going') or contains(.,'Cancel') or contains(.,'Remove')] | //span[contains(.,'Not Going')]/ancestor::button";
+        try {
+            const notGoingBtn = await driver.wait(until.elementLocated(By.xpath(notGoingBtnXpath)), 5000);
+            await driver.executeScript("arguments[0].click();", notGoingBtn);
+            console.log("✅ RSVP: Successfully toggled off.");
+            await sleep(2000);
+            
+            // Re-RSVP to keep state valid
+            const rsvpBtnAgain = await driver.wait(until.elementLocated(By.xpath(rsvpBtnXpath)), 5000);
+            await driver.executeScript("arguments[0].click();", rsvpBtnAgain);
+            console.log("✅ RSVP: Marked as 'Going' again.");
+        } catch (innerError) {
+            console.log("ℹ️ Could not find button to toggle RSVP off. System might only support one-way RSVP or text is different.");
+        }
+
     } catch (e) {
         console.log("ℹ️ RSVP button not found.");
     }

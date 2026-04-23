@@ -26,13 +26,19 @@ async function cleanPorts() {
                     const parts = line.trim().split(/\s+/);
                     if (parts.length > 4 && parts[1].endsWith(`:${port}`)) {
                         const pid = parts[parts.length - 1];
-                        console.log(`🔫 Killing process ${pid} on port ${port}`);
-                        execSync(`taskkill /F /PID ${pid}`);
+                        // Skip PID 0 (System Idle Process)
+                        if (pid !== '0') {
+                            console.log(`🔫 Killing process tree ${pid} on port ${port}`);
+                            try { execSync(`taskkill /F /T /PID ${pid}`); } catch (err) {}
+                        }
                     }
                 }
+            } else {
+                // Cross-platform support for Mac/Linux
+                try { execSync(`lsof -ti:${port} | xargs kill -9`); } catch (err) {}
             }
         } catch (e) {
-            // Port likely not in use
+            // Port likely not in use or netstat found nothing
         }
     }
 }
@@ -58,7 +64,7 @@ async function startTests() {
     // 🔹 START SERVERS
     // -------------------------------
     console.log("\n📦 Launching Backend & Frontend...");
-    
+
     // Using full command string to avoid DEP0190 on Windows
     const backend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../backend' });
     const frontend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../frontend' });
@@ -88,7 +94,7 @@ async function startTests() {
         .build();
 
     const baseUrl = "http://localhost:5173";
-    
+
     // Humanized Identity Generation
     const { name, username, email } = getRandomIdentity();
     const testPass = "SecurePass123!";
