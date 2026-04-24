@@ -1,5 +1,6 @@
 const CircleMessageService = require('../services/circleMessageService');
 const { getIo } = require('../sockets');
+const { processMentions } = require('../services/notificationService');
 
 exports.getMessages = async (req, res) => {
     try {
@@ -30,6 +31,10 @@ exports.createMessage = async (req, res) => {
             replyTo,
             mentions
         });
+
+        if (content?.text) {
+            processMentions(content.text, req.userId, 'message', message._id).catch(err => console.error(err));
+        }
 
         try {
             getIo().to(req.params.circleId).emit('newCircleMessage', message);
