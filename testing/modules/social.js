@@ -160,11 +160,11 @@ async function testSocialFlow(driver, baseUrl) {
     console.log("Redirected to Messages.");
     await sleep(5000);
 
-    console.log("Sending Humanized Message...");
-    const firstMsg = getRandomMessage();
+    console.log("Sending Standard Audit Message...");
+    const auditMsg = "Hello! This is an automated audit message for social stability verification.";
     const chatBox = By.css('input[placeholder*="Type a message"]');
-    await typeWithEnter(driver, chatBox, firstMsg);
-    console.log("First message sent.");
+    await typeWithEnter(driver, chatBox, auditMsg);
+    console.log("Fixed audit message sent.");
     await sleep(4000);
 
     // Profile Edit Edge Case

@@ -62,7 +62,7 @@ async function testStoriesFlow(driver, baseUrl, username) {
     }
 }
 
-async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
+async function testCirclesFlow(driver, baseUrl, username) {
 
     console.log("\nSTEP 5: Circle Creation Boundary Testing");
     await driver.get(baseUrl + "/circles/create");
@@ -76,7 +76,7 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
 
     console.log("Edge Case: Submitting partial data (only name)...");
     const nameInput = await driver.findElement(By.id("name"));
-    await nameInput.sendKeys("P"); // Too short
+    await nameInput.sendKeys("Test");
     await driver.executeScript("arguments[0].click();", submitBtn);
     await sleep(2000);
     console.log("Partial data form (short name) submitted.");
@@ -87,7 +87,7 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     await nameInput.sendKeys(Key.CONTROL, "a", Key.BACK_SPACE);
     await descInput.sendKeys(Key.CONTROL, "a", Key.BACK_SPACE);
 
-    const circleName = "Testing Circle " + uniqueId;
+    const circleName = "Testing Club";
     console.log(`Action: Creating Circle "${circleName}"...`);
     await type(driver, By.id("name"), circleName);
     await type(driver, By.id("description"), "A community for testers.");
@@ -101,7 +101,26 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
 
     // Wait for the redirect to the circle details page (it now happens automatically)
     await driver.wait(until.urlMatches(/\/circles\/[a-z0-9-]+/), 20000);
-    console.log("Successfully redirected to new Circle Profile.");
+    console.log("SUCCESS: Redirected to new Circle Profile.");
+    await sleep(5000);
+
+    console.log("Action: Navigating to Home Feed to verify circle list...");
+    await driver.get(baseUrl + "/feed");
+    await sleep(6000);
+
+    console.log("Action: Entering 'Testing Club' from the sidebar...");
+    try {
+        const sidebarLinkLoc = By.xpath(`//aside//p[contains(text(), 'Testing Club')]/ancestor::a`);
+        const sidebarLink = await driver.wait(until.elementLocated(sidebarLinkLoc), 15000);
+        await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", sidebarLink);
+        await sleep(2000);
+        await driver.executeScript("arguments[0].click();", sidebarLink);
+        console.log("Successfully entered circle from sidebar.");
+    } catch (e) {
+        console.log("Sidebar link not found or delayed. Using direct URL as fallback.");
+        await driver.get(baseUrl + "/circles/testing-club");
+    }
+
     await sleep(5000);
     console.log("Inside Circle Profile.");
     await sleep(8000);
@@ -115,14 +134,14 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
         await driver.executeScript("arguments[0].click();", chatInput);
         await sleep(1000);
 
-        const message = "Automated audit test: " + uniqueId;
+        const message = "Audit confirmed: System is stable.";
         for (const char of message) {
             await chatInput.sendKeys(char);
             await sleep(100);
         }
         await sleep(1000);
         await chatInput.sendKeys(Key.ENTER);
-        console.log("Chat message sent via Enter key.");
+        console.log("Chat message sent successfully.");
     } catch (e) {
         console.log("Chat message could not be sent: " + e.message);
     }

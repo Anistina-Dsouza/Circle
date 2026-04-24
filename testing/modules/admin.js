@@ -118,23 +118,16 @@ async function testAdminFlow(driver, baseUrl) {
 
     try {
         console.log("Action: Creating a new Announcement...");
-        const newAnnouncementBtn = await driver.wait(until.elementLocated(By.xpath("//button[contains(., 'New Announcement')]")), 15000);
-        await driver.executeScript("arguments[0].click();", newAnnouncementBtn);
-        await sleep(2000);
-
-        const titleInput = await driver.wait(until.elementLocated(By.id("title")), 10000);
+        const titleInput = await driver.wait(until.elementLocated(By.id("announcement-title")), 15000);
         await titleInput.sendKeys("System Maintenance Alert");
         
-        const contentInput = await driver.findElement(By.id("content"));
+        const contentInput = await driver.findElement(By.id("announcement-message"));
         await contentInput.sendKeys("The system will be under maintenance tonight at 12 PM PST. Please save your work.");
         
-        const targetGroupSelect = await driver.findElement(By.id("targetGroup"));
-        await targetGroupSelect.sendKeys("all");
-
-        await sleep(1000);
-        const submitAnnBtn = await driver.findElement(By.css('button[type="submit"]'));
+        await sleep(2000);
+        const submitAnnBtn = await driver.findElement(By.id("broadcast-btn"));
         await driver.executeScript("arguments[0].click();", submitAnnBtn);
-        await sleep(3000);
+        await sleep(4000);
 
         console.log("Announcement created successfully.");
         

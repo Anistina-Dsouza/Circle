@@ -101,7 +101,6 @@ async function startTests() {
     const username = "symgaming19";
     const email = "symgaming19@gmail.com";
     const testPass = "SecurePass123!";
-    const uniqueId = Date.now().toString().slice(-4);
 
     try {
         console.log(`TESTING WITH USER: ${name} (@${username})`);
@@ -118,7 +117,7 @@ async function startTests() {
 
         // Run Module 3: Circles (Chat + Meetings)
         await testJoinCircleFlow(driver, baseUrl);
-        const { meetingCreated } = await testCirclesFlow(driver, baseUrl, uniqueId, username);
+        const { meetingCreated } = await testCirclesFlow(driver, baseUrl, username);
 
         // Run Module 4: Meetings (Legacy RSVP & Join)
         await testMeetingsFlow(driver, baseUrl, meetingCreated);
