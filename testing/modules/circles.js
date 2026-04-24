@@ -68,45 +68,63 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     await driver.get(baseUrl + "/circles/create");
     await sleep(4000);
 
+    console.log("Edge Case: Submitting empty circle form...");
+    const submitBtn = await driver.findElement(By.css('button[type="submit"]'));
+    await driver.executeScript("arguments[0].click();", submitBtn);
+    await sleep(2000);
+    console.log("Empty form submitted. No redirection expected.");
+
+    console.log("Edge Case: Submitting partial data (only name)...");
+    const nameInput = await driver.findElement(By.id("name"));
+    await nameInput.sendKeys("P"); // Too short
+    await driver.executeScript("arguments[0].click();", submitBtn);
+    await sleep(2000);
+    console.log("Partial data form (short name) submitted.");
+
+    const descInput = await driver.findElement(By.id("description"));
+
+    // Clear for real test
+    await nameInput.sendKeys(Key.CONTROL, "a", Key.BACK_SPACE);
+    await descInput.sendKeys(Key.CONTROL, "a", Key.BACK_SPACE);
+
     const circleName = "Testing Circle " + uniqueId;
     console.log(`Action: Creating Circle "${circleName}"...`);
     await type(driver, By.id("name"), circleName);
     await type(driver, By.id("description"), "A community for testers.");
-    
+
     console.log("Action: Adding Circle Icon URL...");
-    await type(driver, By.id("icon"), "https://images.unsplash.com/photo-1522071823916-291e56997d41?w=200&q=80");
+    await type(driver, By.id("icon"), "https://i.pinimg.com/736x/34/57/78/345778407d68e67b4b88dd966ae3c0b9.jpg"); // Proper circle image
     await sleep(2000);
 
     await click(driver, 'button[type="submit"]');
-    console.log("New circle created.");
-    await sleep(10000);
-    await driver.get(baseUrl + "/feed");
-    await sleep(6000);
-    const myCircleLink = By.xpath(`//p[contains(text(),'${circleName}')]/ancestor::a | //p[text()='${circleName}']/ancestor::a`);
-    const sidebarCircle = await safeAction(driver, myCircleLink, `Sidebar Link for ${circleName}`);
-    if (sidebarCircle) {
-        await driver.executeScript("arguments[0].click();", sidebarCircle);
-    } else {
-        await driver.get(baseUrl + "/circles");
-        await sleep(5000);
-        await safeClickText(driver, "View");
-    }
+    console.log("Circle creation submitted. Waiting for automatic redirect...");
 
-    await driver.wait(until.urlContains("/circles/"), 20000);
+    // Wait for the redirect to the circle details page (it now happens automatically)
+    await driver.wait(until.urlMatches(/\/circles\/[a-z0-9-]+/), 20000);
+    console.log("Successfully redirected to new Circle Profile.");
+    await sleep(5000);
     console.log("Inside Circle Profile.");
     await sleep(8000);
 
     try {
         console.log("Sending Chat Message...");
-        const chatInput = await driver.wait(until.elementLocated(By.css('input[placeholder*="Share something"]')), 20000);
-        await chatInput.sendKeys("Automated audit test: " + uniqueId);
+        const chatInputLoc = By.css('input[placeholder*="Share something"]');
+        const chatInput = await driver.wait(until.elementLocated(chatInputLoc), 25000);
+        await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", chatInput);
         await sleep(2000);
-        const sendBtnSelector = By.css('button.bg-gradient-to-br.from-violet-600, button[class*="from-violet-600"]');
-        const sendBtn = await driver.wait(until.elementLocated(sendBtnSelector), 15000);
-        await driver.executeScript("arguments[0].click();", sendBtn);
-        console.log("Chat message sent.");
+        await driver.executeScript("arguments[0].click();", chatInput);
+        await sleep(1000);
+
+        const message = "Automated audit test: " + uniqueId;
+        for (const char of message) {
+            await chatInput.sendKeys(char);
+            await sleep(100);
+        }
+        await sleep(1000);
+        await chatInput.sendKeys(Key.ENTER);
+        console.log("Chat message sent via Enter key.");
     } catch (e) {
-        console.log("Chat message could not be sent.");
+        console.log("Chat message could not be sent: " + e.message);
     }
 
     let meetingCreated = false;
@@ -129,14 +147,14 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     console.log("Edge Case: Scheduling meeting in the past...");
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowDateStr = tomorrow.getFullYear() + '-' + 
-        String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' + 
+    const tomorrowDateStr = tomorrow.getFullYear() + '-' +
+        String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' +
         String(tomorrow.getDate()).padStart(2, '0');
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const pastDateStr = yesterday.getFullYear() + '-' + 
-        String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
+    const pastDateStr = yesterday.getFullYear() + '-' +
+        String(yesterday.getMonth() + 1).padStart(2, '0') + '-' +
         String(yesterday.getDate()).padStart(2, '0');
 
     const titleLocator = By.id("meeting-title");
@@ -207,7 +225,7 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
 
     console.log("Setting meeting date and time...");
     const durationInput = await driver.findElement(By.id("meeting-duration"));
-    
+
     await driver.executeScript(`
         const el = arguments[0];
         const val = arguments[1];
@@ -270,22 +288,69 @@ async function testJoinCircleFlow(driver, baseUrl) {
     await driver.get(baseUrl + "/circles");
     await sleep(5000);
 
+    console.log("Testing Category Filters...");
+    try {
+        const categories = ['Gaming', 'Technology', 'All Categories'];
+        for (const cat of categories) {
+            console.log(`Action: Selecting Category "${cat}"...`);
+            await safeClickText(driver, cat);
+            await sleep(4000); // Slow enough for human eye
+        }
+    } catch (e) {
+        console.log("Category filter test encountered issues: " + e.message);
+    }
+
+    console.log("Edge Case: Searching for non-existent circle...");
+    try {
+        const searchInputLoc = By.id("search-circles");
+        const searchInput = await safeAction(driver, searchInputLoc, "Circle Search Box");
+        if (searchInput) {
+            console.log("Action: Typing nonsense in search...");
+            await clearAndType(driver, searchInputLoc, "ThisCircleDoesNotExist12345");
+            await sleep(4000);
+            const noResults = await driver.findElements(By.xpath("//*[contains(text(), 'No circles found') or contains(text(), 'No results')]"));
+            if (noResults.length > 0) {
+                console.log("SUCCESS: Correctly handled non-existent circle search.");
+            }
+
+            await sleep(2000);
+            await clearAndType(driver, searchInputLoc, "");
+            await sleep(3000);
+        }
+    } catch (e) {
+        console.log("Circle search testing encountered issues: " + e.message);
+    }
+
     console.log("Looking for circles to join...");
     try {
-        // Find a circle card that has a "Join" button
-        const joinBtnLocator = By.xpath("//button[contains(., 'Join')]");
-        const joinBtns = await driver.findElements(joinBtnLocator);
-        
-        if (joinBtns.length > 0) {
-            console.log(`Found ${joinBtns.length} circles available to join.`);
-            const targetJoinBtn = joinBtns[0];
-            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", targetJoinBtn);
+        // Find a circle card and click "View Circle"
+        const viewBtnLocator = By.xpath("//a[contains(., 'View Circle')]");
+        const viewBtns = await driver.findElements(viewBtnLocator);
+
+        if (viewBtns.length > 0) {
+            console.log(`Found ${viewBtns.length} circles available.`);
+            const targetViewBtn = viewBtns[0];
+            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", targetViewBtn);
             await sleep(1500);
-            await driver.executeScript("arguments[0].click();", targetJoinBtn);
+            await driver.executeScript("arguments[0].click();", targetViewBtn);
+
+            // Wait for redirection to join page or details
             await sleep(3000);
-            console.log("Joined circle successfully.");
+            const currentUrl = await driver.getCurrentUrl();
+            if (currentUrl.includes("/join")) {
+                console.log("Redirected to Join page. Submitting join request...");
+                const introArea = await driver.wait(until.elementLocated(By.tagName("textarea")), 10000);
+                await introArea.sendKeys("Hello! I am an automated tester interested in joining this community for quality audit purposes.");
+                await sleep(1000);
+                const sendReqBtn = await driver.findElement(By.xpath("//button[contains(., 'Send Join Request')]"));
+                await driver.executeScript("arguments[0].click();", sendReqBtn);
+                await sleep(3000);
+                console.log("Join request sent successfully.");
+            } else {
+                console.log("Already a member or redirected elsewhere: " + currentUrl);
+            }
         } else {
-            console.log("No 'Join' buttons found. All circles might be already joined or none available.");
+            console.log("No circles found to interact with.");
         }
     } catch (e) {
         console.log("Circle joining test encountered an issue: " + e.message);

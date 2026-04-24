@@ -116,6 +116,37 @@ async function testAdminFlow(driver, baseUrl) {
     await sleep(4000);
     console.log("Reached Announcements page.");
 
+    try {
+        console.log("Action: Creating a new Announcement...");
+        const newAnnouncementBtn = await driver.wait(until.elementLocated(By.xpath("//button[contains(., 'New Announcement')]")), 15000);
+        await driver.executeScript("arguments[0].click();", newAnnouncementBtn);
+        await sleep(2000);
+
+        const titleInput = await driver.wait(until.elementLocated(By.id("title")), 10000);
+        await titleInput.sendKeys("System Maintenance Alert");
+        
+        const contentInput = await driver.findElement(By.id("content"));
+        await contentInput.sendKeys("The system will be under maintenance tonight at 12 PM PST. Please save your work.");
+        
+        const targetGroupSelect = await driver.findElement(By.id("targetGroup"));
+        await targetGroupSelect.sendKeys("all");
+
+        await sleep(1000);
+        const submitAnnBtn = await driver.findElement(By.css('button[type="submit"]'));
+        await driver.executeScript("arguments[0].click();", submitAnnBtn);
+        await sleep(3000);
+
+        console.log("Announcement created successfully.");
+        
+        // Verify it appears
+        const latestAnn = await driver.wait(until.elementLocated(By.xpath("//h3[contains(text(), 'System Maintenance Alert')]")), 10000);
+        if (latestAnn) {
+            console.log("SUCCESS: Verified - New announcement visible in list.");
+        }
+    } catch (e) {
+        console.log("Announcement creation test failed: " + e.message);
+    }
+
     // Return to Admin Dashboard
     await driver.get(baseUrl + "/admin");
     await sleep(3000);

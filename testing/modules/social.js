@@ -37,12 +37,13 @@ async function testSocialFlow(driver, baseUrl) {
         // Optional: Verify button changed to "Following"
         const followBtn = await driver.findElements(By.xpath("//button[contains(.,'Following')]"));
         if (followBtn.length > 0) {
-            console.log("✅ Follow confirmed.");
+            console.log("SUCCESS: Follow confirmed.");
         }
 
         console.log("Navigating to Profile via User Card...");
-        await sleep(1000);
-        // Look for any link that goes to a profile
+        await sleep(2000); // Wait for potential list re-renders
+        
+        // RE-FIND elements to avoid stale references
         const profileLink = By.xpath("//div[contains(@class, 'group')]//a[contains(@href, '/profile/')]");
         try {
             const profileBtns = await driver.findElements(profileLink);
@@ -59,8 +60,15 @@ async function testSocialFlow(driver, baseUrl) {
                 return;
             }
         } catch (e) {
-            console.log("Could not click profile card: " + e.message);
-            return;
+            console.log("Could not click profile card (might be stale, retrying): " + e.message);
+            // One retry attempt with a fresh lookup
+            await sleep(2000);
+            const retryBtns = await driver.findElements(profileLink);
+            if (retryBtns.length > 0) {
+                await driver.executeScript("arguments[0].click();", retryBtns[0]);
+            } else {
+                return;
+            }
         }
     } else {
         console.log("Explorer search unavailable. Skipping social tests.");
@@ -97,13 +105,43 @@ async function testSocialFlow(driver, baseUrl) {
     }
 
     console.log("Interacting with Profile Name...");
+    await sleep(2000); // Wait for profile to settle
     try {
         const profileNameLoc = By.xpath("//h1[string-length(text()) > 0]");
         const profileName = await driver.findElement(profileNameLoc);
+        await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", profileName);
+        await sleep(1500);
         await driver.executeScript("arguments[0].click();", profileName);
         console.log("Successfully clicked on user name.");
     } catch (e) {
-        console.log("Could not click on user name.");
+        console.log("Stale element or error clicking profile name, retrying...");
+        await sleep(2000);
+        const profileNameLoc = By.xpath("//h1[string-length(text()) > 0]");
+        const profileName = await driver.findElement(profileNameLoc);
+        await driver.executeScript("arguments[0].click();", profileName);
+    }
+    await sleep(2000);
+
+    console.log("Checking for User Stories...");
+    try {
+        const storyCardLoc = By.xpath("//div[contains(@class, 'group')]//h3[contains(text(), '')]/ancestor::div[contains(@class, 'cursor-pointer')]");
+        const stories = await driver.findElements(storyCardLoc);
+        if (stories.length > 0) {
+            console.log(`Found ${stories.length} active stories. Clicking the first one...`);
+            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", stories[0]);
+            await sleep(1000);
+            await stories[0].click();
+            await driver.wait(until.urlContains("/stories/"), 10000);
+            console.log("Successfully navigated to Story Viewer.");
+            await sleep(3000);
+            await driver.navigate().back();
+            await driver.wait(until.urlContains("/profile/"), 10000);
+            console.log("Returned to profile.");
+        } else {
+            console.log("No active stories found on this profile.");
+        }
+    } catch (e) {
+        console.log("Error interacting with stories: " + e.message);
     }
 
     console.log("Accessing Message button on Profile...");
@@ -135,12 +173,20 @@ async function testSocialFlow(driver, baseUrl) {
     await sleep(3000);
 
     const bioBox = By.name("bio");
+    const picBox = By.name("profilePic");
+    
     if (await safeAction(driver, bioBox, "Bio Edit Box")) {
-        console.log("Updating bio with complex string...");
-        await clearAndType(driver, bioBox, "Design Enthusiast • Nature Lover • Tech Innovator! ⚡ #CirclePlatform");
+        console.log("Updating bio and profile picture...");
+        await clearAndType(driver, bioBox, "Design Enthusiast - Nature Lover - Tech Innovator! [CirclePlatform]");
+        
+        const picInput = await driver.findElement(picBox);
+        await clearAndType(driver, picBox, "https://i.pinimg.com/736x/48/36/40/483640f966ae32e0ee0670493793f897.jpg");
+        
+        await sleep(1000);
         await safeClickText(driver, "Save Changes");
         await sleep(3000);
-        console.log("Bio updated.");
+        console.log("Profile updated with new bio and picture.");
+        await driver.wait(until.urlContains("/profile/"), 10000);
     }
 }
 

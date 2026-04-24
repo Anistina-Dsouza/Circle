@@ -14,7 +14,7 @@ async function waitForInteractable(driver, locator, timeout = 25000) {
         await driver.wait(until.elementIsVisible(element), 15000);
         await driver.wait(async () => await element.isEnabled(), 15000);
         await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
-        await sleep(800);
+        await sleep(1500);
         return element;
     } catch (error) {
         throw new Error(`Critical element missing or hidden: ${locator.toString()}`);
@@ -30,10 +30,10 @@ async function safeAction(driver, locator, actionName, timeout = 10000) {
         const element = await driver.wait(until.elementLocated(locator), timeout);
         await driver.wait(until.elementIsVisible(element), 5000);
         await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
-        console.log(`✅ ${actionName} found.`);
+        console.log(`SUCCESS: ${actionName} found.`);
         return element;
     } catch (e) {
-        console.log(`⚠️ Skip: ${actionName} - Not present or not required at this moment.`);
+        console.log(`SKIP: ${actionName} - Not present or not required at this moment.`);
         return null;
     }
 }
@@ -45,7 +45,7 @@ async function type(driver, locator, text) {
     const element = await waitForInteractable(driver, locator);
     for (const char of text) {
         await element.sendKeys(char);
-        await sleep(80);
+        await sleep(120);
     }
 }
 
@@ -53,7 +53,7 @@ async function typeWithEnter(driver, locator, text) {
     const element = await waitForInteractable(driver, locator);
     for (const char of text) {
         await element.sendKeys(char);
-        await sleep(80);
+        await sleep(120);
     }
     await sleep(500);
     await element.sendKeys(Key.ENTER);
@@ -74,14 +74,14 @@ async function clearAndType(driver, locator, text) {
 
     for (const char of text) {
         await element.sendKeys(char);
-        await sleep(80);
+        await sleep(120);
     }
 }
 
 async function click(driver, selector) {
     const locator = (typeof selector === 'string') ? By.css(selector) : selector;
     const element = await waitForInteractable(driver, locator);
-    await sleep(1000);
+    await sleep(2000);
     try {
         await element.click();
     } catch (e) {
@@ -93,15 +93,15 @@ async function safeClickText(driver, text) {
     try {
         const xpath = `//button[contains(.,'${text}')] | //a[contains(.,'${text}')] | //span[contains(.,'${text}')]`;
         const btn = await waitForInteractable(driver, By.xpath(xpath));
-        await sleep(1000);
+        await sleep(2000);
         try {
             await btn.click();
         } catch (e) {
             await driver.executeScript("arguments[0].click();", btn);
         }
-        console.log(`✅ Interaction: ${text}`);
+        console.log(`SUCCESS: Interaction - ${text}`);
     } catch (e) {
-        console.log(`⚠️ ${text} not found. Continuing test...`);
+        console.log(`SKIP: ${text} not found. Continuing test...`);
     }
 }
 

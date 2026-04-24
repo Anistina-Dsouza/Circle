@@ -4,7 +4,7 @@ const { spawn, execSync } = require('child_process');
 const { sleep, getRandomIdentity } = require('./utils/helpers');
 
 // Import Test Modules
-const { testSignup, testLogin, testLogout } = require('./modules/auth');
+const { testSignup, testLogin, testLogout, testAdminLogin } = require('./modules/auth');
 const { testSocialFlow } = require('./modules/social');
 const { testStoriesFlow, testCirclesFlow, testJoinCircleFlow } = require('./modules/circles');
 const { testMeetingsFlow } = require('./modules/meetings');
@@ -16,7 +16,7 @@ const { testAdminFlow } = require('./modules/admin');
  */
 
 async function cleanPorts() {
-    console.log("🧹 Cleaning up stale server processes...");
+    console.log("CLEANUP: Cleaning up stale server processes...");
     const ports = [3000, 5173];
     for (const port of ports) {
         try {
@@ -29,7 +29,7 @@ async function cleanPorts() {
                         const pid = parts[parts.length - 1];
                         // Skip PID 0 (System Idle Process)
                         if (pid !== '0') {
-                            console.log(`🔫 Killing process tree ${pid} on port ${port}`);
+                            console.log(`KILL: Stopping process tree ${pid} on port ${port}`);
                             try { execSync(`taskkill /F /T /PID ${pid}`); } catch (err) { }
                         }
                     }
