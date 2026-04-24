@@ -7,12 +7,12 @@ async function testSocialFlow(driver, baseUrl) {
     await sleep(4000);
 
     const searchInputLocator = By.xpath("//input[contains(@placeholder, 'search')] | //input[contains(@class, 'search')]");
-    
+
     console.log("Edge Case: Search Non-Existent User...");
     const searchInput = await safeAction(driver, searchInputLocator, "Search Box");
-    
+
     if (searchInput) {
-        await clearAndType(driver, searchInputLocator, "Ghost_User_XYZ_9999");
+        await clearAndType(driver, searchInputLocator, "Unexisting User");
         await sleep(4000);
 
         console.log("Searching for 'admin'...");
@@ -61,7 +61,7 @@ async function testSocialFlow(driver, baseUrl) {
         console.log("Message button not found on this profile.");
         return;
     }
-    
+
     await driver.wait(until.urlContains("/messages"), 15000);
     console.log("Redirected to Messages.");
     await sleep(5000);

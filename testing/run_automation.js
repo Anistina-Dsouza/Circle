@@ -4,10 +4,11 @@ const { spawn, execSync } = require('child_process');
 const { sleep, getRandomIdentity } = require('./utils/helpers');
 
 // Import Test Modules
-const { testSignup, testLogin } = require('./modules/auth');
+const { testSignup, testLogin, testLogout } = require('./modules/auth');
 const { testSocialFlow } = require('./modules/social');
-const { testCirclesFlow } = require('./modules/circles');
+const { testStoriesFlow, testCirclesFlow } = require('./modules/circles');
 const { testMeetingsFlow } = require('./modules/meetings');
+const { testAdminFlow } = require('./modules/admin');
 
 /**
  * 🎯 CIRCLE MODULAR STABILITY AUDIT (V9)
@@ -29,13 +30,13 @@ async function cleanPorts() {
                         // Skip PID 0 (System Idle Process)
                         if (pid !== '0') {
                             console.log(`🔫 Killing process tree ${pid} on port ${port}`);
-                            try { execSync(`taskkill /F /T /PID ${pid}`); } catch (err) {}
+                            try { execSync(`taskkill /F /T /PID ${pid}`); } catch (err) { }
                         }
                     }
                 }
             } else {
                 // Cross-platform support for Mac/Linux
-                try { execSync(`lsof -ti:${port} | xargs kill -9`); } catch (err) {}
+                try { execSync(`lsof -ti:${port} | xargs kill -9`); } catch (err) { }
             }
         } catch (e) {
             // Port likely not in use or netstat found nothing
@@ -56,30 +57,30 @@ async function checkServer(url, timeout = 60000) {
 }
 
 async function startTests() {
-    console.log("🚀 Initializing Modular Circle Stability Audit...");
+    console.log("Initializing Modular Circle Stability Audit...");
 
     await cleanPorts();
 
     // -------------------------------
     // 🔹 START SERVERS
     // -------------------------------
-    console.log("\n📦 Launching Backend & Frontend...");
+    console.log("\nLaunching Backend & Frontend...");
 
     // Using full command string to avoid DEP0190 on Windows
     const backend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../backend' });
     const frontend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../frontend' });
 
-    console.log("⏳ Waiting for servers to be healthy...");
+    console.log("Waiting for servers to be healthy...");
     const backendUp = await checkServer("http://localhost:3000/health");
     const frontendUp = await checkServer("http://localhost:5173");
 
     if (!backendUp || !frontendUp) {
-        console.log("❌ Server initialization failed. Check if ports 3000/5173 are blocked.");
+        console.log("Server initialization failed. Check if ports 3000/5173 are blocked.");
         backend.kill();
         frontend.kill();
         process.exit(1);
     }
-    console.log("✅ Servers are online.");
+    console.log("Servers are online.");
 
     // -------------------------------
     // 🔹 SETUP DRIVER
@@ -95,35 +96,52 @@ async function startTests() {
 
     const baseUrl = "http://localhost:5173";
 
-    // Humanized Identity Generation
-    const { name, username, email } = getRandomIdentity();
+    // Specific Identity requested
+    const name = "Sym Gaming";
+    const username = "symgaming19";
+    const email = "symgaming19@gmail.com";
     const testPass = "SecurePass123!";
     const uniqueId = Date.now().toString().slice(-4);
 
     try {
-        console.log(`🧪 TESTING WITH USER: ${name} (@${username})`);
+        console.log(`TESTING WITH USER: ${name} (@${username})`);
 
         // Run Module 1: Auth
         await testSignup(driver, baseUrl, email, username, testPass);
         await testLogin(driver, baseUrl, email, testPass);
 
+        // Run Module 2.5: Stories
+        await testStoriesFlow(driver, baseUrl, username);
+
         // Run Module 2: Social & Profile
         await testSocialFlow(driver, baseUrl);
 
-        // Run Module 3: Circles (Stories + Chat + Meetings)
+        // Run Module 3: Circles (Chat + Meetings)
         const { meetingCreated } = await testCirclesFlow(driver, baseUrl, uniqueId, username);
 
         // Run Module 4: Meetings (Legacy RSVP & Join)
         await testMeetingsFlow(driver, baseUrl, meetingCreated);
 
+        // --- TRANSITION TO ADMIN TESTING ---
+        // Step 1: Logout after user part is done
+        await testLogout(driver, baseUrl);
 
-        console.log("\n🏁 ALL MODULAR AUDIT PHASES PASSED SUCCESSFULLY");
+        // Step 2: Re-login as ADMIN for Admin Platform Audit
+        const adminEmail = "admin@gmail.com";
+        const adminPass = "password@123";
+        await testAdminLogin(driver, baseUrl, adminEmail, adminPass);
+
+        // Run Module 5: Admin Platform
+        await testAdminFlow(driver, baseUrl);
+
+
+        console.log("\nALL MODULAR AUDIT PHASES PASSED SUCCESSFULLY");
 
     } catch (error) {
-        console.log("\n❌ AUDIT FATALITY:");
+        console.log("\nAUDIT FATALITY:");
         console.log(error.message || error);
     } finally {
-        console.log("\n🧹 System shutdown...");
+        console.log("\nSystem shutdown...");
         await driver.quit();
         backend.kill();
         frontend.kill();
