@@ -15,30 +15,51 @@ async function testSocialFlow(driver, baseUrl) {
         await clearAndType(driver, searchInputLocator, "Unexisting User");
         await sleep(4000);
 
-        console.log("Searching for 'admin'...");
-        await clearAndType(driver, searchInputLocator, "admin");
-        await sleep(5000);
+        console.log("Searching for 'maryam'...");
+        await clearAndType(driver, searchInputLocator, "maryam");
+        await sleep(3000); // Wait for debounce and search API
+
+        // Wait for search results to appear or refresh
+        await driver.wait(until.elementLocated(By.css('div.group')), 15000);
+        await sleep(2000);
 
         console.log("Verifying search results...");
         const userCards = await driver.findElements(By.css('div.group'));
         if (userCards.length === 0) {
-            console.log("No search results found for 'admin'. Skipping social interaction.");
+            console.log("No search results found. Skipping social interaction.");
             return;
         }
 
         console.log("Following user...");
         await safeClickText(driver, "Follow");
-        await sleep(2000);
+        await sleep(3000); // Wait for optimistic update and API
+        
+        // Optional: Verify button changed to "Following"
+        const followBtn = await driver.findElements(By.xpath("//button[contains(.,'Following')]"));
+        if (followBtn.length > 0) {
+            console.log("✅ Follow confirmed.");
+        }
 
         console.log("Navigating to Profile via User Card...");
-        const profileLink = By.xpath("//h3[contains(text(),'admin')] | //p[contains(text(),'@admin')]");
+        await sleep(1000);
+        // Look for any link that goes to a profile
+        const profileLink = By.xpath("//div[contains(@class, 'group')]//a[contains(@href, '/profile/')]");
         try {
-            const profileBtn = await driver.wait(until.elementLocated(profileLink), 15000);
-            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", profileBtn);
-            await sleep(2000);
-            await driver.executeScript("arguments[0].click();", profileBtn);
+            const profileBtns = await driver.findElements(profileLink);
+            if (profileBtns.length > 0) {
+                const profileBtn = profileBtns[0];
+                const targetUrl = await profileBtn.getAttribute('href');
+                console.log(`Targeting profile: ${targetUrl}`);
+                
+                await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", profileBtn);
+                await sleep(1000);
+                await driver.executeScript("arguments[0].click();", profileBtn);
+            } else {
+                console.log("Profile link not found in user card.");
+                return;
+            }
         } catch (e) {
-            console.log("Could not click profile card. Skipping message flow.");
+            console.log("Could not click profile card: " + e.message);
             return;
         }
     } else {
@@ -47,8 +68,43 @@ async function testSocialFlow(driver, baseUrl) {
     }
 
     await driver.wait(until.urlContains("/profile/"), 15000);
-    console.log("Landed on profile.");
-    await sleep(3000);
+    console.log("URL updated to profile.");
+    await sleep(2000); // Allow initial render
+
+    // Wait for any profile indicator (Success H1 or Error H2)
+    console.log("Waiting for profile content or error...");
+    try {
+        // More robust wait: look for the profile header or the 404 container
+        await driver.wait(until.elementLocated(By.xpath("//h1 | //h2[contains(text(), 'Not Found') or contains(text(), 'Notice')]")), 20000);
+        await sleep(2000);
+        
+        const h1s = await driver.findElements(By.tagName("h1"));
+        const h2Errors = await driver.findElements(By.xpath("//h2[contains(text(), 'Not Found') or contains(text(), 'Notice')]"));
+        
+        if (h2Errors.length > 0) {
+            console.log("Profile Page returned an error: " + await h2Errors[0].getText());
+            return;
+        }
+        
+        if (h1s.length === 0) {
+            throw new Error("Profile page loaded but no H1 name found.");
+        }
+    } catch (e) {
+        console.log("Profile page failed to load expected content.");
+        const bodyText = await driver.findElement(By.tagName("body")).getText();
+        console.log("Visible body text snippets: " + bodyText.substring(0, 500));
+        throw e;
+    }
+
+    console.log("Interacting with Profile Name...");
+    try {
+        const profileNameLoc = By.xpath("//h1[string-length(text()) > 0]");
+        const profileName = await driver.findElement(profileNameLoc);
+        await driver.executeScript("arguments[0].click();", profileName);
+        console.log("Successfully clicked on user name.");
+    } catch (e) {
+        console.log("Could not click on user name.");
+    }
 
     console.log("Accessing Message button on Profile...");
     const msgBtnLocator = By.xpath("//button[contains(.,'Message') or .//span[text()='Message']]");

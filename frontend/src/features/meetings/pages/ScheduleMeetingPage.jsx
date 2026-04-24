@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FeedNavbar from '../../feed/components/FeedNavbar';
-import { Calendar, Clock, Video, Users, ArrowLeft, Check, Loader } from 'lucide-react';
+import { Calendar, Clock, Video, Users, ArrowLeft, Check, Loader, AlertCircle } from 'lucide-react';
 import meetingService from '../services/meetingService';
 import axios from 'axios';
 
@@ -20,6 +20,28 @@ const ScheduleMeetingPage = () => {
     const [myCircles, setMyCircles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
+
+    const validate = () => {
+        const newErrors = {};
+        if (!formData.title.trim()) newErrors.title = 'Meeting title is required';
+        if (!formData.circle) newErrors.circle = 'Please select a community circle';
+        if (!formData.date) newErrors.date = 'Meeting date is required';
+        if (!formData.time) newErrors.time = 'Meeting time is required';
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+        const fieldName = id.replace('meeting-', '');
+        setFormData(prev => ({ ...prev, [fieldName]: value }));
+        if (errors[fieldName]) {
+            setErrors(prev => ({ ...prev, [fieldName]: '' }));
+        }
+        setError(null);
+    };
 
     useEffect(() => {
         const fetchCircles = async () => {
@@ -43,6 +65,8 @@ const ScheduleMeetingPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate()) return;
+        
         setLoading(true);
         setError(null);
         try {
@@ -105,14 +129,20 @@ const ScheduleMeetingPage = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-400 ml-1">Meeting Title</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., Weekly Design Sync"
-                                className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors"
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                required
-                            />
+                                <input
+                                    id="meeting-title"
+                                    type="text"
+                                    placeholder="e.g., Weekly Design Sync"
+                                    className={`w-full bg-[#0F0529] border rounded-xl px-4 py-3 focus:outline-none transition-colors ${errors.title ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-purple-500/50'}`}
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                />
+                                {errors.title && (
+                                    <div className="flex items-center mt-1 text-red-500 text-xs gap-1 ml-1">
+                                        <AlertCircle size={12} />
+                                        <span>{errors.title}</span>
+                                    </div>
+                                )}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -121,16 +151,22 @@ const ScheduleMeetingPage = () => {
                                     <Users size={14} /> Select Circle (Optional)
                                 </label>
                                 <select
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
+                                    id="meeting-circle"
+                                    className={`w-full bg-[#0F0529] border rounded-xl px-4 py-3 focus:outline-none transition-colors appearance-none ${errors.circle ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-purple-500/50'}`}
                                     value={formData.circle}
-                                    onChange={(e) => setFormData({ ...formData, circle: e.target.value })}
-                                    required
+                                    onChange={handleChange}
                                 >
                                     <option value="" disabled>Choose a community to host for</option>
                                     {myCircles.map(circle => (
                                         <option key={circle.id || circle._id} value={circle._id}>{circle.name}</option>
                                     ))}
                                 </select>
+                                {errors.circle && (
+                                    <div className="flex items-center mt-1 text-red-500 text-xs gap-1 ml-1">
+                                        <AlertCircle size={12} />
+                                        <span>{errors.circle}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -152,13 +188,19 @@ const ScheduleMeetingPage = () => {
                                     <Calendar size={14} /> Date
                                 </label>
                                 <input
+                                    id="meeting-date"
                                     type="date"
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors invert-calendar-icon"
+                                    className={`w-full bg-[#0F0529] border rounded-xl px-4 py-3 focus:outline-none transition-colors invert-calendar-icon ${errors.date ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-purple-500/50'}`}
                                     value={formData.date}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                    required
+                                    min={new Date().toLocaleDateString('en-CA')}
+                                    onChange={handleChange}
                                 />
+                                {errors.date && (
+                                    <div className="flex items-center mt-1 text-red-500 text-xs gap-1 ml-1">
+                                        <AlertCircle size={12} />
+                                        <span>{errors.date}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -166,12 +208,18 @@ const ScheduleMeetingPage = () => {
                                     <Clock size={14} /> Time
                                 </label>
                                 <input
+                                    id="meeting-time"
                                     type="time"
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors invert-calendar-icon"
+                                    className={`w-full bg-[#0F0529] border rounded-xl px-4 py-3 focus:outline-none transition-colors invert-calendar-icon ${errors.time ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-purple-500/50'}`}
                                     value={formData.time}
-                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                    required
+                                    onChange={handleChange}
                                 />
+                                {errors.time && (
+                                    <div className="flex items-center mt-1 text-red-500 text-xs gap-1 ml-1">
+                                        <AlertCircle size={12} />
+                                        <span>{errors.time}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -179,6 +227,7 @@ const ScheduleMeetingPage = () => {
                                     <Clock size={14} /> Duration
                                 </label>
                                 <select
+                                    id="meeting-duration"
                                     className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
                                     value={formData.scheduledDuration}
                                     onChange={(e) => setFormData({ ...formData, scheduledDuration: parseInt(e.target.value) })}
@@ -197,6 +246,7 @@ const ScheduleMeetingPage = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-400 ml-1">Description (Agenda)</label>
                             <textarea
+                                id="meeting-description"
                                 rows="3"
                                 placeholder="What will this meeting be about?"
                                 className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors resize-none"
@@ -206,15 +256,16 @@ const ScheduleMeetingPage = () => {
                         </div>
 
                         <button
+                            id="schedule-meeting-btn"
                             type="submit"
-                            disabled={loading || !formData.title || !formData.date || !formData.time}
+                            disabled={loading}
                             className={`w-full text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-4 
-                                ${loading || !formData.title || !formData.date || !formData.time 
+                                ${loading 
                                     ? 'bg-purple-600/50 cursor-not-allowed' 
                                     : 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/20'}`}
                         >
                             {loading ? (
-                                <Loader size={20} className="animate-spin" />
+                                <Loader id="meeting-loader" size={20} className="animate-spin" />
                             ) : (
                                 <Check size={20} />
                             )}

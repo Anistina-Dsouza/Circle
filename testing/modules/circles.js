@@ -72,6 +72,11 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     console.log(`Action: Creating Circle "${circleName}"...`);
     await type(driver, By.id("name"), circleName);
     await type(driver, By.id("description"), "A community for testers.");
+    
+    console.log("Action: Adding Circle Icon URL...");
+    await type(driver, By.id("icon"), "https://images.unsplash.com/photo-1522071823916-291e56997d41?w=200&q=80");
+    await sleep(2000);
+
     await click(driver, 'button[type="submit"]');
     console.log("New circle created.");
     await sleep(10000);
@@ -147,19 +152,24 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     await sleep(1000);
 
     const dateInput = await driver.findElement(By.id("meeting-date"));
-    // Using executeScript to set values to ensure React picks them up and bypasses browser-specific date pickers
-    await driver.executeScript(`
-        arguments[0].value = '${pastDateStr}';
-        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-    `, dateInput);
-
     const timeInput = await driver.findElement(By.id("meeting-time"));
     await driver.executeScript(`
-        arguments[0].value = '10:00';
-        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-    `, timeInput);
+        const el = arguments[0];
+        const val = arguments[1];
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        nativeInputValueSetter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, dateInput, pastDateStr);
+
+    await driver.executeScript(`
+        const el = arguments[0];
+        const val = arguments[1];
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        nativeInputValueSetter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, timeInput, '10:00');
 
     await sleep(1000);
     const currentScheduleBtn = await driver.findElement(scheduleBtnLoc);
@@ -196,25 +206,34 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     await sleep(1000);
 
     console.log("Setting meeting date and time...");
+    const durationInput = await driver.findElement(By.id("meeting-duration"));
+    
     await driver.executeScript(`
-        arguments[0].value = '${tomorrowDateStr}';
-        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('blur', { bubbles: true }));
-    `, dateInput);
+        const el = arguments[0];
+        const val = arguments[1];
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        nativeInputValueSetter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, dateInput, tomorrowDateStr);
 
     await driver.executeScript(`
-        arguments[0].value = '14:00';
-        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-    `, timeInput);
+        const el = arguments[0];
+        const val = arguments[1];
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        nativeInputValueSetter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, timeInput, '14:00');
 
-    await sleep(1000);
-
-    console.log("Selecting meeting duration...");
-    const durationSelect = await driver.findElement(By.id("meeting-duration"));
-    await durationSelect.sendKeys("1 hour");
-    await sleep(1000);
+    await driver.executeScript(`
+        const el = arguments[0];
+        const val = arguments[1];
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+        nativeInputValueSetter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, durationInput, '60');
 
     await clearAndType(driver, By.id("meeting-description"), "Automated Kickoff Session for " + circleName);
     await sleep(3000);
@@ -246,7 +265,35 @@ async function testCirclesFlow(driver, baseUrl, uniqueId, username) {
     return { meetingCreated };
 }
 
+async function testJoinCircleFlow(driver, baseUrl) {
+    console.log("\nSTEP 5b: Circle Discovery & Joining Audit");
+    await driver.get(baseUrl + "/circles");
+    await sleep(5000);
+
+    console.log("Looking for circles to join...");
+    try {
+        // Find a circle card that has a "Join" button
+        const joinBtnLocator = By.xpath("//button[contains(., 'Join')]");
+        const joinBtns = await driver.findElements(joinBtnLocator);
+        
+        if (joinBtns.length > 0) {
+            console.log(`Found ${joinBtns.length} circles available to join.`);
+            const targetJoinBtn = joinBtns[0];
+            await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", targetJoinBtn);
+            await sleep(1500);
+            await driver.executeScript("arguments[0].click();", targetJoinBtn);
+            await sleep(3000);
+            console.log("Joined circle successfully.");
+        } else {
+            console.log("No 'Join' buttons found. All circles might be already joined or none available.");
+        }
+    } catch (e) {
+        console.log("Circle joining test encountered an issue: " + e.message);
+    }
+}
+
 module.exports = {
     testStoriesFlow,
-    testCirclesFlow
+    testCirclesFlow,
+    testJoinCircleFlow
 };

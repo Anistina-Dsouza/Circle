@@ -6,7 +6,7 @@ const { sleep, getRandomIdentity } = require('./utils/helpers');
 // Import Test Modules
 const { testSignup, testLogin, testLogout } = require('./modules/auth');
 const { testSocialFlow } = require('./modules/social');
-const { testStoriesFlow, testCirclesFlow } = require('./modules/circles');
+const { testStoriesFlow, testCirclesFlow, testJoinCircleFlow } = require('./modules/circles');
 const { testMeetingsFlow } = require('./modules/meetings');
 const { testAdminFlow } = require('./modules/admin');
 
@@ -117,6 +117,7 @@ async function startTests() {
         await testSocialFlow(driver, baseUrl);
 
         // Run Module 3: Circles (Chat + Meetings)
+        await testJoinCircleFlow(driver, baseUrl);
         const { meetingCreated } = await testCirclesFlow(driver, baseUrl, uniqueId, username);
 
         // Run Module 4: Meetings (Legacy RSVP & Join)

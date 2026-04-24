@@ -22,8 +22,16 @@ async function testSignup(driver, baseUrl, testEmail, testUser, testPass) {
     await click(driver, submitBtn);
     await sleep(2000);
 
+    console.log("Edge Case: Duplicate Email Registration...");
+    await clearAndType(driver, By.name("email"), "maryamshaikh191103@gmail.com");
+    await clearAndType(driver, By.name("username"), "duplicate_user");
+    await clearAndType(driver, By.name("password"), "Password123!");
+    await click(driver, submitBtn);
+    await sleep(3000);
+
     console.log(`Performing Humanized Registration with Tags: ${testUser}`);
     await clearAndType(driver, By.name("username"), testUser);
+    await clearAndType(driver, By.name("email"), testEmail);
     await clearAndType(driver, By.name("password"), testPass);
 
     // Select Interest Tags

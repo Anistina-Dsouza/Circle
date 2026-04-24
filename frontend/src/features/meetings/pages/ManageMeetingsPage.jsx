@@ -87,6 +87,7 @@ const ManageMeetingsPage = () => {
                     </div>
 
                     <button
+                        id="schedule-new-btn-manage"
                         onClick={() => navigate('/meetings/schedule')}
                         className="w-full sm:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
@@ -129,6 +130,7 @@ const ManageMeetingsPage = () => {
 
                                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                                     <button
+                                        id={`delete-meeting-btn-${meeting._id || meeting.id}`}
                                         onClick={() => handleDelete(meeting._id || meeting.id)}
                                         className="flex-1 lg:flex-none bg-[#330808]/50 border border-red-500/20 hover:border-red-500/40 text-red-400 px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-[#330808]"
                                     >
@@ -136,7 +138,7 @@ const ManageMeetingsPage = () => {
                                         <span className="text-[10px] font-black uppercase tracking-widest">Delete</span>
                                     </button>
                                     <button
-
+                                        id={`start-zoom-btn-${meeting._id || meeting.id}`}
                                         onClick={() => handleStartZoom(meeting)}
                                         className="w-full lg:w-auto bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 flex items-center justify-center"
                                     >

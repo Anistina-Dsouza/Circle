@@ -178,6 +178,7 @@ const MeetingsPage = () => {
                     {canHost && (
                         <div className="flex items-center gap-3">
                             <button
+                                id="schedule-new-btn"
                                 onClick={() => navigate('/meetings/schedule')}
                                 className="flex items-center justify-center gap-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95"
                             >
