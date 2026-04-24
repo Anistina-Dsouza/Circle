@@ -63,21 +63,22 @@ async function testLogin(driver, baseUrl, testEmail, testPass) {
 
     console.log("Edge Case: Submit Empty Fields...");
     await click(driver, submitBtn);
-    await sleep(2000);
+    await sleep(5000);
 
     console.log("Edge Case: Non-Existent User...");
     await clearAndType(driver, By.name("email"), "fakeuser@test.com");
     await clearAndType(driver, By.name("password"), "SomeSecretPass123!");
     await click(driver, submitBtn);
-    await sleep(3000);
+    await sleep(5000);
 
     console.log("Edge Case: Wrong Password...");
     await clearAndType(driver, By.name("email"), testEmail);
     await clearAndType(driver, By.name("password"), "IncorrectPassword");
     await click(driver, submitBtn);
-    await sleep(3000);
+    await sleep(5000);
 
     console.log("Performing Valid Login...");
+    await clearAndType(driver, By.name("email"), testEmail);
     await clearAndType(driver, By.name("password"), testPass);
     await click(driver, submitBtn);
     await driver.wait(until.urlContains("/feed"), 15000);

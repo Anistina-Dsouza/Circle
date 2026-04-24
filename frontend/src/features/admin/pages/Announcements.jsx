@@ -97,6 +97,7 @@ export default function Announcements() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
+                id="announcement-title"
                 className="w-full bg-[#1a0033] px-6 py-4 rounded-xl border border-purple-900/40 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                 required
               />
@@ -113,6 +114,7 @@ export default function Announcements() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 maxLength={500}
+                id="announcement-message"
                 className="w-full bg-[#1a0033] px-6 py-4 rounded-xl border border-purple-900/40 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-white"
                 required
               />
@@ -124,6 +126,7 @@ export default function Announcements() {
             {/* Button */}
             <button 
               type="submit" 
+              id="broadcast-btn"
               disabled={submitting || !title.trim() || !message.trim()}
               className="w-full bg-gradient-to-r from-purple-500 to-purple-600 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >

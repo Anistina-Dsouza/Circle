@@ -17,6 +17,7 @@ const ScheduleMeetingPage = () => {
         description: '',
         scheduledDuration: 60,
     });
+    const [successMsg, setSuccessMsg] = useState('');
     const [myCircles, setMyCircles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -92,7 +93,10 @@ const ScheduleMeetingPage = () => {
             };
 
             await meetingService.createMeeting(payload);
-            navigate('/meetings');
+            setSuccessMsg('Meeting scheduled successfully!');
+            setTimeout(() => {
+                navigate('/meetings');
+            }, 2000);
         } catch (err) {
             console.error('Error creating meeting:', err);
             setError(err.response?.data?.message || 'Failed to schedule Zoom meeting. Please verify your Zoom credentials or try again.');
@@ -102,8 +106,18 @@ const ScheduleMeetingPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0F0529] text-white font-sans">
+        <div className="min-h-screen bg-[#0F0529] text-white font-sans relative">
             <FeedNavbar activePage="Meetings" />
+
+            {/* Success Toast */}
+            {successMsg && (
+                <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-green-600 text-white px-8 py-4 rounded-2xl shadow-2xl shadow-green-900/40 flex items-center gap-3 border border-green-500/20">
+                        <Check size={20} />
+                        <span className="font-bold tracking-wide">{successMsg}</span>
+                    </div>
+                </div>
+            )}
 
             <main className="max-w-2xl mx-auto px-6 py-12">
                 <button
