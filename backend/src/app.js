@@ -15,6 +15,7 @@ const conversationRoutes = require('./routes/conversationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const meetingRoutes = require('./routes/meetingRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 
 const app = express();
@@ -66,6 +67,7 @@ app.use('/api/circlemessages', circleMessageRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 
 // 404 handler

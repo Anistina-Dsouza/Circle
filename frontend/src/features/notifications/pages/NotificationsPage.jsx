@@ -1,84 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const NotificationsPage = () => {
     const [activeTab, setActiveTab] = useState('all');
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            type: 'like',
-            user: {
-                name: 'khushiepal',
-                username: 'khushiepal',
-                avatar: 'https://via.placeholder.com/150'
-            },
-            content: 'liked your moment from last night! ',
-            time: '2m ago',
-            isRead: false
-        },
-        {
-            id: 2,
-            type: 'follow',
-            user: {
-                name: 'maryam',
-                username: 'maryam',
-                avatar: 'https://via.placeholder.com/150'
-            },
-            content: 'started following you. Connect back?',
-            time: '15m ago',
-            isRead: false
-        },
-        {
-            id: 3,
-            type: 'mention',
-            user: {
-                name: 'kalagipandya',
-                username: 'kalagipandya',
-                avatar: 'https://via.placeholder.com/150'
-            },
-            content: 'mentioned you in a comment: "@sakina check this out!"',
-            time: '2h ago',
-            isRead: true
-        },
-        {
-            id: 4,
-            type: 'circle_invite',
-            user: {
-                name: 'Design Enthusiasts',
-                username: 'design_circle',
-                avatar: 'https://via.placeholder.com/150'
-            },
-            content: 'invited you to join the "Design Patterns" circle.',
-            time: '5h ago',
-            isRead: true
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${backendUrl}/api/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                setNotifications(response.data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+        } finally {
+            setLoading(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
 
     const getIcon = (type) => {
         switch (type) {
+            case 'reaction':
             case 'like': return <Heart className="text-red-500" size={16} fill="currentColor" />;
             case 'follow': return <UserPlus className="text-blue-500" size={16} />;
-            case 'mention': return <MessageCircle className="text-purple-500" size={16} />;
-            case 'circle_invite': return <Star className="text-yellow-500" size={16} fill="currentColor" />;
+            case 'mention':
+            case 'message': return <MessageCircle className="text-purple-500" size={16} />;
+            case 'circle_invite':
+            case 'circle_join': return <Star className="text-yellow-500" size={16} fill="currentColor" />;
             default: return <Bell size={16} />;
         }
     };
 
-    const markAllRead = () => {
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    const markAllRead = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${backendUrl}/api/notifications/mark-all-read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        } catch (error) {
+            console.error('Failed to mark all as read:', error);
+        }
     };
 
-    const clearAll = () => {
+    const clearAll = async () => {
         if (window.confirm('Clear all notifications?')) {
-            setNotifications([]);
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(`${backendUrl}/api/notifications/clear-all`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setNotifications([]);
+            } catch (error) {
+                console.error('Failed to clear notifications:', error);
+            }
         }
+    };
+
+    const markAsRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${backendUrl}/api/notifications/${id}/read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+        } catch (error) {
+            console.error('Failed to mark as read:', error);
+        }
+    };
+
+    const formatTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return `${Math.floor(diffInSeconds / 86400)}d ago`;
     };
 
     const filteredNotifications = notifications.filter(n => {
         if (activeTab === 'all') return true;
         if (activeTab === 'unread') return !n.isRead;
+        // Group similar types for tabs
+        if (activeTab === 'like') return n.type === 'reaction' || n.type === 'like';
+        if (activeTab === 'mention') return n.type === 'mention' || n.type === 'message' || n.type === 'flash_reply';
+        if (activeTab === 'circle_invite') return n.type === 'circle_invite' || n.type === 'circle_join';
         return n.type === activeTab;
     });
 
@@ -136,7 +157,9 @@ const NotificationsPage = () => {
 
                 {/* Notifications List */}
                 <div className="space-y-3">
-                    {filteredNotifications.length === 0 ? (
+                    {loading ? (
+                        <div className="text-center text-gray-500 py-10">Loading notifications...</div>
+                    ) : filteredNotifications.length === 0 ? (
                         <div className="bg-[#12082A]/50 border border-dashed border-white/10 rounded-3xl p-16 text-center flex flex-col items-center">
                             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                                 <Bell className="text-gray-600" size={32} />
@@ -147,8 +170,9 @@ const NotificationsPage = () => {
                     ) : (
                         filteredNotifications.map((noti) => (
                             <div 
-                                key={noti.id}
-                                className={`group relative bg-[#12082A] border transition-all duration-300 p-4 rounded-3xl flex gap-4 items-start active:scale-[0.98] ${
+                                key={noti._id || noti.id}
+                                onClick={() => !noti.isRead && markAsRead(noti._id || noti.id)}
+                                className={`group relative bg-[#12082A] border transition-all duration-300 p-4 rounded-3xl flex gap-4 items-start cursor-pointer active:scale-[0.98] ${
                                     noti.isRead 
                                     ? 'border-white/5 opacity-80' 
                                     : 'border-purple-500/30 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.05)]'
@@ -161,8 +185,8 @@ const NotificationsPage = () => {
 
                                 <div className="shrink-0 relative">
                                     <img 
-                                        src={noti.user.avatar} 
-                                        alt={noti.user.name} 
+                                        src={noti.sender?.avatar || 'https://via.placeholder.com/150'} 
+                                        alt={noti.sender?.name || 'System'} 
                                         className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/5"
                                     />
                                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#12082A] border border-white/10 flex items-center justify-center shadow-2xl">
@@ -173,17 +197,21 @@ const NotificationsPage = () => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                         <div className="flex items-center gap-1.5 flex-wrap">
-                                            <Link to={`/profile/${noti.user.username}`} className="text-sm font-black hover:text-purple-400 transition-colors">
-                                                {noti.user.name}
-                                            </Link>
-                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">• {noti.time}</span>
+                                            {noti.sender ? (
+                                                <Link to={`/profile/${noti.sender.username}`} onClick={(e) => e.stopPropagation()} className="text-sm font-black hover:text-purple-400 transition-colors">
+                                                    {noti.sender.name}
+                                                </Link>
+                                            ) : (
+                                                <span className="text-sm font-black">System</span>
+                                            )}
+                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">• {formatTime(noti.createdAt || noti.time)}</span>
                                         </div>
                                         {!noti.isRead && (
                                             <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
                                         )}
                                     </div>
                                     <p className={`text-sm leading-relaxed ${noti.isRead ? 'text-gray-400' : 'text-gray-200 font-medium'}`}>
-                                        {noti.content}
+                                        {noti.message || noti.content}
                                     </p>
                                 </div>
 
