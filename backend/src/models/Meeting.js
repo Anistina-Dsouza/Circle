@@ -107,7 +107,6 @@ const meetingSchema = new mongoose.Schema({
 meetingSchema.index({ host: 1, startTime: -1 });
 meetingSchema.index({ circle: 1, startTime: -1 });
 meetingSchema.index({ status: 1, startTime: 1 });
-meetingSchema.index({ roomId: 1 });
 
 // Middleware
 meetingSchema.pre('save', function(next) {

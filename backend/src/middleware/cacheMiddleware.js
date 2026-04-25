@@ -12,8 +12,15 @@ const cacheMiddleware = (duration = 3600) => {
     }
 
     try {
-      // Use the request URL as the cache key
-      const key = `__express__${req.originalUrl || req.url}`;
+      // Use the request URL as the base key
+      let key = `__express__${req.originalUrl || req.url}`;
+      
+      // If the user is authenticated, append their ID to the key
+      // This ensures personalized feeds/data aren't leaked to other users
+      if (req.user && req.user._id) {
+        key += `_user_${req.user._id}`;
+      }
+
       const cachedResponse = await redisClient.get(key);
 
       if (cachedResponse) {

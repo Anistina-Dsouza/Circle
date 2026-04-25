@@ -12,6 +12,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const [previewUrl, setPreviewUrl] = useState('');
     const [uploadMode, setUploadMode] = useState('device'); // 'device' or 'link'
     const [mediaFile, setMediaFile] = useState(null);
+    const [error, setError] = useState('');
     
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
@@ -29,8 +30,14 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     const handleFileSelect = (e) => {
+        setError('');
         const file = e.target.files[0];
         if (file) {
+            // Client-side validation for file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                setError('File size exceeds 10MB limit. Please choose a smaller file.');
+                return;
+            }
             setMediaFile(file);
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
@@ -40,6 +47,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     };
 
     const handleUrlChange = (url) => {
+        setError('');
         setMediaFile(null);
         setMediaUrl(url);
         setPreviewUrl(url);
@@ -53,10 +61,11 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
 
     const handlePostStory = async () => {
         if (!mediaUrl && !mediaFile) {
-            alert('Please upload an image or video first');
+            setError('Please upload an image or video first');
             return;
         }
 
+        setError('');
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -94,7 +103,8 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
             }
         } catch (error) {
             console.error('Error posting story:', error);
-            console.log(error.response?.data?.error || 'Failed to post story');
+            const backendError = error.response?.data?.error || 'Failed to post story';
+            setError(backendError);
         } finally {
             setLoading(false);
         }
@@ -203,7 +213,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                             <ImageIcon size={32} className="text-purple-400" />
                                         </div>
                                         <h4 className="font-bold text-white mb-1">Drag and drop or click to upload</h4>
-                                        <p className="text-xs text-gray-500">Supports JPG, PNG, MP4 up to 15MB</p>
+                                        <p className="text-xs text-gray-500">Supports JPG, PNG, MP4 up to 10MB</p>
                                         <input 
                                             type="file" 
                                             ref={fileInputRef} 
@@ -286,6 +296,16 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${isPublic ? 'right-1' : 'left-1'}`} />
                                 </button>
                             </div>
+                            
+                            {/* Error Display */}
+                            {error && (
+                                <div className="bg-red-500/10 border border-red-500/50 rounded-2xl p-4 flex items-center space-x-3">
+                                    <div className="p-2 bg-red-500/20 rounded-full">
+                                        <X size={16} className="text-red-400" />
+                                    </div>
+                                    <p className="text-sm font-medium text-red-400">{error}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
