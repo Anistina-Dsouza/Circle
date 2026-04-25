@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Smile, Phone, Video, MoreVertical, MessageCircle, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera } from 'lucide-react';
+import { Send, Smile, Phone, Video, MoreVertical, MessageCircle, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera, Reply, X, Trash2, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
@@ -7,8 +7,106 @@ import axios from 'axios';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 
+/* ── single message bubble ──────────────────────────── */
+const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
+    const isMe = msg.sender === 'me';
+    const likedByMe = msg.likedByMe;
+
+    return (
+        <div className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+            <div className={`flex max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end gap-3 group relative`}>
+                {/* Avatar */}
+                {!isMe && (
+                    <div className="shrink-0 mb-1 active:scale-90 transition-transform">
+                        <img
+                            src={msg.avatar || 'https://via.placeholder.com/150'}
+                            alt="Sender"
+                            className="w-8 h-8 rounded-full object-cover ring-2 ring-white/5 hover:ring-violet-500/30 transition-all"
+                        />
+                    </div>
+                )}
+
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1`}>
+                    {/* Bubble Container */}
+                    <div className={`relative px-4 py-2.5 rounded-2xl border transition-all duration-300 group shadow-sm ${
+                        isMe
+                            ? 'bg-violet-600 text-white rounded-tr-none border-violet-500/20'
+                            : 'bg-white/5 text-gray-200 rounded-tl-none border-white/5 backdrop-blur-sm'
+                    }`}>
+                        
+                        {/* Reply To Preview */}
+                        {msg.replyTo && (
+                            <div className={`mb-2 p-2 rounded-lg text-xs border-l-4 overflow-hidden ${isMe ? 'bg-violet-900/40 border-violet-400' : 'bg-black/20 border-gray-500'}`}>
+                                <p className="font-bold text-[10px] mb-0.5 text-violet-300">{msg.replyTo.name}</p>
+                                <p className="line-clamp-1 opacity-60 text-gray-300">{msg.replyTo.text}</p>
+                            </div>
+                        )}
+
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {msg.isDeleted ? <span className="italic opacity-50">This message was deleted</span> : msg.text}
+                        </p>
+
+                        {!msg.isDeleted && (
+                            /* Hover Actions Bar */
+                            <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 pointer-events-none group-hover:pointer-events-auto scale-90 origin-top`}>
+                                <button 
+                                    onClick={() => onReply(msg)}
+                                    className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all" 
+                                    title="Reply"
+                                >
+                                    <Reply size={12} />
+                                </button>
+                                <button 
+                                    onClick={() => onToggleReaction(msg.id)}
+                                    className={`p-1.5 rounded-full transition-all ${likedByMe ? 'text-red-500 bg-red-500/10' : 'text-gray-400 hover:text-red-400 hover:bg-white/10'}`} 
+                                    title={likedByMe ? "Unlike" : "Like"}
+                                >
+                                    <Heart size={12} fill={likedByMe ? "currentColor" : "none"} />
+                                </button>
+                                {isMe && (
+                                    <button 
+                                        onClick={() => onDelete(msg.id)}
+                                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white/10 rounded-full transition-all" 
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Reactions Display */}
+                    {msg.reactions?.length > 0 && (
+                        <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            {msg.reactions.map((r, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => onToggleReaction(msg.id, r.icon)}
+                                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] transition-all ${
+                                        likedByMe && r.icon === '❤️'
+                                        ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                                        : 'bg-white/5 border-white/5 text-gray-400 hover:bg-violet-500/20'
+                                    }`}
+                                >
+                                    <span>{r.icon}</span>
+                                    <span className="font-bold">{r.count}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <span className={`text-[10px] text-gray-600 font-medium ${isMe ? 'text-right' : 'text-left'}`}>
+                        {msg.time}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ChatArea = ({ chatId }) => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     
     // Safe user ID retrieval
     const currentUserId = (() => {
@@ -28,6 +126,7 @@ const ChatArea = ({ chatId }) => {
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [hasNewMessages, setHasNewMessages] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [replyingTo, setReplyingTo] = useState(null);
     const messagesEndRef = useRef(null);
     const scrollRef = useRef(null);
     const socketRef = useRef(null);
@@ -44,13 +143,15 @@ const ChatArea = ({ chatId }) => {
 
 
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (resetNewMessages = true) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        setHasNewMessages(false);
+        if (resetNewMessages) {
+            setHasNewMessages(false);
+        }
     };
 
     useEffect(() => {
-        scrollToBottom();
+        scrollToBottom(false);
     }, [messages]);
 
     const handleScroll = () => {
@@ -77,27 +178,22 @@ const ChatArea = ({ chatId }) => {
                     axios.get(`${BACKEND_URL}/api/dm/conversations/${chatId}`, { headers: { Authorization: `Bearer ${token}` } }),
                     axios.get(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages`, { headers: { Authorization: `Bearer ${token}` } })
                 ]);
-                setChatDetails(chatRes.data.conversation);
+                const convo = chatRes.data.conversation;
+                setChatDetails(convo);
+                
+                // Get other participant for name/avatar
+                const other = convo?.participants?.find(p => (p.user?._id || p.user) !== currentUserId)?.user;
+
                 // Format messages from backend
                 const backendMessages = msgRes.data.messages || [];
-                const formatted = backendMessages.map(msg => {
-                    const senderObj = msg.sender;
-                    const senderId = senderObj?._id || senderObj;
-                    return {
-                        id: msg._id,
-                        sender: senderId === currentUserId ? 'me' : 'them',
-                        text: msg.content?.text || '',
-                        time: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                        date: new Date(msg.createdAt).toLocaleDateString()
-                    };
-                });
+                const formatted = backendMessages.map(msg => formatBackendMessage(msg, currentUserId, other));
                 setMessages(formatted);
             } catch (err) {
                 console.error("Failed to fetch chat data", err);
             }
         };
         fetchData();
-    }, [chatId]);
+    }, [chatId, currentUserId]);
 
 
     useEffect(() => {
@@ -118,19 +214,10 @@ const ChatArea = ({ chatId }) => {
 
         // Listen for new messages
         socketRef.current.on('newMessage', (newMessage) => {
-             console.log('New message received via socket:', newMessage);
-             const senderObj = newMessage.sender;
-             const senderId = senderObj?._id || senderObj;
-             // Only add if we didn't send it (or we can use it to replace the optimistic one)
+             const senderId = newMessage.sender?._id || newMessage.sender;
              if (senderId !== currentUserId) {
-                  const formattedMessage = {
-                      id: newMessage._id || Date.now(),
-                      sender: 'them',
-                      text: newMessage.content?.text || '',
-                      time: new Date(newMessage.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                      date: new Date(newMessage.createdAt || Date.now()).toLocaleDateString()
-                  };
-                  setMessages((prev) => [...prev, formattedMessage]);
+                  const other = chatDetails?.participants?.find(p => (p.user?._id || p.user) !== currentUserId)?.user;
+                  setMessages((prev) => [...prev, formatBackendMessage(newMessage, currentUserId, other)]);
                   
                   // Check if user is scrolled up
                   const element = scrollRef.current;
@@ -138,6 +225,22 @@ const ChatArea = ({ chatId }) => {
                       setHasNewMessages(true);
                   }
              }
+        });
+
+        socketRef.current.on('messageDeleted', ({ messageId }) => {
+            setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, isDeleted: true, text: 'This message was deleted' } : msg));
+        });
+
+        socketRef.current.on('messageReacted', ({ messageId, reactions }) => {
+            setMessages(prev => prev.map(msg => 
+                msg.id === messageId 
+                ? { 
+                    ...msg, 
+                    reactions: reactions.map(r => ({ icon: r.emoji, count: r.users?.length || 1 })),
+                    likedByMe: reactions.some(r => r.emoji === '❤️' && r.users.some(u => (u._id || u) === currentUserId))
+                  } 
+                : msg
+            ));
         });
 
         // Listen for updated messages
@@ -157,7 +260,7 @@ const ChatArea = ({ chatId }) => {
                 socketRef.current.disconnect();
             }
         };
-    }, [chatId]);
+    }, [chatId, currentUserId]);
 
     // Close emoji picker on click outside
     useEffect(() => {
@@ -176,6 +279,69 @@ const ChatArea = ({ chatId }) => {
             socketRef.current.emit('join_conversation', chatId);
         }
     }, [chatId]);
+
+    const formatBackendMessage = (msg, myUserId, otherUser) => {
+        const senderId = msg.sender?._id || msg.sender;
+        const isMe = senderId === myUserId;
+        
+        const heartReaction = msg.reactions?.find(r => r.emoji === '❤️');
+        const likedByMe = heartReaction?.users?.some(u => (u._id || u) === myUserId);
+
+        return {
+            id: msg._id,
+            sender: isMe ? 'me' : 'them',
+            text: msg.content?.text || '',
+            time: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            date: new Date(msg.createdAt).toLocaleDateString(),
+            reactions: msg.reactions?.map(r => ({ icon: r.emoji, count: r.users?.length || 1 })) || [],
+            likedByMe,
+            isDeleted: msg.isDeleted,
+            avatar: isMe ? null : (otherUser?.profilePic || 'https://via.placeholder.com/150'),
+            replyTo: msg.replyTo ? {
+                id: msg.replyTo._id,
+                name: (msg.replyTo.sender?._id || msg.replyTo.sender) === myUserId ? 'You' : (otherUser?.displayName || otherUser?.username || 'Them'),
+                text: msg.replyTo.content?.text || 'Media'
+            } : null
+        };
+    };
+
+    const handleToggleReaction = async (messageId, emoji = '❤️') => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages/${messageId}/react`, 
+                { emoji },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            if (res.data.reactions) {
+                setMessages(prev => prev.map(msg => 
+                    msg.id === messageId 
+                    ? { 
+                        ...msg, 
+                        reactions: res.data.reactions.map(r => ({ icon: r.emoji, count: r.users?.length || 1 })),
+                        likedByMe: res.data.reactions.some(r => r.emoji === '❤️' && r.users.some(u => (u._id || u) === currentUserId))
+                      } 
+                    : msg
+                ));
+            }
+        } catch (err) {
+            console.error("Failed to toggle reaction", err);
+        }
+    };
+
+    const handleDeleteMessage = async (messageId) => {
+        if (!window.confirm('Delete this message for everyone?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages/${messageId}`, {
+                data: { deleteFor: 'everyone' },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, isDeleted: true, text: 'This message was deleted' } : msg));
+        } catch (err) {
+            console.error("Failed to delete message", err);
+        }
+    };
 
     const handleSend = async (e) => {
         e.preventDefault();
@@ -198,12 +364,14 @@ const ChatArea = ({ chatId }) => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages`, {
-                content: { text: textToSubmit }
+                content: { text: textToSubmit },
+                replyTo: replyingTo?.id
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Optionally update the tempId with the real ID
-            setMessages((prev) => prev.map(m => m.id === tempId ? { ...m, id: res.data.message._id } : m));
+            const other = chatDetails?.participants?.find(p => (p.user?._id || p.user) !== currentUserId)?.user;
+            setMessages((prev) => prev.map(m => m.id === tempId ? formatBackendMessage(res.data.message, currentUserId, other) : m));
+            setReplyingTo(null);
         } catch (err) {
             console.error("Failed to send message", err);
             // Optionally remove the message or mark as failed
@@ -333,39 +501,15 @@ const ChatArea = ({ chatId }) => {
                 {Object.entries(groupedMessages).map(([date, msgs]) => (
                     <div key={date}>
                         <DateDivider date={date} />
-                        <div className="space-y-4">
+                        <div className="space-y-1">
                             {msgs.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`flex w-full ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                                >
-                                    <div className={`flex max-w-[75%] ${msg.sender === 'me' ? 'flex-row-reverse space-x-reverse' : 'flex-row'} items-end space-x-3`}>
-                                        {msg.sender === 'them' && (
-                                            <Link to={`/profile/${otherParticipant?.username}`} className="shrink-0 mb-2 active:scale-90 transition-transform">
-                                                <img
-                                                    src={chatAvatar}
-                                                    alt="Sender"
-                                                    className="w-8 h-8 rounded-full object-cover ring-2 ring-white/5 hover:ring-violet-500/30 transition-all cursor-pointer"
-                                                />
-                                            </Link>
-                                        )}
-
-
-                                        <div className="flex flex-col space-y-1">
-                                            <div
-                                                className={`px-5 py-3 rounded-2xl text-[14px] leading-relaxed shadow-sm transition-all hover:brightness-110 ${msg.sender === 'me'
-                                                        ? 'bg-violet-600 text-white rounded-tr-none shadow-violet-900/10 border border-violet-500/20'
-                                                        : 'bg-white/5 text-gray-200 rounded-tl-none border border-white/5 backdrop-blur-sm'
-                                                    }`}
-                                            >
-                                                {msg.text}
-                                            </div>
-                                            <span className={`text-[10px] text-gray-600 font-medium ${msg.sender === 'me' ? 'text-right pr-1' : 'text-left pl-1'}`}>
-                                                {msg.time}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ChatMessage 
+                                    key={msg.id} 
+                                    msg={msg} 
+                                    onToggleReaction={handleToggleReaction}
+                                    onReply={setReplyingTo}
+                                    onDelete={handleDeleteMessage}
+                                />
                             ))}
                         </div>
                     </div>
@@ -389,6 +533,23 @@ const ChatArea = ({ chatId }) => {
 
             {/* Input Area */}
             <div className="p-6 bg-[#0F0529] border-t border-white/5">
+                
+                {/* Reply Preview Bar */}
+                {replyingTo && (
+                    <div className="mb-3 bg-[#1A1140]/80 backdrop-blur-md border-l-4 border-violet-500 rounded-r-2xl p-3 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex-1">
+                            <p className="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-1">Replying to {replyingTo.name}</p>
+                            <p className="text-xs text-gray-400 line-clamp-1 italic">"{replyingTo.text}"</p>
+                        </div>
+                        <button 
+                            onClick={() => setReplyingTo(null)}
+                            className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-full transition-all active:scale-90"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                )}
+
                 <form
                     onSubmit={handleSend}
                     className="flex items-center space-x-3 bg-[#1E1B3A] rounded-full px-2 py-2 pr-2 border border-white/5 focus-within:border-purple-500/50 transition-colors shadow-lg"

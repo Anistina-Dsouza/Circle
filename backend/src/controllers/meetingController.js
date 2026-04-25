@@ -10,7 +10,7 @@ const zoomService = require('../services/zoomService');
 exports.getDashboard = async (req, res) => {
   try {
     const userId = req.user._id;
-    const now = new Date();
+    const now = new Date(Date.now() - 5 * 60 * 1000);
 
     const hosted = await Meeting.find({ host: userId, startTime: { $gte: now } })
       .sort({ startTime: 1 })
@@ -21,7 +21,6 @@ exports.getDashboard = async (req, res) => {
 
     const upcoming = await Meeting.find({ 
       startTime: { $gte: now },
-      host: { $ne: userId }, // exclude those already in hosted
       $or: [
         { 'participants.user': userId },
         { circle: { $in: circleIds } }
@@ -223,7 +222,7 @@ exports.scheduleMeeting = async (req, res) => {
  */
 exports.getMyMeetings = async (req, res) => {
   try {
-    const now = new Date();
+    const now = new Date(Date.now() - 5 * 60 * 1000);
     const meetings = await Meeting.find({ 
       host: req.user._id,
       endTime: { $gte: now }
@@ -311,7 +310,7 @@ exports.deleteMeeting = async (req, res) => {
  */
 exports.getUpcomingMeetings = async (req, res) => {
   try {
-    const now = new Date();
+    const now = new Date(Date.now() - 5 * 60 * 1000);
     const { circleId } = req.query;
     
     let query = { startTime: { $gte: now } };
@@ -363,7 +362,7 @@ exports.getUpcomingMeetings = async (req, res) => {
  */
 exports.getMeetingHistory = async (req, res) => {
   try {
-    const now = new Date();
+    const now = new Date(Date.now() - 5 * 60 * 1000);
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
@@ -485,7 +484,7 @@ exports.updateRSVP = async (req, res) => {
 exports.getCircleMeetings = async (req, res) => {
   try {
     const { circleId } = req.params;
-    const now = new Date();
+    const now = new Date(Date.now() - 5 * 60 * 1000);
     const currentUserId = req.user._id.toString();
 
     const meetings = await Meeting.find({

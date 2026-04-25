@@ -11,7 +11,7 @@ const circleRoutes = require('./routes/circleRoutes');
 const momentRoutes = require('./routes/momentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const circleMessageRoutes = require('./routes/circleMessageRoutes'); // Import circle message routes
-const conversationRoutes = require('./routes/conversationRoutes'); 
+const conversationRoutes = require('./routes/conversationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const meetingRoutes = require('./routes/meetingRoutes');
@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 app.get('/', (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     message: 'Circle API is running!',
     endpoints: {
       auth: '/api/auth',
@@ -62,8 +62,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/moments', momentRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/dm/conversations', conversationRoutes); 
-app.use('/api/circlemessages', circleMessageRoutes); 
+app.use('/api/dm/conversations', conversationRoutes);
+app.use('/api/circlemessages', circleMessageRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/meetings', meetingRoutes);

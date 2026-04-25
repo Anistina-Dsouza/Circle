@@ -17,6 +17,8 @@ const StoryViewerPage = () => {
     const [showViewers, setShowViewers] = useState(false);
     const [error, setError] = useState(null);
     
+    const [successMsg, setSuccessMsg] = useState('');
+    
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
     const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -69,20 +71,17 @@ const StoryViewerPage = () => {
         return () => clearInterval(progressTimer.current);
     }, [currentIndex, loading, stories.length, isPaused, error, showViewers, stories, step]);
 
-    // Separate effect to handle automatic transition when progress reaches 100%
     useEffect(() => {
         if (progress >= 100) {
             handleNext();
         }
-    }, [progress]);
+    }, [progress, handleNext]);
 
-    // Record view whenever a new story is displayed
     useEffect(() => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
             const momentId = stories[currentIndex]._id || stories[currentIndex].id;
             if (momentId) {
                 const token = localStorage.getItem('token');
-                // Silently fetch to record view
                 axios.get(`${baseUrl}/api/moments/${momentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }).catch(e => console.log('Silent view tracking error', e));
@@ -120,16 +119,21 @@ const StoryViewerPage = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 
-                // Remove deleted story from state
-                const newStories = stories.filter(s => s._id !== momentId);
-                if (newStories.length === 0) {
-                    navigate('/feed');
-                } else {
-                    setStories(newStories);
-                    setCurrentIndex(Math.min(currentIndex, newStories.length - 1));
-                    setProgress(0);
-                }
-            } catch (error) {
+                setSuccessMsg('Story deleted permanently!');
+                setTimeout(() => {
+                    setSuccessMsg('');
+                    // Remove deleted story from state after toast starts fading
+                    const newStories = stories.filter(s => s._id !== momentId);
+                    if (newStories.length === 0) {
+                        navigate('/feed');
+                    } else {
+                        setStories(newStories);
+                        setCurrentIndex(Math.min(currentIndex, newStories.length - 1));
+                        setProgress(0);
+                    }
+                }, 1500);
+            } catch (err) {
+                console.error('Delete error:', err);
                 alert('Failed to delete story');
             }
         }
@@ -139,7 +143,7 @@ const StoryViewerPage = () => {
         if (e.target.closest('button')) return;
 
         const { clientX } = e;
-        const screenWidth = window.innerWidth;
+        // const screenWidth = window.innerWidth;
         const cardElement = e.currentTarget;
         const cardRect = cardElement.getBoundingClientRect();
         
@@ -186,6 +190,15 @@ const StoryViewerPage = () => {
 
     return (
         <div className="fixed inset-0 bg-[#0F0529] z-[100] flex flex-col items-center justify-center overflow-hidden font-sans">
+            {/* Success Toast */}
+            {successMsg && (
+                <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[200] animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl shadow-red-900/40 flex items-center gap-3 border border-red-400/20">
+                        <AlertCircle size={20} />
+                        <span className="font-bold text-sm tracking-wide">{successMsg}</span>
+                    </div>
+                </div>
+            )}
 
             {/* Stories Container (Card Style) */}
             <div className="relative w-full max-w-[420px] h-full h-[95vh] flex flex-col py-8">

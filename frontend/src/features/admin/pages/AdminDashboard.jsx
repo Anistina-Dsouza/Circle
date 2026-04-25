@@ -7,6 +7,7 @@ import KPICard from "../components/KPICard";
 import LatestRegistrations from "../components/LatestRegistrations";
 import CirclesTable from "../components/CirclesTable";
 import NetworkChart from "../components/NetworkChart";
+import GrowthTrends from "../components/GrowthTrends";
 
 export default function AdminDashboard() {
     const [data, setData] = useState(null);
@@ -35,6 +36,11 @@ export default function AdminDashboard() {
         };
 
         fetchDashboardData();
+
+        // Implement Auto-Polling for Dynamic System Pulse (Every 30s)
+        const refreshInterval = setInterval(fetchDashboardData, 30000);
+        
+        return () => clearInterval(refreshInterval);
     }, []);
 
     if (loading) {
@@ -60,6 +66,7 @@ export default function AdminDashboard() {
 
     // Safely fallback to 0 if data gracefully handles errors
     const stats = data?.stats || { totalUsers: 0, totalCircles: 0, activeUsers: 0, flaggedItems: 0 };
+    const trends = data?.trends || { registrations: [], categories: [], hourly: [] };
     const latestUsers = data?.latestUsers || [];
     const latestCircles = data?.latestCircles || [];
 
@@ -73,12 +80,19 @@ export default function AdminDashboard() {
                 <KPICard value={stats.flaggedItems.toLocaleString()} label="Flagged" badge={stats.flaggedItems > 0 ? "Review" : "Good"} />
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+            <div className="grid lg:grid-cols-2 gap-8 mb-8 mt-10">
                 <LatestRegistrations users={latestUsers} />
                 <CirclesTable circles={latestCircles} />
             </div>
 
-            <NetworkChart />
+            <NetworkChart 
+                registrationTrends={trends.registrations} 
+                hourlyTrends={trends.hourly}
+            />
+
+            <div className="mt-12">
+                <GrowthTrends trends={trends} />
+            </div>
 
         </AdminLayout>
     )

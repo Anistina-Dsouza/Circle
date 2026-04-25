@@ -3,8 +3,11 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const circleController = require('../controllers/circleController');
 
+const cacheMiddleware = require('../middleware/cacheMiddleware');
+
 // =========== PUBLIC ROUTES ===========
-router.get('/', circleController.getPublicCircles);
+// Cache public circles list for 5 minutes (300 seconds)
+router.get('/', cacheMiddleware(300), circleController.getPublicCircles);
 router.get('/:slug', circleController.getCircleBySlug);
 router.get('/:circleId/members', circleController.getCircleMembers);
 

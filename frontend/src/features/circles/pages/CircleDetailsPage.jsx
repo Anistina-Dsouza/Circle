@@ -16,7 +16,8 @@ import CircleInviteModal  from '../components/CircleInviteModal';
 import ReportModal        from '../../../components/common/ReportModal';
 
 /* ── helpers ──────────────────────────────────────────────── */
-const DEFAULT_COVER = 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop';
+const DEFAULT_COVER   = 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop';
+const DEFAULT_PROFILE = 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg';
 
 const formatCount = (n) => {
     if (!n) return '0';
@@ -150,8 +151,12 @@ const CircleDetailsPage = () => {
 
                     {/* Avatar + info */}
                     <div className="flex items-end gap-5">
-                        <div className="w-24 h-24 rounded-full border-4 border-[#0F0529] overflow-hidden shadow-2xl shadow-violet-900/40 shrink-0">
-                            <img src={circle.profilePic || coverSrc} alt={circle.name} className="w-full h-full object-cover" />
+                        <div className="w-24 h-24 rounded-full border-4 border-[#0F0529] overflow-hidden shadow-2xl shadow-violet-900/40 shrink-0 bg-[#1A0833]">
+                            <img 
+                                src={circle.profilePic && circle.profilePic.length > 5 ? circle.profilePic : DEFAULT_PROFILE} 
+                                alt={circle.name} 
+                                className="w-full h-full object-cover" 
+                            />
                         </div>
                         <div className="pb-1">
                             <h1 className="text-2xl font-extrabold text-white leading-tight mb-1.5">

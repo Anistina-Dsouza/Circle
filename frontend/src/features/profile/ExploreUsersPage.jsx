@@ -62,6 +62,20 @@ const ExploreUsersPage = () => {
     }, [searchQuery, fetchUsers]);
 
     const handleFollowToggle = async (userId, isFollowing) => {
+        // Optimistically update local users state for immediate follower count feedback
+        setUsers(prevUsers => prevUsers.map(u => {
+            if (u._id === userId) {
+                return {
+                    ...u,
+                    stats: {
+                        ...u.stats,
+                        followerCount: Math.max(0, (u.stats?.followerCount || 0) + (isFollowing ? -1 : 1))
+                    }
+                };
+            }
+            return u;
+        }));
+
         if (isFollowing) {
             await unfollowUser(userId);
         } else {

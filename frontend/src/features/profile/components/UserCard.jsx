@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom';
 const UserCard = ({ user, currentUserFollowing = [], onFollowToggle }) => {
     // Check if the current user is following this specific user
     const isFollowing = currentUserFollowing.some(f => {
+        if (!f) return false;
         const followedUser = f.following || f;
+        if (!followedUser) return false;
         return (followedUser._id || followedUser).toString() === user._id.toString();
     });
 

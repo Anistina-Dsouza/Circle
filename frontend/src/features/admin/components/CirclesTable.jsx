@@ -23,21 +23,25 @@ export default function CirclesTable({ circles }) {
     };
 
     return (
-        <div className="p-6 rounded-[28px] bg-[radial-gradient(circle_at_top,#2a004a,#13001f)] border border-white/5 overflow-hidden">
+        <div className="rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold">New Circles</h2>
-                <Link to="/admin/communities">
-                    <span className="text-purple-400 text-xs tracking-widest hover:text-purple-300 transition cursor-pointer">MANAGE</span>
+            <div className="flex justify-between items-center px-8 py-7 border-b border-white/5">
+                <div>
+                    <h2 className="text-xl font-bold text-white tracking-tight">New Circles</h2>
+                    <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Community Growth</p>
+                </div>
+                <Link to="/admin/communities" className="flex items-center gap-2 text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                    <span>Manage</span>
+                    <Settings size={12} />
                 </Link>
             </div>
 
             {/* Column Headings */}
-            <div className="flex text-xs uppercase tracking-widest text-gray-500 pb-4 border-b border-white/5">
-                <div className="w-[45%] pl-2">Circle</div>
+            <div className="flex px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-white/30 border-b border-white/5 bg-white/[0.02]">
+                <div className="w-[45%]">Circle</div>
                 <div className="w-[20%]">Category</div>
                 <div className="w-[20%]">Members</div>
-                <div className="w-[15%] text-right pr-2">Action</div>
+                <div className="w-[15%] text-right">Action</div>
             </div>
 
             {/* Rows */}
@@ -46,38 +50,43 @@ export default function CirclesTable({ circles }) {
                     circles.map((c, i) => (
                         <div
                             key={c._id || i}
-                            className="flex items-center py-4 hover:bg-purple-900/20 transition px-2 rounded-xl"
+                            className="group flex items-center px-8 py-6 hover:bg-white/[0.03] transition-all relative"
                         >
+                            <div className="absolute left-0 w-1 h-0 bg-indigo-500 group-hover:h-1/2 top-1/4 transition-all duration-300 rounded-r-full" />
+
                             {/* Circle */}
-                            <div className="w-[45%] flex gap-4 items-center overflow-hidden">
+                            <div className="w-[45%] flex gap-5 items-center overflow-hidden">
                                 {c.coverImage && c.coverImage !== 'default_circle.png' ? (
-                                    <img src={c.coverImage} className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-800/60 flex-shrink-0" alt={c.name} />
+                                    <img src={c.coverImage} className="w-11 h-11 rounded-2xl object-cover ring-2 ring-white/5 flex-shrink-0 group-hover:scale-105 transition-transform" alt={c.name} />
                                 ) : (
-                                    <div className="w-10 h-10 bg-purple-800/60 rounded-full flex items-center justify-center text-purple-300 flex-shrink-0">
+                                    <div className="w-11 h-11 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-purple-400 flex-shrink-0 shadow-xl group-hover:bg-purple-500 group-hover:text-white transition-all">
                                         {getDefaultIcon(c.category)}
                                     </div>
                                 )}
-                                <span className="text-sm font-medium truncate">{c.name}</span>
+                                <span className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">{c.name}</span>
                             </div>
 
                             {/* Category */}
                             <div className="w-[20%]">
-                                <span className="text-xs px-3 py-1 rounded-full bg-purple-900/40 text-purple-300 truncate inline-block max-w-[90%]">
+                                <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-white/5 text-white/60 border border-white/5 uppercase tracking-tighter truncate inline-block max-w-[90%] group-hover:border-white/20 transition-all">
                                     {c.category}
                                 </span>
                             </div>
 
                             {/* Members */}
                             <div className="w-[20%]">
-                                <span className="text-xs px-3 py-1 rounded-full bg-purple-700/20 text-purple-200">
-                                    {c.stats?.memberCount || c.members?.length || 0}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                                    <span className="text-xs font-black text-white/80">
+                                        {c.stats?.memberCount || c.members?.length || 0}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Action */}
                             <div className="w-[15%] flex justify-end">
                                 <Link to="/admin/communities">
-                                    <button className="p-2 rounded-full hover:bg-purple-800/40 transition">
+                                    <button className="p-3 rounded-xl bg-white/5 text-white/30 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-xl">
                                         <Settings size={16} />
                                     </button>
                                 </Link>
@@ -85,8 +94,8 @@ export default function CirclesTable({ circles }) {
                         </div>
                     ))
                 ) : (
-                    <div className="py-8 text-center text-sm text-gray-400">
-                        No circles have been created yet.
+                    <div className="py-20 text-center text-sm text-white/20 italic">
+                        No circles have been detected in the system.
                     </div>
                 )}
             </div>

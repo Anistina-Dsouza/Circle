@@ -15,78 +15,82 @@ const MeetingsPage = () => {
         canHost: false
     });
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchDashboard = async (isManual = false) => {
+        try {
+            if (isManual) setRefreshing(true);
+            else setLoading(true);
+
+            const res = await meetingService.getDashboard();
+            if (res.success && res.data) {
+                const mapUpcoming = (m) => {
+                    const dateObj = new Date(m.startTime);
+                    const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
+                    const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
+                    return {
+                        id: m._id,
+                        status: 'UPCOMING',
+                        statusColor: 'bg-purple-500/20 text-purple-300',
+                        title: m.title,
+                        circle: m.circle?.name || 'General Community',
+                        host: m.host?.profile?.displayName || m.host?.username || 'You',
+                        dateLabel: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
+                        time: dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+                        attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
+                        plusCount: plusCount,
+                        btnColor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]',
+                        meetingLink: m.meetingLink
+                    };
+                };
+
+                const mapPast = (m) => {
+                    const dateObj = new Date(m.startTime);
+                    const attendeesCount = m.participants?.filter(p => p.status === 'attended').length || m.participants?.length || 0;
+                    return {
+                        id: m._id,
+                        title: m.title,
+                        description: `Held with ${attendeesCount} attendees • ${m.duration || m.scheduledDuration || 60}m duration`,
+                        date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    };
+                };
+
+                const mapHosted = (m) => {
+                    const dateObj = new Date(m.startTime);
+                    const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
+                    const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
+                    return {
+                        id: m._id,
+                        status: 'HOSTING',
+                        statusColor: 'bg-green-500/20 text-green-300',
+                        title: m.title,
+                        circle: m.circle?.name || 'Your Meeting',
+                        host: 'You',
+                        dateLabel: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
+                        time: dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+                        attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
+                        plusCount: plusCount,
+                        btnColor: 'bg-indigo-600 hover:bg-indigo-500',
+                        meetingLink: m.meetingLink
+                    };
+                }
+
+                setDashboardData({
+                    hosted: res.data.hosted.map(mapHosted),
+                    upcoming: res.data.upcoming.map(mapUpcoming),
+                    past: res.data.past.map(mapPast),
+                    canHost: res.data.canHost
+                });
+            }
+        } catch (err) {
+            console.error("Failed to load dashboard data", err);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                setLoading(true);
-                const res = await meetingService.getDashboard();
-                if (res.success && res.data) {
-                    const mapUpcoming = (m) => {
-                        const dateObj = new Date(m.startTime);
-                        const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
-                        const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
-                        return {
-                            id: m._id,
-                            status: 'UPCOMING',
-                            statusColor: 'bg-purple-500/20 text-purple-300',
-                            title: m.title,
-                            circle: m.circle?.name || 'General Community',
-                            host: m.host?.profile?.displayName || m.host?.username || 'You',
-                            dateLabel: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
-                            time: dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-                            attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
-                            plusCount: plusCount,
-                            btnColor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]',
-                            meetingLink: m.meetingLink
-                        };
-                    };
-
-                    const mapPast = (m) => {
-                        const dateObj = new Date(m.startTime);
-                        const attendeesCount = m.participants?.filter(p => p.status === 'attended').length || m.participants?.length || 0;
-                        return {
-                            id: m._id,
-                            title: m.title,
-                            description: `Held with ${attendeesCount} attendees • ${m.duration || m.scheduledDuration || 60}m duration`,
-                            date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                        };
-                    };
-
-                    const mapHosted = (m) => {
-                        const dateObj = new Date(m.startTime);
-                        const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
-                        const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
-                        return {
-                            id: m._id,
-                            status: 'HOSTING',
-                            statusColor: 'bg-green-500/20 text-green-300',
-                            title: m.title,
-                            circle: m.circle?.name || 'Your Meeting',
-                            host: 'You',
-                            dateLabel: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
-                            time: dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-                            attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
-                            plusCount: plusCount,
-                            btnColor: 'bg-indigo-600 hover:bg-indigo-500',
-                            meetingLink: m.meetingLink
-                        };
-                    }
-
-                    setDashboardData({
-                        hosted: res.data.hosted.map(mapHosted),
-                        upcoming: res.data.upcoming.map(mapUpcoming),
-                        past: res.data.past.map(mapPast),
-                        canHost: res.data.canHost
-                    });
-                }
-            } catch (err) {
-                console.error("Failed to load dashboard data", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchDashboard();
     }, []);
 
@@ -178,6 +182,15 @@ const MeetingsPage = () => {
                     {canHost && (
                         <div className="flex items-center gap-3">
                             <button
+                                onClick={() => fetchDashboard(true)}
+                                disabled={refreshing}
+                                className={`flex items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all ${refreshing ? 'cursor-not-allowed opacity-50' : ''}`}
+                                title="Refresh Dashboard"
+                            >
+                                <Loader size={18} className={refreshing ? 'animate-spin' : ''} />
+                            </button>
+                            <button
+                                id="schedule-new-btn"
                                 onClick={() => navigate('/meetings/schedule')}
                                 className="flex items-center justify-center gap-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95"
                             >
