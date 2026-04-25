@@ -218,8 +218,8 @@ const ProfilePage = () => {
 
             return {
                 id: story._id || story.id,
-                title: story.caption || 'Untitled Moment',
-                description: story.caption || 'No description',
+                title: story.caption || '',
+                description: '',
                 timeLeft: timeLeftText,
                 image: story.media?.url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
             };
