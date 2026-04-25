@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter } from 'lucide-react';
+import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -7,17 +7,26 @@ import axios from 'axios';
 const NotificationsPage = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [notifications, setNotifications] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${backendUrl}/api/notifications`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.data.success) {
-                setNotifications(response.data.data);
+            const [notifRes, annRes] = await Promise.all([
+                axios.get(`${backendUrl}/api/notifications`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }),
+                axios.get(`${backendUrl}/api/announcements`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }).catch(() => ({ data: { success: false } }))
+            ]);
+            if (notifRes.data.success) {
+                setNotifications(notifRes.data.data);
+            }
+            if (annRes.data.success) {
+                setAnnouncements(annRes.data.data);
             }
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
@@ -140,7 +149,7 @@ const NotificationsPage = () => {
 
                 {/* Tabs / Filter Area */}
                 <div className="flex items-center gap-1 bg-[#12082A] p-1.5 rounded-2xl border border-white/5 mb-6 overflow-x-auto no-scrollbar">
-                    {['all', 'unread', 'mention', 'like', 'circle_invite'].map(tab => (
+                    {['all', 'unread', 'mention', 'like', 'circle_invite', 'announcements'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -159,6 +168,40 @@ const NotificationsPage = () => {
                 <div className="space-y-3">
                     {loading ? (
                         <div className="text-center text-gray-500 py-10">Loading notifications...</div>
+                    ) : activeTab === 'announcements' ? (
+                        announcements.length === 0 ? (
+                            <div className="bg-[#12082A]/50 border border-dashed border-white/10 rounded-3xl p-16 text-center flex flex-col items-center">
+                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                    <Megaphone className="text-gray-600" size={32} />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-300 mb-1">No Announcements</h3>
+                                <p className="text-gray-500 text-sm max-w-xs mx-auto">No global announcements from the admin team yet.</p>
+                            </div>
+                        ) : (
+                            announcements.map((ann) => (
+                                <div key={ann._id} className="group relative bg-[#12082A] border border-blue-500/30 bg-blue-500/5 shadow-[0_0_20px_rgba(59,130,246,0.05)] transition-all duration-300 p-4 rounded-3xl flex gap-4 items-start">
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-blue-500 rounded-r-full" />
+                                    
+                                    <div className="shrink-0 relative">
+                                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 ring-2 ring-white/5">
+                                            <Megaphone size={24} />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-sm font-black text-blue-400">Admin Announcement</span>
+                                                <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">• {formatTime(ann.createdAt)}</span>
+                                            </div>
+                                        </div>
+                                        <h4 className="text-white font-bold text-base mb-1">{ann.title}</h4>
+                                        <p className="text-sm leading-relaxed text-gray-300 font-medium whitespace-pre-wrap">
+                                            {ann.message}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )
                     ) : filteredNotifications.length === 0 ? (
                         <div className="bg-[#12082A]/50 border border-dashed border-white/10 rounded-3xl p-16 text-center flex flex-col items-center">
                             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
@@ -185,8 +228,8 @@ const NotificationsPage = () => {
 
                                 <div className="shrink-0 relative">
                                     <img 
-                                        src={noti.sender?.avatar || 'https://via.placeholder.com/150'} 
-                                        alt={noti.sender?.name || 'System'} 
+                                        src={noti.sender?.profilePic || noti.sender?.avatar || 'https://via.placeholder.com/150'} 
+                                        alt={noti.sender?.displayName || noti.sender?.name || 'System'} 
                                         className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/5"
                                     />
                                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#12082A] border border-white/10 flex items-center justify-center shadow-2xl">
@@ -199,7 +242,7 @@ const NotificationsPage = () => {
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {noti.sender ? (
                                                 <Link to={`/profile/${noti.sender.username}`} onClick={(e) => e.stopPropagation()} className="text-sm font-black hover:text-purple-400 transition-colors">
-                                                    {noti.sender.name}
+                                                    {noti.sender.displayName || noti.sender.username}
                                                 </Link>
                                             ) : (
                                                 <span className="text-sm font-black">System</span>
@@ -223,10 +266,18 @@ const NotificationsPage = () => {
                     )}
                 </div>
 
-                {notifications.length > 0 && (
-                    <div className="mt-12 text-center text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em]">
-                        Showing {filteredNotifications.length} of {notifications.length} notifications
-                    </div>
+                {activeTab === 'announcements' ? (
+                    announcements.length > 0 && (
+                        <div className="mt-12 text-center text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+                            Showing {announcements.length} announcements
+                        </div>
+                    )
+                ) : (
+                    notifications.length > 0 && (
+                        <div className="mt-12 text-center text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+                            Showing {filteredNotifications.length} of {notifications.length} notifications
+                        </div>
+                    )
                 )}
             </div>
         </div>
