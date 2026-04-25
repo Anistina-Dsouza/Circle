@@ -20,6 +20,7 @@ exports.createMoment = async (req, res) => {
             else resolve(result);
           }
         );
+        stream.on('error', (err) => reject(err));
         stream.end(req.file.buffer);
       });
 
