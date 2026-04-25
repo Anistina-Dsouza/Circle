@@ -75,7 +75,7 @@ const StoryViewerPage = () => {
         if (progress >= 100) {
             handleNext();
         }
-    }, [progress]);
+    }, [progress, handleNext]);
 
     useEffect(() => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
@@ -132,7 +132,8 @@ const StoryViewerPage = () => {
                         setProgress(0);
                     }
                 }, 1500);
-            } catch (error) {
+            } catch (err) {
+                console.error('Delete error:', err);
                 alert('Failed to delete story');
             }
         }
@@ -142,7 +143,7 @@ const StoryViewerPage = () => {
         if (e.target.closest('button')) return;
 
         const { clientX } = e;
-        const screenWidth = window.innerWidth;
+        // const screenWidth = window.innerWidth;
         const cardElement = e.currentTarget;
         const cardRect = cardElement.getBoundingClientRect();
         

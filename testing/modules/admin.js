@@ -120,17 +120,17 @@ async function testAdminFlow(driver, baseUrl) {
         console.log("Action: Creating a new Announcement...");
         const titleInput = await driver.wait(until.elementLocated(By.id("announcement-title")), 15000);
         await titleInput.sendKeys("System Maintenance Alert");
-        
+
         const contentInput = await driver.findElement(By.id("announcement-message"));
         await contentInput.sendKeys("The system will be under maintenance tonight at 12 PM PST. Please save your work.");
-        
+
         await sleep(2000);
         const submitAnnBtn = await driver.findElement(By.id("broadcast-btn"));
         await driver.executeScript("arguments[0].click();", submitAnnBtn);
         await sleep(4000);
 
         console.log("Announcement created successfully.");
-        
+
         // Verify it appears
         const latestAnn = await driver.wait(until.elementLocated(By.xpath("//h3[contains(text(), 'System Maintenance Alert')]")), 10000);
         if (latestAnn) {

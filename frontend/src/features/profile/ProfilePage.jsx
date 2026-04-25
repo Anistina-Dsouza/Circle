@@ -21,8 +21,9 @@ const ProfilePage = () => {
     const [currentUserFollowing, setCurrentUserFollowing] = useState([]);
 
     // Modal states
-    const [modalOpen, setModalOpen] = useState(false);
-    const [modalType, setModalType] = useState(null);
+    // Modal states (Moved to ProfileHeader)
+    // const [modalOpen, setModalOpen] = useState(false);
+    // const [modalType, setModalType] = useState(null);
 
     // Use ref to track if component is mounted
     const isMounted = useRef(true);
@@ -172,7 +173,7 @@ const ProfilePage = () => {
 
         // Ensure followers is an array
         const followersArray = Array.isArray(followers) ? followers : [];
-        const followingArray = Array.isArray(following) ? following : [];
+        // const followingArray = Array.isArray(following) ? following : [];
 
 
         // Check if current user is following this profile
@@ -202,7 +203,7 @@ const ProfilePage = () => {
             stories: (user.stats?.momentCount || stories.length || 0).toLocaleString(),
             isFollowing: isFollowing
         };
-    }, [user, followers, following, stories, isFollowing]);
+    }, [user, followers, following, stories]);
 
     // Format stories
     const formatStoriesForDisplay = useCallback(() => {
@@ -232,38 +233,38 @@ const ProfilePage = () => {
     }, [stories]);
 
     // Core follow/unfollow function
-    const toggleFollow = useCallback(async (targetUserId, targetUsername) => {
-        if (!targetUserId || !loggedInUser) return false;
-
-        try {
-            const token = localStorage.getItem('token');
-
-            // Check current follow status
-            const isCurrentlyFollowing = following.some(f => {
-                const fUser = f.following || f;
-                return (fUser._id || fUser).toString() === targetUserId.toString();
-            });
-
-            if (isCurrentlyFollowing) {
-                // Unfollow
-                await axios.delete(`${baseUrl}/api/users/${targetUserId}/unfollow`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                console.log(`Unfollowed user: ${targetUsername}`);
-            } else {
-                // Follow
-                await axios.post(`${baseUrl}/api/users/${targetUserId}/follow`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                console.log(`Followed user: ${targetUsername}`);
-            }
-
-            return true; // Success
-        } catch (error) {
-            console.error('Follow toggle error:', error);
-            return false; // Failed
-        }
-    }, [baseUrl, following, loggedInUser]);
+    // const toggleFollow = useCallback(async (targetUserId, targetUsername) => {
+    //     if (!targetUserId || !loggedInUser) return false;
+    //
+    //     try {
+    //         const token = localStorage.getItem('token');
+    //
+    //         // Check current follow status
+    //         const isCurrentlyFollowing = following.some(f => {
+    //             const fUser = f.following || f;
+    //             return (fUser._id || fUser).toString() === targetUserId.toString();
+    //         });
+    //
+    //         if (isCurrentlyFollowing) {
+    //             // Unfollow
+    //             await axios.delete(`${baseUrl}/api/users/${targetUserId}/unfollow`, {
+    //                 headers: { Authorization: `Bearer ${token}` }
+    //             });
+    //             console.log(`Unfollowed user: ${targetUsername}`);
+    //         } else {
+    //             // Follow
+    //             await axios.post(`${baseUrl}/api/users/${targetUserId}/follow`, {}, {
+    //                 headers: { Authorization: `Bearer ${token}` }
+    //             });
+    //             console.log(`Followed user: ${targetUsername}`);
+    //         }
+    //
+    //         return true; // Success
+    //     } catch (error) {
+    //         console.error('Follow toggle error:', error);
+    //         return false; // Failed
+    //     }
+    // }, [baseUrl, following, loggedInUser]);
 
     // Handle follow/unfollow from profile header
     const handleProfileFollowToggle = useCallback(async (targetUserId) => {
@@ -432,16 +433,17 @@ const ProfilePage = () => {
     }, [currentUserFollowing]);
 
     // Open modal
-    const openModal = (type) => {
-        setModalType(type);
-        setModalOpen(true);
-    };
+    // Open modal
+    // const openModal = (type) => {
+    //     setModalType(type);
+    //     setModalOpen(true);
+    // };
 
     // Close modal
-    const closeModal = () => {
-        setModalOpen(false);
-        setModalType(null);
-    };
+    // const closeModal = () => {
+    //     setModalOpen(false);
+    //     setModalType(null);
+    // };
 
     // Handle initialising or opening chat
     const handleMessageClick = async (targetUserId) => {
@@ -565,14 +567,7 @@ const ProfilePage = () => {
                     </div>
                 )}
 
-                {/* Follow/Following Modal */}
-                <FollowListModal
-                    isOpen={modalOpen}
-                    onClose={closeModal}
-                    title={modalType === 'followers' ? 'Followers' : 'Following'}
-                    users={modalType === 'followers' ? formattedFollowers : formattedFollowing}
-                    onFollowToggle={handleModalFollowToggle}
-                />
+
 
                 <div className="h-16" />
             </main>

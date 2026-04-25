@@ -1,36 +1,125 @@
 const User = require('../models/User');
 const Circle = require('../models/Circle');
 const Report = require('../models/Report');
+const Meeting = require('../models/Meeting');
 
 const getDashboardStats = async (req, res) => {
   try {
-    // 1. Get total counts
-    const totalUsers = await User.countDocuments();
-    const totalCircles = await Circle.countDocuments();
-
-    // Active users: online status is 'online' or lastSeen within 24h
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const activeUsers = await User.countDocuments({
-      $or: [
-        { 'onlineStatus.status': 'online' },
-        { 'onlineStatus.lastSeen': { $gte: oneDayAgo } }
-      ]
-    });
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Flagged items -> Pending reports
-    const flaggedItems = await Report.countDocuments({ status: 'pending' });
+    // Execute multiple independent queries in parallel for maximum performance
+    const [
+      totalUsers,
+      totalCircles,
+      activeUsers,
+      flaggedItems,
+      latestUsers,
+      latestCircles,
+      categoryStats,
+      userHourly,
+      circleHourly,
+      meetingHourly,
+      userDaily,
+      circleDaily,
+      meetingDaily
+    ] = await Promise.all([
+      User.countDocuments(),
+      Circle.countDocuments(),
+      User.countDocuments({
+        $or: [
+          { 'onlineStatus.status': 'online' },
+          { 'onlineStatus.lastSeen': { $gte: oneDayAgo } }
+        ]
+      }),
+      Report.countDocuments({ status: 'pending' }),
+      User.find({}).sort({ createdAt: -1 }).limit(5).select('username email displayName profilePic createdAt isActive isVerified onlineStatus'),
+      Circle.find({}).sort({ createdAt: -1 }).limit(4).select('name category stats members coverImage'),
+      
+      // Dynamic Stat: Circle Distribution by Category
+      Circle.aggregate([
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+      ]),
 
-    // 2. Get latest registrations (top 5 users)
-    const latestUsers = await User.find({})
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('username email displayName profilePic isVerified isActive createdAt');
+      // Live View Trend: Combined Hourly activity (Users + Circles + Meetings)
+      User.aggregate([
+        { $match: { createdAt: { $gte: oneDayAgo } } },
+        { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } }
+      ]),
+      Circle.aggregate([
+        { $match: { createdAt: { $gte: oneDayAgo } } },
+        { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } }
+      ]),
+      Meeting.aggregate([
+        { $match: { createdAt: { $gte: oneDayAgo } } },
+        { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } }
+      ]),
 
-    // 3. Get latest circles (top 4 circles)
-    const latestCircles = await Circle.find({})
-      .sort({ createdAt: -1 })
-      .limit(4)
-      .select('name category stats members coverImage');
+      // 7-Day Trend: Combined Daily activity
+      User.aggregate([
+        { $match: { createdAt: { $gte: sevenDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+      ]),
+      Circle.aggregate([
+        { $match: { createdAt: { $gte: sevenDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+      ]),
+      Meeting.aggregate([
+        { $match: { createdAt: { $gte: sevenDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+      ])
+    ]);
+
+    // Import Meeting model (ensure it's at the top if not already)
+    // const Meeting = require('../models/Meeting'); 
+
+    // Combine Hourly Results
+    const combinedHourly = [];
+    const currentHour = new Date().getHours();
+    for (let i = 0; i < 24; i++) {
+        const hour = (currentHour - 23 + i + 24) % 24;
+        const uCount = userHourly.find(t => t._id === hour)?.count || 0;
+        const cCount = circleHourly.find(t => t._id === hour)?.count || 0;
+        const mCount = meetingHourly.find(t => t._id === hour)?.count || 0;
+        
+        combinedHourly.push({
+            _id: `${hour}:00`,
+            count: uCount + cCount + mCount
+        });
+    }
+
+    // Combine 7-Day Results
+    const combinedDaily = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        
+        const uCount = userDaily.find(t => t._id === dateStr)?.count || 0;
+        const cCount = circleDaily.find(t => t._id === dateStr)?.count || 0;
+        const mCount = meetingDaily.find(t => t._id === dateStr)?.count || 0;
+
+        combinedDaily.push({
+            _id: dateStr,
+            count: uCount + cCount + mCount
+        });
+    }
+
+    // Process latest users to include pending report counts
+    const latestUsersWithReports = await Promise.all(latestUsers.map(async (u) => {
+      const reportsCount = await Report.countDocuments({
+        reportedItemId: u._id,
+        reportedItemType: 'User',
+        status: 'pending'
+      });
+      return {
+        ...u.toObject(),
+        pendingReports: reportsCount
+      };
+    }));
 
     res.json({
       success: true,
@@ -41,7 +130,12 @@ const getDashboardStats = async (req, res) => {
           activeUsers,
           flaggedItems
         },
-        latestUsers,
+        trends: {
+          registrations: combinedDaily,
+          categories: categoryStats,
+          hourly: combinedHourly
+        },
+        latestUsers: latestUsersWithReports,
         latestCircles
       }
     });
@@ -50,7 +144,7 @@ const getDashboardStats = async (req, res) => {
     console.error('Admin Dashboard Error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve dashboard stats',
+      message: 'Failed to retrieve dynamic dashboard stats',
       error: error.message
     });
   }

@@ -7,7 +7,7 @@ import axios from 'axios';
 const EditProfilePage = () => {
     const navigate = useNavigate();
     const baseUrl = import.meta.env.VITE_API_URL;
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');

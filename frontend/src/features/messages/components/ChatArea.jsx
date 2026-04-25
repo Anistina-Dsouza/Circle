@@ -8,7 +8,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 
 const ChatArea = ({ chatId }) => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     
     // Safe user ID retrieval
     const currentUserId = (() => {
@@ -44,13 +44,15 @@ const ChatArea = ({ chatId }) => {
 
 
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (resetNewMessages = true) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        setHasNewMessages(false);
+        if (resetNewMessages) {
+            setHasNewMessages(false);
+        }
     };
 
     useEffect(() => {
-        scrollToBottom();
+        scrollToBottom(false);
     }, [messages]);
 
     const handleScroll = () => {
@@ -97,7 +99,7 @@ const ChatArea = ({ chatId }) => {
             }
         };
         fetchData();
-    }, [chatId]);
+    }, [chatId, currentUserId]);
 
 
     useEffect(() => {
@@ -157,7 +159,7 @@ const ChatArea = ({ chatId }) => {
                 socketRef.current.disconnect();
             }
         };
-    }, [chatId]);
+    }, [chatId, currentUserId]);
 
     // Close emoji picker on click outside
     useEffect(() => {

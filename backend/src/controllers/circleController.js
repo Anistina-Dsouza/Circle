@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // =========== CREATE CIRCLE ===========
 exports.createCircle = async (req, res) => {
   try {
-    const { name, description, type, coverImage, category } = req.body;
+    const { name, description, type, coverImage, profilePic, icon, category } = req.body;
     
     // Validation
     if (!name || name.length < 3) {
@@ -30,7 +30,8 @@ exports.createCircle = async (req, res) => {
       description,
       type: type || 'public',
       category: category || 'Technology',
-      coverImage: coverImage || 'default_circle.png',
+      coverImage: coverImage || 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop',
+      profilePic: profilePic || icon || 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg',
       creator: req.userId,
       members: [{
         user: req.userId,

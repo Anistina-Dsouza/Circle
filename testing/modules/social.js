@@ -33,7 +33,7 @@ async function testSocialFlow(driver, baseUrl) {
         console.log("Following user...");
         await safeClickText(driver, "Follow");
         await sleep(3000); // Wait for optimistic update and API
-        
+
         // Optional: Verify button changed to "Following"
         const followBtn = await driver.findElements(By.xpath("//button[contains(.,'Following')]"));
         if (followBtn.length > 0) {
@@ -42,7 +42,7 @@ async function testSocialFlow(driver, baseUrl) {
 
         console.log("Navigating to Profile via User Card...");
         await sleep(2000); // Wait for potential list re-renders
-        
+
         // RE-FIND elements to avoid stale references
         const profileLink = By.xpath("//div[contains(@class, 'group')]//a[contains(@href, '/profile/')]");
         try {
@@ -51,7 +51,7 @@ async function testSocialFlow(driver, baseUrl) {
                 const profileBtn = profileBtns[0];
                 const targetUrl = await profileBtn.getAttribute('href');
                 console.log(`Targeting profile: ${targetUrl}`);
-                
+
                 await driver.executeScript("arguments[0].scrollIntoView({block: 'center'});", profileBtn);
                 await sleep(1000);
                 await driver.executeScript("arguments[0].click();", profileBtn);
@@ -85,15 +85,15 @@ async function testSocialFlow(driver, baseUrl) {
         // More robust wait: look for the profile header or the 404 container
         await driver.wait(until.elementLocated(By.xpath("//h1 | //h2[contains(text(), 'Not Found') or contains(text(), 'Notice')]")), 20000);
         await sleep(2000);
-        
+
         const h1s = await driver.findElements(By.tagName("h1"));
         const h2Errors = await driver.findElements(By.xpath("//h2[contains(text(), 'Not Found') or contains(text(), 'Notice')]"));
-        
+
         if (h2Errors.length > 0) {
             console.log("Profile Page returned an error: " + await h2Errors[0].getText());
             return;
         }
-        
+
         if (h1s.length === 0) {
             throw new Error("Profile page loaded but no H1 name found.");
         }
@@ -174,14 +174,14 @@ async function testSocialFlow(driver, baseUrl) {
 
     const bioBox = By.name("bio");
     const picBox = By.name("profilePic");
-    
+
     if (await safeAction(driver, bioBox, "Bio Edit Box")) {
         console.log("Updating bio and profile picture...");
         await clearAndType(driver, bioBox, "Design Enthusiast - Nature Lover - Tech Innovator! [CirclePlatform]");
-        
+
         const picInput = await driver.findElement(picBox);
         await clearAndType(driver, picBox, "https://i.pinimg.com/736x/48/36/40/483640f966ae32e0ee0670493793f897.jpg");
-        
+
         await sleep(1000);
         await safeClickText(driver, "Save Changes");
         await sleep(3000);
