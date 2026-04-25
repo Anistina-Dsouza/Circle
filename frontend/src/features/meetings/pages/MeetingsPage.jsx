@@ -286,7 +286,19 @@ const MeetingsPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {upcoming.map((meeting) => (
                                 <div key={meeting.id} className="cursor-pointer" onClick={() => {
-                                    if (meeting.meetingLink) window.open(meeting.meetingLink, '_blank');
+                                    if (meeting.meetingLink) {
+                                        try {
+                                            const userStr = localStorage.getItem('user');
+                                            const user = userStr ? JSON.parse(userStr) : null;
+                                            const displayName = user?.profile?.displayName || user?.username || 'Participant';
+                                            const url = new URL(meeting.meetingLink);
+                                            url.searchParams.set('uname', displayName);
+                                            url.searchParams.set('un', btoa(displayName));
+                                            window.open(url.toString(), '_blank');
+                                        } catch (err) {
+                                            window.open(meeting.meetingLink, '_blank');
+                                        }
+                                    }
                                 }}>
                                     <UpcomingMeetingCard meeting={meeting} />
                                 </div>

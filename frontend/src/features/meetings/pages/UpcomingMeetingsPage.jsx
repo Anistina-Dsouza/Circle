@@ -136,7 +136,17 @@ const UpcomingMeetingsPage = () => {
                         {filteredMeetings.map((meeting) => (
                             <div key={meeting.id} className="group cursor-pointer" onClick={(e) => {
                                 if (meeting.meetingLink) {
-                                    window.open(meeting.meetingLink, '_blank');
+                                    try {
+                                        const userStr = localStorage.getItem('user');
+                                        const user = userStr ? JSON.parse(userStr) : null;
+                                        const displayName = user?.profile?.displayName || user?.username || 'Participant';
+                                        const url = new URL(meeting.meetingLink);
+                                        url.searchParams.set('uname', displayName);
+                                        url.searchParams.set('un', btoa(displayName));
+                                        window.open(url.toString(), '_blank');
+                                    } catch (err) {
+                                        window.open(meeting.meetingLink, '_blank');
+                                    }
                                 }
                             }}>
                                 <UpcomingMeetingCard meeting={meeting} />
