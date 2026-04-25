@@ -65,10 +65,12 @@ const useFollowData = (username) => {
                 if (currentUser?._id && followers.length > 0) {
                     isFollowing = followers.some(follow => {
                         // Handle different follow object structures
-                        const followerUser = follow.follower || follow;
+                        const followerUser = follow ? (follow.follower || follow) : null;
+                        if (!followerUser) return false;
+                        
                         const followerId = followerUser._id || followerUser;
                         
-                        if (typeof followerId === 'object' && followerId._id) {
+                        if (followerId && typeof followerId === 'object' && followerId._id) {
                             return followerId._id.toString() === currentUser._id.toString();
                         } else if (followerId) {
                             return followerId.toString() === currentUser._id.toString();
@@ -130,12 +132,26 @@ const useFollowData = (username) => {
                 followedAt: new Date().toISOString()
             };
             
-            setFollowData(prev => ({
-                ...prev,
-                followers: [newFollower, ...prev.followers],
-                followersCount: prev.followersCount + 1,
-                isFollowing: true
-            }));
+            setFollowData(prev => {
+                const newState = { ...prev };
+                
+                // If we are tracking the target user (Profile Page context), 
+                // their followers list should include the current user.
+                if (username !== currentUser.username) {
+                    newState.followers = [newFollower, ...prev.followers];
+                    newState.followersCount = prev.followersCount + 1;
+                    newState.isFollowing = true;
+                }
+                
+                // If we are tracking the current user (Explore/Feed context),
+                // their following list should include the new target user.
+                if (username === currentUser.username) {
+                    newState.following = [{ following: userId, _id: userId }, ...prev.following];
+                    newState.followingCount = prev.followingCount + 1;
+                }
+                
+                return newState;
+            });
             
             return { success: true };
         } catch (error) {
@@ -159,16 +175,34 @@ const useFollowData = (username) => {
             
             
             // Remove current user from followers list
-            setFollowData(prev => ({
-                ...prev,
-                followers: prev.followers.filter(follow => {
-                    const followerUser = follow.follower || follow;
-                    const followerId = followerUser._id || followerUser;
-                    return followerId.toString() !== currentUser._id.toString();
-                }),
-                followersCount: Math.max(0, prev.followersCount - 1),
-                isFollowing: false
-            }));
+            setFollowData(prev => {
+                const newState = { ...prev };
+                
+                // If tracking target user, remove current user from their followers
+                if (username !== currentUser.username) {
+                    newState.followers = (prev.followers || []).filter(follow => {
+                        const followerUser = follow ? (follow.follower || follow) : null;
+                        if (!followerUser) return false;
+                        const followerId = followerUser._id || followerUser;
+                        return followerId && followerId.toString() !== currentUser._id.toString();
+                    });
+                    newState.followersCount = Math.max(0, prev.followersCount - 1);
+                    newState.isFollowing = false;
+                }
+                
+                // If tracking current user, remove target user from their following
+                if (username === currentUser.username) {
+                    newState.following = (prev.following || []).filter(follow => {
+                        const followedUser = follow ? (follow.following || follow) : null;
+                        if (!followedUser) return false;
+                        const followedId = followedUser._id || followedUser;
+                        return followedId && followedId.toString() !== userId.toString();
+                    });
+                    newState.followingCount = Math.max(0, prev.followingCount - 1);
+                }
+                
+                return newState;
+            });
             
             return { success: true };
         } catch (error) {

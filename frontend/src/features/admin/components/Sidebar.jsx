@@ -1,14 +1,17 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Layers, Megaphone, BarChart, LogOut } from "lucide-react";
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <aside
@@ -24,28 +27,29 @@ export default function Sidebar() {
       "
     >
       {/* Logo */}
-      <h2 className="text-2xl font-semibold mb-10">Circle</h2>
+      <h2 className="text-2xl font-semibold mb-10 tracking-tight text-white/90">Circle</h2>
 
       {/* Navigation (scrollable if long) */}
       <nav className="flex-1 space-y-4 overflow-y-auto pr-2">
 
         <Link to="/admin">
-          <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+          <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active={isActive("/admin")} />
         </Link>
 
         <Link to="/admin/users">
-          <Item icon={<Users size={18} />} label="Users" />
+          <Item icon={<Users size={18} />} label="Users" active={isActive("/admin/users")} />
         </Link>
 
         <Link to="/admin/communities">
-          <Item icon={<Layers size={18} />} label="Circles" />
+          <Item icon={<Layers size={18} />} label="Circles" active={isActive("/admin/communities")} />
         </Link>
         
         <Link to="/admin/announcements">
-          <Item icon={<Megaphone size={18} />} label="Announcements" />
+          <Item icon={<Megaphone size={18} />} label="Announcements" active={isActive("/admin/announcements")} />
         </Link>
-        <Link to="/admin" onClick={() => alert("Detailed Reports engine is coming soon!")}>
-          <Item icon={<BarChart size={18} />} label="Reports" />
+
+        <Link to="/admin/reports">
+          <Item icon={<BarChart size={18} />} label="Reports" active={isActive("/admin/reports")} />
         </Link>
 
       </nav>

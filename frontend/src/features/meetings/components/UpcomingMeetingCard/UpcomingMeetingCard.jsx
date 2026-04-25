@@ -52,7 +52,10 @@ const UpcomingMeetingCard = ({ meeting }) => {
                 </div>
 
                 {/* Join Button */}
-                <button className={`w-full flex items-center justify-center gap-2 ${meeting.btnColor} text-white py-3 rounded-lg font-semibold transition-colors`}>
+                <button 
+                    id={`join-meeting-btn-${meeting.id}`}
+                    className={`w-full flex items-center justify-center gap-2 ${meeting.btnColor} text-white py-3 rounded-lg font-semibold transition-colors`}
+                >
                     <Video size={18} />
                     <span>Join via Zoom</span>
                 </button>

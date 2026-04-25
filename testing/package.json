@@ -1,0 +1,13 @@
+{
+  "name": "circle-selenium-automation",
+  "version": "1.0.0",
+  "description": "Full Selenium automation for Circle App",
+  "main": "run_automation.js",
+  "scripts": {
+    "start": "node run_automation.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.10.0",
+    "chromedriver": "^133.0.0"
+  }
+}

@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { avatar } from "../../../utils/avatar";
-import { Eye } from "lucide-react";
+import { Eye, ExternalLink, ShieldCheck, UserMinus, Clock } from "lucide-react";
 
 export default function LatestRegistrations({ users }) {
+  const navigate = useNavigate();
+
   // Format date helper
   const formatTimeAgo = (dateString) => {
     if (!dateString) return 'Unknown';
@@ -20,73 +22,121 @@ export default function LatestRegistrations({ users }) {
   };
 
   return (
-    <div className="rounded-[28px] bg-[radial-gradient(circle_at_top,#2a004a,#13001f)] border border-white/5 overflow-hidden">
+    <div className="rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="flex justify-between items-center px-8 py-6 border-b border-white/5">
-        <h2 className="text-lg font-semibold">Latest Registrations</h2>
-        <Link to="/admin/users" className="text-purple-400 text-xs tracking-widest hover:text-purple-300 transition">VIEW ALL</Link>
+      <div className="flex justify-between items-center px-8 py-7 border-b border-white/5">
+        <div>
+          <h2 className="text-xl font-bold text-white tracking-tight">Recent Signups</h2>
+          <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Incoming Traffic</p>
+        </div>
+        <Link to="/admin/users" className="flex items-center gap-2 text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-4 py-2 rounded-full border border-white/5">
+          <span>Manage All</span>
+          <ExternalLink size={12} />
+        </Link>
       </div>
 
-      {/* Column Headings */}
-      <div className="flex px-8 py-4 text-xs uppercase tracking-widest text-gray-400 border-b border-white/5">
-        <div className="w-[45%]">User</div>
-        <div className="w-[20%]">Status</div>
-        <div className="w-[20%]">Joined</div>
-        <div className="w-[15%] text-right">Action</div>
+      {/* Table Headers for Clarity */}
+      <div className="flex px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-white/20 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex-1">Participant</div>
+        <div className="hidden sm:flex items-center gap-10">
+          <div className="w-24 text-center">Audit Status</div>
+          <div className="w-24 text-center">Timeline</div>
+          <div className="w-12 text-right pr-2">Activity</div>
+        </div>
       </div>
 
       {/* Rows */}
       <div className="divide-y divide-white/5">
         {users && users.length > 0 ? (
           users.map((u, i) => (
-            <div key={u._id || i} className="flex items-center px-8 py-5 hover:bg-purple-900/20 transition">
+            <div 
+              key={u._id || i} 
+              onClick={() => navigate(`/profile/${u.username}`)}
+              className={`group flex items-center px-8 py-6 transition-all cursor-pointer relative 
+                ${u.isActive ? 'hover:bg-white/[0.03]' : 'bg-red-900/5 opacity-75 grayscale-[20%]'}`}
+            >
+              {u.isActive && <div className="absolute left-0 w-1 h-0 bg-purple-500 group-hover:h-1/2 top-1/4 transition-all duration-300 rounded-r-full" />}
+              
               {/* USER */}
-              <div className="w-[45%] flex items-center gap-4">
-                <img
-                  src={u.profilePic || avatar(u.displayName || u.username)}
-                  className="w-11 h-11 rounded-full ring-2 ring-purple-700/40 object-cover bg-[#0F0529]"
-                  alt={u.username}
-                />
+              <div className="flex-1 flex items-center gap-5">
+                <div className="relative">
+                  <img
+                    src={u.profilePic || avatar(u.displayName || u.username)}
+                    className={`w-12 h-12 rounded-2xl object-cover bg-[#0F0529] group-hover:scale-105 transition-transform duration-300
+                      ${u.isActive ? 'ring-2 ring-white/5' : 'ring-2 ring-red-900/40'}`}
+                    alt={u.username}
+                  />
+                  {/* Dynamic Status Dot */}
+                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#13001f] shadow-lg transition-all duration-500
+                    ${!u.isActive ? 'bg-red-500' : (u.onlineStatus?.status === 'online' ? 'bg-green-500 animate-pulse' : 'bg-gray-600')}`} 
+                  />
+                </div>
                 <div className="overflow-hidden">
-                  <p className="font-medium truncate">{u.displayName || u.username}</p>
-                  <p className="text-sm text-gray-400 truncate">{u.email}</p>
+                  <p className={`font-bold text-white group-hover:text-purple-300 transition-colors 
+                    ${!u.isActive && 'line-through text-white/40'}`}>
+                    {u.displayName || u.username}
+                  </p>
+                  <p className="text-[10px] text-white/40 truncate font-black uppercase tracking-widest">
+                    {u.onlineStatus?.status === 'online' ? 'Currently Online' : `Last seen ${formatTimeAgo(u.onlineStatus?.lastSeen)}`}
+                  </p>
                 </div>
               </div>
 
-              {/* STATUS */}
-              <div className="w-[20%]">
-                <span
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold
-                  ${!u.isActive 
-                    ? "bg-red-900/40 text-red-500 border border-red-500/20" 
-                    : u.isVerified
-                      ? "bg-[#123c2a] text-green-400"
-                      : "bg-[#3a2f00] text-yellow-400"
-                  }`}
-                >
-                  {!u.isActive ? "SUSPENDED" : (u.isVerified ? "VERIFIED" : "PENDING")}
-                </span>
-              </div>
+              {/* STATS/META */}
+              <div className="hidden sm:flex items-center gap-10">
+                {/* STATUS */}
+                <div className="flex items-center gap-2">
+                  {!u.isActive ? (
+                    <div 
+                      title="This account has been suspended and has restricted access."
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-tighter border border-red-500/20"
+                    >
+                      <UserMinus size={10} />
+                      <span>Suspended</span>
+                    </div>
+                  ) : u.pendingReports > 0 ? (
+                    <div 
+                      title={`${u.pendingReports} unresolved moderation reports require your attention.`}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-tighter shadow-[0_0_15px_rgba(220,38,38,0.4)] animate-pulse"
+                    >
+                      <span>{u.pendingReports} PENDING</span>
+                    </div>
+                  ) : u.isVerified ? (
+                    <div 
+                      title="This account has been verified by the system."
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-tighter border border-green-500/20"
+                    >
+                      <ShieldCheck size={10} />
+                      <span>Verified</span>
+                    </div>
+                  ) : (
+                    <div 
+                      title="This is a regular active account with no reports."
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-tighter border border-indigo-500/20"
+                    >
+                      <span>Active Member</span>
+                    </div>
+                  )}
+                </div>
 
-              {/* JOINED */}
-              <div className="w-[20%] text-gray-400 text-sm">
-                {formatTimeAgo(u.createdAt)}
-              </div>
+                {/* JOINED */}
+                <div className="text-white/30 text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                  {formatTimeAgo(u.createdAt)}
+                </div>
 
-              {/* ACTION */}
-              <div className="w-[15%] flex justify-end">
-                <button className="p-2 rounded-full hover:bg-purple-800/40 transition">
+                {/* ACTION */}
+                <button className="p-3 rounded-xl bg-white/5 text-white/30 group-hover:bg-purple-500 group-hover:text-white transition-all shadow-xl">
                   <Eye size={16} />
                 </button>
               </div>
             </div>
           ))
         ) : (
-          <div className="px-8 py-5 text-gray-400 text-sm text-center">
-            No recent registrations found.
+          <div className="px-8 py-20 text-white/20 text-sm text-center italic">
+            No recent registrations detected.
           </div>
         )}
       </div>
     </div>
   );
-}
+}

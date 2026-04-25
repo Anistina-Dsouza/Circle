@@ -15,6 +15,8 @@ const ManageUsers = React.lazy(() => import('./features/admin/pages/ManageUsers'
 const ManageCommunities = React.lazy(() => import('./features/admin/pages/ManageCommunities'));
 const Announcements = React.lazy(() => import('./features/admin/pages/Announcements'));
 
+const AdminReports =React.lazy(() => import('./features/admin/pages/AdminReports'));
+
 const ProfilePage = React.lazy(() => import('./features/profile/ProfilePage'));
 const EditProfilePage = React.lazy(() => import('./features/profile/EditProfilePage'));
 const ExploreUsersPage = React.lazy(() => import('./features/profile/ExploreUsersPage'));
@@ -122,6 +124,8 @@ function App() {
               <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
               <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
               <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
+              <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+
             </Routes>
           </Suspense>
         </main>
