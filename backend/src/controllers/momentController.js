@@ -2,6 +2,8 @@ const Moment = require('../models/Moment');
 const User = require('../models/User');
 const Follow = require('../models/Follow');
 const cloudinary = require('../utils/cloudinary');
+const { processMentions } = require('../services/notificationService');
+
 
 // =========== CREATE MOMENT ===========
 exports.createMoment = async (req, res) => {
@@ -49,6 +51,11 @@ exports.createMoment = async (req, res) => {
     await User.findByIdAndUpdate(req.userId, {
       $inc: { 'stats.momentCount': 1 }
     });
+
+    if (caption) {
+      // Background processing, no need to await
+      processMentions(caption, req.userId, 'moment', moment._id).catch(err => console.error(err));
+    }
 
     res.status(201).json({
       success: true,
@@ -253,6 +260,10 @@ exports.replyToMoment = async (req, res) => {
     }
 
     await moment.addReply(req.userId, message);
+
+    if (message) {
+      processMentions(message, req.userId, 'moment', moment._id).catch(err => console.error(err));
+    }
 
     res.json({
       success: true,

@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Follow = require('../models/Follow');
+const Notification = require('../models/Notification');
 
 // GET /api/users/:username
 exports.getUserProfile = async (req, res) => {
@@ -195,6 +196,20 @@ exports.followUser = async (req, res) => {
       follower: req.userId,
       following: userId
     });
+
+    // Send notification
+    try {
+      await Notification.createNotification({
+        user: userId,
+        type: 'follow',
+        title: 'New Follower',
+        message: 'started following you',
+        sender: req.userId,
+        relatedItem: { type: 'user', id: req.userId }
+      });
+    } catch (err) {
+      console.error('Failed to create follow notification:', err);
+    }
 
     // Update counts (denormalized)
     await User.findByIdAndUpdate(req.userId, {
