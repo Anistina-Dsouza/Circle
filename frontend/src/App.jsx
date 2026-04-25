@@ -14,6 +14,7 @@ import AdminDashboard from './features/admin/pages/AdminDashboard';
 import ManageUsers from './features/admin/pages/ManageUsers';
 import ManageCommunities from './features/admin/pages/ManageCommunities';
 import Announcements from './features/admin/pages/Announcements';
+import AdminReports from './features/admin/pages/AdminReports';
 
 import ProfilePage from './features/profile/ProfilePage';
 import EditProfilePage from './features/profile/EditProfilePage';
@@ -117,6 +118,7 @@ function App() {
             <Route path="/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
             <Route path="/admin/communities" element={<AdminRoute><ManageCommunities /></AdminRoute>} />
             <Route path="/admin/announcements" element={<AdminRoute><Announcements /></AdminRoute>} />
+            <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
           </Routes>
         </main>
       </div>

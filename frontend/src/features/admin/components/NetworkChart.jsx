@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Activity } from "lucide-react";
 
-export default function NetworkChart({ registrationTrends = [], hourlyTrends = [] }) {
-  const [timeline, setTimeline] = useState("Live View");
+export default function NetworkChart({ registrationTrends = [], hourlyTrends = [], isDetailed = false }) {
+  const [timeline, setTimeline] = useState(isDetailed ? "Live View" : "Live View");
   
   // Date formatting helper
   const formatDate = (dateStr) => {
@@ -53,8 +53,9 @@ export default function NetworkChart({ registrationTrends = [], hourlyTrends = [
 
 
   return (
-    <div className="mt-12 rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 shadow-2xl relative transition-all duration-500 hover:border-purple-500/20">
+    <div className={`${isDetailed ? '' : 'mt-12 rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 shadow-2xl'} relative transition-all duration-500 hover:border-purple-500/20`}>
       {/* Standardized Header */}
+      {!isDetailed && (
       <div className="flex justify-between items-center px-8 py-7 border-b border-white/5">
         <div className="flex items-center gap-5">
            <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
@@ -95,8 +96,9 @@ export default function NetworkChart({ registrationTrends = [], hourlyTrends = [
             </div>
         </div>
       </div>
+      )}
 
-      <div className="pt-24 pb-10 px-10">
+      <div className={`${isDetailed ? 'pt-6' : 'pt-24'} pb-10 px-10`}>
         <div className="relative h-[340px]">
             {/* High-Contrast Y-Axis Grid */}
             <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pr-8">
@@ -224,7 +226,7 @@ export default function NetworkChart({ registrationTrends = [], hourlyTrends = [
         <div className="flex mt-8 ml-16 px-6 justify-between relative border-t border-white/10 pt-10">
             {chartData.map((item, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-4">
-                {(timeline !== "Live View" || i % 6 === 0 || i === chartData.length - 1) ? (
+                {(timeline !== "Live View" || i % (isDetailed ? 8 : 6) === 0 || i === chartData.length - 1) ? (
                 <>
                     <div className={`w-2 h-2 rounded-full transition-all duration-700 ${active === item.day ? 'bg-purple-400 scale-150 shadow-[0_0_12px_rgba(168,85,247,0.6)]' : 'bg-white/10'}`} />
                     <span

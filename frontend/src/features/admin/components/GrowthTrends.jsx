@@ -1,13 +1,13 @@
 import React from 'react';
 import { TrendingUp, Layout, Activity, ChevronRight } from 'lucide-react';
 
-const GrowthTrends = ({ trends }) => {
+const GrowthTrends = ({ trends, hideDistribution = false }) => {
     const { registrations = [], categories = [] } = trends;
-
+ 
     // Calculate max registration for scaling
     const maxReg = Math.max(...registrations.map(r => r.count), 5);
     const maxCat = Math.max(...categories.map(c => c.count), 1);
-
+ 
     // Date formatting helper
     const formatDate = (dateStr) => {
         try {
@@ -17,9 +17,9 @@ const GrowthTrends = ({ trends }) => {
             return dateStr;
         }
     };
-
+ 
     return (
-        <div className="grid lg:grid-cols-2 gap-10">
+        <div className={`grid ${hideDistribution ? 'grid-cols-1' : 'lg:grid-cols-2'} gap-10`}>
             {/* Registration Trends - GROWTH VELOCITY */}
             <div className="rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-500 hover:border-purple-500/20 relative">
                 {/* Standardized Header */}
@@ -38,7 +38,7 @@ const GrowthTrends = ({ trends }) => {
                         <span>Live Audit</span>
                     </div>
                 </div>
-
+ 
                 <div className="p-10">
                     <div className="relative h-[280px]">
                         {/* High-Contrast Y-Axis Grid */}
@@ -52,7 +52,7 @@ const GrowthTrends = ({ trends }) => {
                                 </div>
                             ))}
                         </div>
-
+ 
                         {/* Chart Area - Tactical Growth Columns */}
                         <div className="absolute inset-0 left-16 px-6 flex items-end justify-between gap-4">
                             {registrations.length > 0 ? registrations.map((d, i) => (
@@ -65,10 +65,10 @@ const GrowthTrends = ({ trends }) => {
                                             </div>
                                             <div className="w-2 h-2 bg-purple-600 rotate-45 mx-auto -mt-1 border-r border-b border-purple-400/30" />
                                         </div>
-
+ 
                                         {/* Tactical Column Track */}
                                         <div className="absolute inset-x-0 bottom-0 top-0 w-full max-w-[24px] mx-auto bg-purple-500/[0.02] rounded-full border border-white/[0.03] pointer-events-none" />
-
+ 
                                         {/* The Pillar - Segmented Design */}
                                         <div 
                                             className="w-full max-w-[24px] rounded-full transition-all duration-1000 ease-out relative z-10 overflow-hidden
@@ -81,7 +81,7 @@ const GrowthTrends = ({ trends }) => {
                                             {/* Pulse Animation */}
                                             <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_0%,rgba(255,255,255,0.2)_50%,transparent_100%)] h-1/2 w-full animate-scan" />
                                         </div>
-
+ 
                                         {/* Interactive Node Peak */}
                                         <div 
                                             className="absolute w-2 h-2 rounded-full transition-all duration-500 z-20 mb-[-4px] bg-white/20 border border-purple-400/30 group-hover/bar:bg-fuchsia-400 group-hover/bar:scale-150 group-hover/bar:shadow-[0_0_15px_#e879f9]"
@@ -96,7 +96,7 @@ const GrowthTrends = ({ trends }) => {
                             )}
                         </div>
                     </div>
-
+ 
                     {/* Bottom X-Axis */}
                     <div className="flex mt-8 ml-16 px-6 justify-between border-t border-white/5 pt-8">
                         {registrations.map((item, i) => (
@@ -110,8 +110,9 @@ const GrowthTrends = ({ trends }) => {
                     </div>
                 </div>
             </div>
-
+ 
             {/* Category Popularity - DISTRIBUTION */}
+            {!hideDistribution && (
             <div className="rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-500 hover:border-indigo-500/20 relative">
                 {/* Standardized Header */}
                 <div className="flex justify-between items-center px-8 py-7 border-b border-white/5">
@@ -124,11 +125,8 @@ const GrowthTrends = ({ trends }) => {
                             <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Niche Saturation</p>
                         </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40">
-                        <ChevronRight size={16} />
-                    </div>
                 </div>
-
+ 
                 <div className="p-10 space-y-9">
                     {categories.length > 0 ? categories.map((cat, idx) => (
                         <div key={idx} className="space-y-4 group/row">
@@ -160,6 +158,7 @@ const GrowthTrends = ({ trends }) => {
                     )}
                 </div>
             </div>
+            )}
         </div>
     );
 };

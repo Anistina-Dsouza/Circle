@@ -2,13 +2,13 @@ const User = require('../models/User');
 const Circle = require('../models/Circle');
 const Report = require('../models/Report');
 const Meeting = require('../models/Meeting');
+const CircleMessage = require('../models/CircleMessage');
 
 const getDashboardStats = async (req, res) => {
   try {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Execute multiple independent queries in parallel for maximum performance
     const [
       totalUsers,
       totalCircles,
@@ -22,7 +22,11 @@ const getDashboardStats = async (req, res) => {
       meetingHourly,
       userDaily,
       circleDaily,
-      meetingDaily
+      meetingDaily,
+      latestReports,
+      liveMeetings,
+      totalMeetings,
+      latestMeetings
     ] = await Promise.all([
       User.countDocuments(),
       Circle.countDocuments(),
@@ -36,14 +40,12 @@ const getDashboardStats = async (req, res) => {
       User.find({}).sort({ createdAt: -1 }).limit(5).select('username email displayName profilePic createdAt isActive isVerified onlineStatus'),
       Circle.find({}).sort({ createdAt: -1 }).limit(4).select('name category stats members coverImage'),
       
-      // Dynamic Stat: Circle Distribution by Category
       Circle.aggregate([
         { $group: { _id: "$category", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 5 }
       ]),
 
-      // Live View Trend: Combined Hourly activity (Users + Circles + Meetings)
       User.aggregate([
         { $match: { createdAt: { $gte: oneDayAgo } } },
         { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } }
@@ -57,7 +59,6 @@ const getDashboardStats = async (req, res) => {
         { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } }
       ]),
 
-      // 7-Day Trend: Combined Daily activity
       User.aggregate([
         { $match: { createdAt: { $gte: sevenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
@@ -69,13 +70,24 @@ const getDashboardStats = async (req, res) => {
       Meeting.aggregate([
         { $match: { createdAt: { $gte: sevenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
-      ])
+      ]),
+      
+      Report.find({ status: 'pending' })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('reporter', 'username displayName')
+        .select('reason reportedItemType createdAt status'),
+        
+      Meeting.countDocuments({ status: 'live' }),
+      Meeting.countDocuments(),
+
+      Meeting.find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('host', 'username displayName profilePic')
+        .select('title status createdAt roomId')
     ]);
 
-    // Import Meeting model (ensure it's at the top if not already)
-    // const Meeting = require('../models/Meeting'); 
-
-    // Combine Hourly Results
     const combinedHourly = [];
     const currentHour = new Date().getHours();
     for (let i = 0; i < 24; i++) {
@@ -90,7 +102,6 @@ const getDashboardStats = async (req, res) => {
         });
     }
 
-    // Combine 7-Day Results
     const combinedDaily = [];
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -108,7 +119,6 @@ const getDashboardStats = async (req, res) => {
         });
     }
 
-    // Process latest users to include pending report counts
     const latestUsersWithReports = await Promise.all(latestUsers.map(async (u) => {
       const reportsCount = await Report.countDocuments({
         reportedItemId: u._id,
@@ -128,15 +138,19 @@ const getDashboardStats = async (req, res) => {
           totalUsers,
           totalCircles,
           activeUsers,
-          flaggedItems
+          flaggedItems,
+          liveMeetings,
+          totalMeetings
         },
+        latestReports,
         trends: {
           registrations: combinedDaily,
           categories: categoryStats,
           hourly: combinedHourly
         },
         latestUsers: latestUsersWithReports,
-        latestCircles
+        latestCircles,
+        latestMeetings
       }
     });
 
@@ -152,10 +166,8 @@ const getDashboardStats = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    // Fetch all users safely excluding passwords
     const users = await User.find({}).sort({ createdAt: -1 }).select('-password -resetPasswordToken -resetPasswordExpires');
     
-    // Join logic: Calculate strictly pending user reports for each node footprint
     const usersWithReports = await Promise.all(users.map(async (u) => {
       const reportsCount = await Report.countDocuments({
         reportedItemId: u._id,
@@ -191,7 +203,6 @@ const toggleUserSuspension = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Administrators cannot be suspended natively via UI.' });
     }
 
-    // Toggle the Active state completely
     user.isActive = !user.isActive;
     await user.save({ validateBeforeSave: false });
 
@@ -305,6 +316,195 @@ const getItemReports = async (req, res) => {
   }
 };
 
+const getDetailedResonance = async (req, res) => {
+  try {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    const aggregateResonance = async (Model) => {
+      return await Model.aggregate([
+        { $match: { createdAt: { $gte: oneDayAgo } } },
+        {
+          $group: {
+            _id: {
+              hour: { $hour: "$createdAt" },
+              minute: {
+                $subtract: [
+                  { $minute: "$createdAt" },
+                  { $mod: [{ $minute: "$createdAt" }, 15] }
+                ]
+              }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { "_id.hour": 1, "_id.minute": 1 } }
+      ]);
+    };
+
+    const [userRes, circleRes, meetingRes] = await Promise.all([
+      aggregateResonance(User),
+      aggregateResonance(Circle),
+      aggregateResonance(Meeting)
+    ]);
+
+    const timeline = [];
+    const now = new Date();
+    for (let i = 0; i < 96; i++) {
+      const time = new Date(now.getTime() - (95 - i) * 15 * 60 * 1000);
+      const hour = time.getHours();
+      const minute = Math.floor(time.getMinutes() / 15) * 15;
+      
+      const findCount = (res) => res.find(r => r._id.hour === hour && r._id.minute === minute)?.count || 0;
+      
+      timeline.push({
+        _id: `${hour}:${minute === 0 ? '00' : minute}`,
+        count: findCount(userRes) + findCount(circleRes) + findCount(meetingRes)
+      });
+    }
+
+    res.json({ success: true, data: timeline });
+  } catch (error) {
+    console.error('Detailed Resonance Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve detailed resonance map', error: error.message });
+  }
+};
+
+const getCommunityDistribution = async (req, res) => {
+  try {
+    const categories = ['Technology', 'UI/UX Design', 'Gaming', 'Digital Art', 'Web3', 'Startups'];
+    const distribution = await Circle.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          circleCount: { $sum: 1 },
+          totalMembers: { $sum: "$stats.memberCount" },
+          totalMessages: { $sum: "$stats.messageCount" },
+          avgActivity: { $avg: "$stats.messageCount" }
+        }
+      }
+    ]);
+
+    const fullDistribution = categories.map(cat => {
+      const found = distribution.find(d => d._id === cat);
+      return found || { _id: cat, circleCount: 0, totalMembers: 0, totalMessages: 0, avgActivity: 0 };
+    }).sort((a, b) => b.totalMembers - a.totalMembers);
+
+    const topCircles = await Circle.find({ isActive: true })
+      .sort({ "stats.memberCount": -1 })
+      .limit(5)
+      .select('name category stats profilePic slug');
+
+    res.json({ 
+      success: true, 
+      data: {
+        distribution: fullDistribution,
+        topCircles
+      }
+    });
+  } catch (error) {
+    console.error('Community Distribution Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve community audit map', error: error.message });
+  }
+};
+
+const getActivityLogs = async (req, res) => {
+  try {
+    const userPage = parseInt(req.query.userPage) || 1;
+    const circlePage = parseInt(req.query.circlePage) || 1;
+    const meetingPage = parseInt(req.query.meetingPage) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    const [users, circles, meetings, totalUsers, totalCircles, totalMeetings] = await Promise.all([
+      User.find({}).sort({ createdAt: -1 }).skip((userPage - 1) * limit).limit(limit).select('username displayName profilePic createdAt onlineStatus'),
+      Circle.find({}).sort({ createdAt: -1 }).skip((circlePage - 1) * limit).limit(limit).select('name category stats createdAt'),
+      Meeting.find({}).sort({ createdAt: -1 }).skip((meetingPage - 1) * limit).limit(limit).populate('host', 'username displayName').select('title status createdAt host roomId'),
+      User.countDocuments(),
+      Circle.countDocuments(),
+      Meeting.countDocuments()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        circles,
+        meetings,
+        pagination: {
+            users: { total: totalUsers, page: userPage, totalPages: Math.ceil(totalUsers / limit) },
+            circles: { total: totalCircles, page: circlePage, totalPages: Math.ceil(totalCircles / limit) },
+            meetings: { total: totalMeetings, page: meetingPage, totalPages: Math.ceil(totalMeetings / limit) },
+            limit
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Activity Logs Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve activity telemetry', error: error.message });
+  }
+};
+
+const getConversationalVelocity = async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // 1. Peak Signal Hours (Heatmap Data)
+    const hourlySignal = await CircleMessage.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: {
+            day: { $dayOfWeek: "$createdAt" },
+            hour: { $hour: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.day": 1, "_id.hour": 1 } }
+    ]);
+
+    // 2. Message-to-Member Ratio (Active vs Lurking)
+    // We'll take top 10 most active circles
+    const circleEngagement = await Circle.find({ isActive: true })
+      .sort({ "stats.messageCount": -1 })
+      .limit(20)
+      .select('name category stats');
+
+    // 3. Response Latency Estimate (Based on reply-to)
+    // Average time between message and its first reply
+    const replies = await CircleMessage.find({ replyTo: { $ne: null } })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('replyTo', 'createdAt');
+
+    let totalLatency = 0;
+    let validReplies = 0;
+    replies.forEach(r => {
+      if (r.replyTo && r.replyTo.createdAt) {
+        const diff = (r.createdAt - r.replyTo.createdAt) / 1000 / 60; // in minutes
+        if (diff > 0 && diff < 1440) { // filter out outliers > 24h
+          totalLatency += diff;
+          validReplies++;
+        }
+      }
+    });
+
+    const avgLatency = validReplies > 0 ? (totalLatency / validReplies).toFixed(2) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        hourlySignal,
+        circleEngagement,
+        avgLatency,
+        platformVolume: await CircleMessage.countDocuments({ createdAt: { $gte: sevenDaysAgo } })
+      }
+    });
+  } catch (error) {
+    console.error('Conversational Velocity Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve engagement telemetry', error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
@@ -312,5 +512,9 @@ module.exports = {
   getAllCircles,
   toggleCircleStatus,
   dismissReports,
-  getItemReports
+  getItemReports,
+  getDetailedResonance,
+  getCommunityDistribution,
+  getActivityLogs,
+  getConversationalVelocity
 };
