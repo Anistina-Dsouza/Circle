@@ -38,11 +38,11 @@ const ManageParticipantsPage = () => {
                         // Transform members to match UI needs
                         const transformedMembers = membersRes.data.members.map(m => ({
                             id: m.user?._id,
-                            name: m.user?.profile?.displayName || m.user?.username || 'Unknown User',
+                            name: m.user?.displayName || m.user?.username || 'Unknown User',
                             username: m.user?.username,
                             role: m.role,
                             joinedDate: new Date(m.joinedAt).toLocaleDateString(),
-                            avatar: m.user?.profile?.profileImage
+                            avatar: m.user?.profilePic
                         }));
                         setMembers(transformedMembers);
                     }
@@ -53,10 +53,10 @@ const ManageParticipantsPage = () => {
                         const transformedRequests = requestsRes.data.pendingRequests.map(r => ({
                             id: r._id,
                             userId: r.user?._id,
-                            name: r.user?.profile?.displayName || r.user?.username || 'Unknown User',
+                            name: r.user?.displayName || r.user?.username || 'Unknown User',
                             username: r.user?.username,
                             time: new Date(r.requestedAt).toLocaleDateString(),
-                            avatar: r.user?.profile?.profileImage,
+                            avatar: r.user?.profilePic,
                             message: r.introduction
                         }));
                         setRequests(transformedRequests);
@@ -116,10 +116,21 @@ const ManageParticipantsPage = () => {
         }
     };
 
-    const handleKick = (memberId) => {
-        // SIMULATION ONLY per user request "no backend changes"
-        alert('Administrative Kick is simulated as there is no backend endpoint yet.');
-        setMembers(prev => prev.filter(m => m.id !== memberId));
+    const handleKick = async (memberId) => {
+        if (!window.confirm("Are you sure you want to remove this member?")) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.delete(`${baseUrl}/api/circles/${circle._id}/members/${memberId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                setMembers(prev => prev.filter(m => m.id !== memberId));
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to remove member');
+        }
     };
 
     const handleChangeRole = async (memberId, newRole) => {

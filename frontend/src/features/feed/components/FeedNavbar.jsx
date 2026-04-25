@@ -7,6 +7,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [unreadCount, setUnreadCount] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -61,6 +62,26 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
             setLoading(false);
         }
     };
+
+    const loadUnreadCount = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await axios.get(`${baseUrl}/api/notifications/unread-count`);
+            if (response.data.success) {
+                setUnreadCount(response.data.count);
+            }
+        } catch (err) {
+            console.error('Could not load unread count:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (!loading && user) {
+            loadUnreadCount();
+        }
+    }, [loading, user]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -137,7 +158,9 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                         className={`transition-colors relative ${activePage === 'Notifications' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     >
                         <Bell size={24} />
-                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0F0529]"></span>
+                        {unreadCount > 0 && (
+                            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0F0529]"></span>
+                        )}
                     </Link>
 
                     {user ? (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Smile, Heart, Reply, X, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera } from 'lucide-react';
+import { Send, Smile, Heart, Reply, X, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera, Trash2 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
@@ -16,7 +16,7 @@ const DateDivider = ({ date }) => (
 );
 
 /* ── single message bubble ──────────────────────────── */
-const ChatMessage = ({ msg, onToggleReaction, onReply }) => {
+const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
     const isMe = msg.isMe;
     const likedByMe = msg.likedByMe;
 
@@ -77,6 +77,15 @@ const ChatMessage = ({ msg, onToggleReaction, onReply }) => {
                         >
                             <Heart size={12} fill={likedByMe ? "currentColor" : "none"} />
                         </button>
+                        {isMe && (
+                            <button 
+                                onClick={() => onDelete(msg.id)}
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white/10 rounded-full transition-all" 
+                                title="Delete"
+                            >
+                                <Trash2 size={12} />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -311,6 +320,19 @@ const CircleChatArea = ({ circle }) => {
             console.error("Failed to toggle reaction", err);
         }
     };
+    
+    const handleDeleteMessage = async (messageId) => {
+        if (!window.confirm('Delete this message?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${backendUrl}/api/circlemessages/${circleId}/messages/${messageId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        } catch (err) {
+            console.error("Failed to delete message", err);
+        }
+    };
 
     const handleSend = async (e) => {
         if (e) e.preventDefault();
@@ -413,6 +435,7 @@ const CircleChatArea = ({ circle }) => {
                                     msg={msg} 
                                     onToggleReaction={handleToggleReaction}
                                     onReply={setReplyingTo}
+                                    onDelete={handleDeleteMessage}
                                 />
                             ))}
                         </div>

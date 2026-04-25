@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Loader2, Activity, Zap, Shield, Users, BarChart3, TrendingUp, AlertTriangle, Cpu, Globe, Trophy, Medal, MessageSquare, Video, UserPlus, Plus, Calendar, Hash, ChevronLeft, ChevronRight, Clock, Info, Sparkles, Filter, List, LayoutGrid, Target, MousePointer2, Flare } from "lucide-react";
+import { Loader2, Activity, Zap, Shield, Users, BarChart3, TrendingUp, AlertTriangle, Cpu, Globe, Trophy, Medal, MessageSquare, Video, UserPlus, Plus, Calendar, Hash, ChevronLeft, ChevronRight, Clock, Info, Sparkles, Filter, List, LayoutGrid, Target, MousePointer2 } from "lucide-react";
 import AdminLayout from "../layouts/AdminLayout";
 import NetworkChart from "../components/NetworkChart";
 import GrowthTrends from "../components/GrowthTrends";
@@ -11,13 +11,13 @@ export default function AdminReports() {
     const [resonanceData, setResonanceData] = useState([]);
     const [distributionData, setDistributionData] = useState(null);
     const [velocityData, setVelocityData] = useState(null);
-    
+
     // Activity Pagination States
     const [activityData, setActivityData] = useState(null);
     const [userPage, setUserPage] = useState(1);
     const [circlePage, setCirclePage] = useState(1);
     const [meetingPage, setMeetingPage] = useState(1);
-    
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -41,7 +41,7 @@ export default function AdminReports() {
                 setDistributionData(res.data.data);
             } else if (tab === "Lifecycle") {
                 const res = await axios.get(`${baseUrl}/api/admin/dashboard`, { headers });
-                setStats(res.data.data); 
+                setStats(res.data.data);
             } else if (tab === "Safety") {
                 const res = await axios.get(`${baseUrl}/api/admin/dashboard`, { headers });
                 setStats(res.data.data);
@@ -62,14 +62,14 @@ export default function AdminReports() {
 
     useEffect(() => {
         fetchReportsData(activeTab, { u: userPage, c: circlePage, m: meetingPage });
-        
+
         let interval;
         if (activeTab === "Resonance") {
             interval = setInterval(() => fetchReportsData("Resonance"), 15000);
         } else if (activeTab === "Activity") {
             interval = setInterval(() => fetchReportsData("Activity", { u: userPage, c: circlePage, m: meetingPage }), 10000);
         }
-        
+
         return () => clearInterval(interval);
     }, [activeTab, userPage, circlePage, meetingPage, fetchReportsData]);
 
@@ -77,9 +77,7 @@ export default function AdminReports() {
         { id: "Resonance", icon: <Activity size={18} />, label: "Resonance", desc: "Live Flux" },
         { id: "Velocity", icon: <Zap size={18} />, label: "Velocity", desc: "Engagement" },
         { id: "Activity", icon: <MessageSquare size={18} />, label: "Activity", desc: "Audit Logs" },
-        { id: "Distribution", icon: <BarChart3 size={18} />, label: "Distribution", desc: "Niche Audit" },
-        { id: "Lifecycle", icon: <TrendingUp size={18} />, label: "Lifecycle", desc: "Growth Path" },
-        { id: "Safety", icon: <Shield size={18} />, label: "Safety", desc: "Integrity" }
+        { id: "Distribution", icon: <BarChart3 size={18} />, label: "Distribution", desc: "Niche Audit" }
     ];
 
     return (
@@ -108,11 +106,10 @@ export default function AdminReports() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex flex-col items-center gap-1 min-w-[100px] px-6 py-4 rounded-[24px] transition-all duration-700 group ${
-                                    activeTab === tab.id 
-                                    ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10" 
+                                className={`flex flex-col items-center gap-1 min-w-[100px] px-6 py-4 rounded-[24px] transition-all duration-700 group ${activeTab === tab.id
+                                    ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10"
                                     : "text-white/20 hover:text-white/60 hover:bg-white/[0.03]"
-                                }`}
+                                    }`}
                             >
                                 <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'scale-100 group-hover:scale-110'}`}>
                                     {tab.icon}
@@ -155,8 +152,8 @@ export default function AdminReports() {
                         {activeTab === "Resonance" && <ResonanceReport stats={stats} resonanceData={resonanceData} />}
                         {activeTab === "Velocity" && <VelocityReport data={velocityData} />}
                         {activeTab === "Activity" && (
-                            <ActivityReport 
-                                data={activityData} 
+                            <ActivityReport
+                                data={activityData}
                                 pages={{ u: userPage, c: circlePage, m: meetingPage }}
                                 setPages={{ u: setUserPage, c: setCirclePage, m: setMeetingPage }}
                             />
@@ -175,39 +172,39 @@ function ResonanceReport({ stats, resonanceData }) {
     return (
         <div className="space-y-10 animate-in fade-in duration-1000">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <PremiumMetric 
-                    label="Active Load" 
-                    value={`${((stats?.activeUsers / (stats?.totalUsers || 1)) * 100).toFixed(1)}%`} 
-                    icon={<Zap size={20} />} 
+                <PremiumMetric
+                    label="Active Load"
+                    value={`${((stats?.activeUsers / (stats?.totalUsers || 1)) * 100).toFixed(1)}%`}
+                    icon={<Zap size={20} />}
                     color="text-amber-400"
                     glow="shadow-amber-500/10"
                     desc="Participation Density"
                 />
-                <PremiumMetric 
-                    label="Platform Nodes" 
-                    value={stats?.totalUsers.toLocaleString()} 
-                    icon={<Users size={20} />} 
+                <PremiumMetric
+                    label="Platform Nodes"
+                    value={stats?.totalUsers.toLocaleString()}
+                    icon={<Users size={20} />}
                     color="text-purple-400"
                     glow="shadow-purple-500/10"
                     desc="Global Context Scale"
                 />
-                <PremiumMetric 
-                    label="Pulse Freq" 
-                    value={resonanceData[resonanceData.length - 1]?.count || 0} 
-                    icon={<Activity size={20} />} 
+                <PremiumMetric
+                    label="Pulse Freq"
+                    value={resonanceData[resonanceData.length - 1]?.count || 0}
+                    icon={<Activity size={20} />}
                     color="text-emerald-400"
                     glow="shadow-emerald-500/10"
                     desc="15m Interaction Delta"
                 />
             </div>
-            
+
             <div className="bg-[#0F0529]/40 border border-white/5 rounded-[40px] p-10 relative overflow-hidden group shadow-inner">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
                 <div className="flex justify-between items-start mb-10">
                     <div>
                         <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Interaction Resonance</h3>
                         <div className="flex items-center gap-2">
-                             <Globe size={12} className="text-purple-400/60" />
+                            <Globe size={12} className="text-purple-400/60" />
                             <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Real-time audit across all node clusters</p>
                         </div>
                     </div>
@@ -238,26 +235,26 @@ function VelocityReport({ data }) {
         <div className="space-y-12 animate-in slide-in-from-bottom-10 duration-1000 pb-20">
             {/* KPI Row */}
             <div className="grid lg:grid-cols-3 gap-8">
-                <PremiumMetric 
-                    label="Response Latency" 
-                    value={`${data?.avgLatency || 0}m`} 
-                    icon={<Clock size={20} />} 
+                <PremiumMetric
+                    label="Response Latency"
+                    value={`${data?.avgLatency || 0}m`}
+                    icon={<Clock size={20} />}
                     color="text-fuchsia-400"
                     glow="shadow-fuchsia-500/10"
                     desc="Avg Reply Interval"
                 />
-                <PremiumMetric 
-                    label="Conversational Load" 
-                    value={data?.platformVolume.toLocaleString()} 
-                    icon={<MessageSquare size={20} />} 
+                <PremiumMetric
+                    label="Conversational Load"
+                    value={data?.platformVolume.toLocaleString()}
+                    icon={<MessageSquare size={20} />}
                     color="text-purple-400"
                     glow="shadow-purple-500/10"
                     desc="7D Signal Volume"
                 />
-                <PremiumMetric 
-                    label="Activity Velocity" 
-                    value={`${((data?.platformVolume / 10080) * 100).toFixed(1)}%`} 
-                    icon={<TrendingUp size={20} />} 
+                <PremiumMetric
+                    label="Activity Velocity"
+                    value={`${((data?.platformVolume / 10080) * 100).toFixed(1)}%`}
+                    icon={<TrendingUp size={20} />}
                     color="text-emerald-400"
                     glow="shadow-emerald-500/10"
                     desc="Signals per Minute"
@@ -286,8 +283,8 @@ function VelocityReport({ data }) {
                                     const val = getIntensity(dIdx + 1, hour);
                                     const opacity = (val / maxIntensity) * 0.9 + 0.1;
                                     return (
-                                        <div 
-                                            key={hour} 
+                                        <div
+                                            key={hour}
                                             className="flex-1 h-8 rounded-[4px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20"
                                             style={{ backgroundColor: `rgba(168, 85, 247, ${opacity})` }}
                                         >
@@ -309,7 +306,7 @@ function VelocityReport({ data }) {
             {/* Immersive Engagement Depth - High Precision Spatial Mapping */}
             <div className="bg-[#0F0529]/40 border border-white/5 rounded-[56px] p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[700px]">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-fuchsia-600/5 pointer-events-none" />
-                
+
                 {/* Neural Pulse Scanline Effect */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                     <div className="w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent absolute top-0 animate-scanline" />
@@ -318,7 +315,7 @@ function VelocityReport({ data }) {
                 <div className="flex justify-between items-end mb-20 relative z-10">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                             <div className="p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                            <div className="p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                                 <Target size={24} className="animate-pulse" />
                             </div>
                             <h3 className="text-4xl font-black text-white uppercase tracking-tighter">Engagement Depth</h3>
@@ -374,18 +371,18 @@ function VelocityReport({ data }) {
                             const left = (circle.stats.memberCount / maxMem) * 80 + 10;
                             const size = Math.max((circle.stats.messageCount / maxMsg) * 70 + 25, 30);
                             const efficiency = (circle.stats.messageCount / (circle.stats.memberCount || 1)).toFixed(1);
-                            
+
                             const showBelow = bottom > 70;
                             const showLeft = left > 75;
 
                             return (
-                                <div 
+                                <div
                                     key={i}
                                     className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center"
-                                    style={{ 
-                                        bottom: `${bottom}%`, 
-                                        left: `${left}%`, 
-                                        width: `${size}px`, 
+                                    style={{
+                                        bottom: `${bottom}%`,
+                                        left: `${left}%`,
+                                        width: `${size}px`,
                                         height: `${size}px`,
                                         background: `radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(124, 58, 237, 0.2))`,
                                         border: `2.5px solid rgba(192, 132, 252, 0.5)`,
@@ -393,12 +390,12 @@ function VelocityReport({ data }) {
                                         animation: `pulse-slow ${5 + i % 4}s infinite alternate ease-in-out`
                                     }}
                                 >
-                                    <span className="text-[9px] font-black text-white/60 group-hover/bubble:text-white transition-colors">{i+1}</span>
+                                    <span className="text-[9px] font-black text-white/60 group-hover/bubble:text-white transition-colors">{i + 1}</span>
 
                                     {/* High-Precision Beacon Tooltip */}
                                     <div className={`absolute ${showBelow ? 'top-full mt-8' : 'bottom-full mb-8'} ${showLeft ? 'right-0' : 'left-1/2 -translate-x-1/2'} opacity-0 group-hover/bubble:opacity-100 transition-all duration-500 pointer-events-none w-80 z-[150]`}>
                                         <div className={`relative bg-[#0A051E]/98 backdrop-blur-3xl border-2 border-purple-500/40 p-8 rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,1)] transform ${showBelow ? 'translate-y-4 group-hover/bubble:translate-y-0' : '-translate-y-4 group-hover/bubble:translate-y-0'}`}>
-                                            
+
                                             {/* Refined Arrow - Precision Beacon */}
                                             <div className={`absolute ${showBelow ? '-top-3' : '-bottom-3'} left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 bg-[#0A051E] border-2 border-purple-500/40 ${showBelow ? 'border-r-0 border-b-0' : 'border-l-0 border-t-0'} shadow-[0_0_30px_rgba(168,85,247,0.3)]`} />
 
@@ -411,10 +408,10 @@ function VelocityReport({ data }) {
                                                     </div>
                                                 </div>
                                                 <div className="shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 rounded-[24px] flex items-center justify-center border-2 border-purple-500/30 shadow-lg">
-                                                    <span className="text-lg font-black text-purple-400">#{i+1}</span>
+                                                    <span className="text-lg font-black text-purple-400">#{i + 1}</span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="grid grid-cols-2 gap-5 mb-8 relative z-10">
                                                 <div className="p-5 rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
                                                     <span className="text-[10px] text-gray-500 font-black uppercase block mb-2 tracking-widest">Signals DB</span>
@@ -425,7 +422,7 @@ function VelocityReport({ data }) {
                                                     <span className="text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.memberCount.toLocaleString()}</span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="p-6 rounded-[32px] bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border-2 border-purple-500/40 flex items-center justify-between shadow-[0_10px_30px_rgba(168,85,247,0.1)] relative z-10 overflow-hidden">
                                                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/5 to-transparent animate-pulse" />
                                                 <div className="flex items-center gap-4 relative z-10">
@@ -460,11 +457,11 @@ function ActivityReport({ data, pages, setPages }) {
     return (
         <div className="space-y-10 animate-in slide-in-from-bottom-8 duration-1000">
             <div className="grid lg:grid-cols-3 gap-8">
-                
+
                 {/* 1. PROFILE INITIALIZATIONS */}
-                <ActivitySegment 
-                    title="Profile Sync" 
-                    icon={<UserPlus size={20} />} 
+                <ActivitySegment
+                    title="Profile Sync"
+                    icon={<UserPlus size={20} />}
                     color="text-blue-400"
                     bg="bg-blue-500/10"
                     page={pages.u}
@@ -475,7 +472,7 @@ function ActivityReport({ data, pages, setPages }) {
                         <ActivityCard key={i} color="blue">
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest px-1.5 py-0.5 bg-blue-500/10 rounded">User Node</span>
-                                <span className="text-[8px] text-gray-600 font-bold">{new Date(user.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span className="text-[8px] text-gray-600 font-bold">{new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">@{user.username}</h4>
                             <div className="mt-3 flex items-center justify-between">
@@ -490,9 +487,9 @@ function ActivityReport({ data, pages, setPages }) {
                 </ActivitySegment>
 
                 {/* 2. COMMUNITY EXPANSION */}
-                <ActivitySegment 
-                    title="Community Expansion" 
-                    icon={<Plus size={20} />} 
+                <ActivitySegment
+                    title="Community Expansion"
+                    icon={<Plus size={20} />}
                     color="text-purple-400"
                     bg="bg-purple-500/10"
                     page={pages.c}
@@ -503,7 +500,7 @@ function ActivityReport({ data, pages, setPages }) {
                         <ActivityCard key={i} color="purple">
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest px-1.5 py-0.5 bg-purple-500/10 rounded">Circle Cluster</span>
-                                <span className="text-[8px] text-gray-600 font-bold">{new Date(circle.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span className="text-[8px] text-gray-600 font-bold">{new Date(circle.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">{circle.name}</h4>
                             <div className="mt-3 flex items-center justify-between">
@@ -518,9 +515,9 @@ function ActivityReport({ data, pages, setPages }) {
                 </ActivitySegment>
 
                 {/* 3. MEETING RESONANCE */}
-                <ActivitySegment 
-                    title="Meeting Resonance" 
-                    icon={<Video size={20} />} 
+                <ActivitySegment
+                    title="Meeting Resonance"
+                    icon={<Video size={20} />}
                     color="text-emerald-400"
                     bg="bg-emerald-500/10"
                     page={pages.m}
@@ -531,13 +528,13 @@ function ActivityReport({ data, pages, setPages }) {
                         <ActivityCard key={i} color="emerald">
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest px-1.5 py-0.5 bg-emerald-500/10 rounded">Sync Event</span>
-                                <span className="text-[8px] text-gray-600 font-bold">{new Date(meeting.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span className="text-[8px] text-gray-600 font-bold">{new Date(meeting.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">{meeting.title}</h4>
                             <div className="mt-3 flex items-center justify-between">
                                 <div className="flex items-center gap-1.5">
                                     <Activity size={10} className="text-gray-600" />
-                                    <span className="text-[8px] font-black text-gray-600 uppercase">Room: {meeting.roomId?.substring(0,8)}...</span>
+                                    <span className="text-[8px] font-black text-gray-600 uppercase">Room: {meeting.roomId?.substring(0, 8)}...</span>
                                 </div>
                                 <span className={`text-[8px] font-black uppercase ${meeting.status === 'live' ? 'text-green-400' : 'text-emerald-400/60'}`}>{meeting.status}</span>
                             </div>
@@ -553,7 +550,7 @@ function ActivitySegment({ title, icon, color, bg, children, page, totalPages, o
     return (
         <div className="bg-[#0F0529]/40 border border-white/5 rounded-[40px] p-8 flex flex-col h-full min-h-[600px] shadow-2xl relative group">
             <div className="absolute top-0 right-10 w-20 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            
+
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <div className={`p-2.5 ${bg} rounded-xl ${color}`}>
@@ -561,9 +558,9 @@ function ActivitySegment({ title, icon, color, bg, children, page, totalPages, o
                     </div>
                     <h3 className="text-lg font-black text-white uppercase tracking-tight">{title}</h3>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                    <button 
+                    <button
                         disabled={page === 1}
                         onClick={() => onPageChange(page - 1)}
                         className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 disabled:opacity-0 hover:text-white transition-all"
@@ -571,7 +568,7 @@ function ActivitySegment({ title, icon, color, bg, children, page, totalPages, o
                         <ChevronLeft size={14} />
                     </button>
                     <span className="text-[10px] font-black text-white/20 tabular-nums">{page}/{totalPages || 1}</span>
-                    <button 
+                    <button
                         disabled={page >= (totalPages || 1)}
                         onClick={() => onPageChange(page + 1)}
                         className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 disabled:opacity-0 hover:text-white transition-all"
@@ -612,7 +609,7 @@ function DistributionReport({ data }) {
                     </div>
                     <h3 className="text-xl font-black text-white uppercase tracking-tight">Niche Saturation</h3>
                 </div>
-                
+
                 <div className="space-y-8">
                     {data?.distribution.map((cat, i) => {
                         const maxMembers = Math.max(...data.distribution.map(d => d.totalMembers), 1);
@@ -633,9 +630,9 @@ function DistributionReport({ data }) {
                                     </div>
                                 </div>
                                 <div className="h-2.5 w-full bg-white/[0.02] rounded-full overflow-hidden border border-white/5 shadow-inner">
-                                    <div 
-                                        className={`h-full bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-400 transition-all duration-1000 relative group-hover/cat:scale-y-110 ${cat.circleCount === 0 ? 'opacity-10' : 'opacity-100 shadow-[0_0_15px_rgba(168,85,247,0.3)]'}`} 
-                                        style={{ width: `${Math.max(percent, cat.circleCount > 0 ? 5 : 0)}%` }} 
+                                    <div
+                                        className={`h-full bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-400 transition-all duration-1000 relative group-hover/cat:scale-y-110 ${cat.circleCount === 0 ? 'opacity-10' : 'opacity-100 shadow-[0_0_15px_rgba(168,85,247,0.3)]'}`}
+                                        style={{ width: `${Math.max(percent, cat.circleCount > 0 ? 5 : 0)}%` }}
                                     >
                                         <div className="absolute inset-0 bg-white/10 animate-pulse opacity-0 group-hover/cat:opacity-100" />
                                     </div>
@@ -658,12 +655,11 @@ function DistributionReport({ data }) {
                 <div className="space-y-5">
                     {data?.topCircles.map((circle, i) => (
                         <div key={i} className="flex items-center gap-5 p-4 rounded-[24px] bg-white/[0.01] border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative">
-                            <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black border-2 border-[#0F0529] shadow-lg transition-transform group-hover:scale-110 ${
-                                i === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-[#1A0C3F]' :
+                            <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black border-2 border-[#0F0529] shadow-lg transition-transform group-hover:scale-110 ${i === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-[#1A0C3F]' :
                                 i === 1 ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-[#1A0C3F]' :
-                                i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
-                                'bg-[#1A1140] text-purple-400'
-                            }`}>
+                                    i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                                        'bg-[#1A1140] text-purple-400'
+                                }`}>
                                 {i === 0 ? <Trophy size={14} /> : i + 1}
                             </div>
 
@@ -677,7 +673,7 @@ function DistributionReport({ data }) {
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                     <h4 className="text-sm font-black text-white tracking-tight leading-none truncate max-w-[120px]">{circle.name}</h4>
-                                    <div className="px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[7px] font-black text-purple-400 uppercase">LVL 0{5-i}</div>
+                                    <div className="px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[7px] font-black text-purple-400 uppercase">LVL 0{5 - i}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[8px] font-black text-purple-400/60 uppercase tracking-widest">{circle.category}</span>

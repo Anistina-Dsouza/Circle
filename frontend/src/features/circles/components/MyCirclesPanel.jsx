@@ -3,6 +3,47 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Users, Plus, ChevronRight, Loader2, Globe, Lock } from 'lucide-react';
 
+const CircleItem = ({ circle }) => (
+    <li>
+        <Link
+            to={`/circles/${circle.slug}`}
+            className="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-violet-500/10 transition-all group"
+        >
+            {/* Avatar */}
+            <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0 border border-violet-500/20 group-hover:border-violet-500/50 transition-colors">
+                <img
+                    src={
+                        (circle.profilePic && circle.profilePic !== '')
+                            ? circle.profilePic
+                            : (circle.coverImage && circle.coverImage !== '')
+                                ? circle.coverImage
+                                : 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png'
+                    }
+                    alt={circle.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-white truncate group-hover:text-violet-300 transition-colors">
+                    {circle.name}
+                </p>
+                <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                    <Users size={10} />
+                    {(circle.stats?.memberCount || 0).toLocaleString()}
+                </p>
+            </div>
+
+            {/* Arrow */}
+            <ChevronRight
+                size={12}
+                className="text-gray-700 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all shrink-0"
+            />
+        </Link>
+    </li>
+);
+
 const MyCirclesPanel = () => {
     const [circles, setCircles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -101,48 +142,43 @@ const MyCirclesPanel = () => {
                             </Link>
                         </div>
                     ) : (
-                        <ul className="space-y-1">
-                            {circles.map((circle) => (
-                                <li key={circle._id}>
-                                    <Link
-                                        to={`/circles/${circle.slug}`}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-violet-500/10 transition-all group"
-                                    >
-                                        {/* Avatar */}
-                                        <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-violet-500/20 group-hover:border-violet-500/50 transition-colors">
-                                            <img
-                                                src={
-                                                    (circle.profilePic && circle.profilePic !== '')
-                                                        ? circle.profilePic
-                                                        : (circle.coverImage && circle.coverImage !== '')
-                                                            ? circle.coverImage
-                                                            : 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png'
-                                                }
-                                                alt={circle.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        </div>
+                        <div className="space-y-6">
+                            {/* Created Circles */}
+                            {circles.filter(c => (c.creator?._id || c.creator)?.toString() === JSON.parse(localStorage.getItem('user'))?._id?.toString()).length > 0 && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-3">
+                                        <span className="text-[10px] font-black text-violet-500 uppercase tracking-[0.15em]">Admin</span>
+                                        <div className="h-[1px] flex-1 bg-violet-500/10" />
+                                    </div>
+                                    <ul className="space-y-1">
+                                        {circles
+                                            .filter(c => (c.creator?._id || c.creator)?.toString() === JSON.parse(localStorage.getItem('user'))?._id?.toString())
+                                            .map((circle) => (
+                                                <CircleItem key={circle._id} circle={circle} />
+                                            ))
+                                        }
+                                    </ul>
+                                </div>
+                            )}
 
-                                        {/* Info */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-white truncate group-hover:text-violet-300 transition-colors">
-                                                {circle.name}
-                                            </p>
-                                            <p className="text-[11px] text-gray-500 flex items-center gap-1">
-                                                <Users size={10} />
-                                                {(circle.stats?.memberCount || 0).toLocaleString()} members
-                                            </p>
-                                        </div>
-
-                                        {/* Arrow */}
-                                        <ChevronRight
-                                            size={14}
-                                            className="text-gray-600 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all shrink-0"
-                                        />
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                            {/* Joined Circles */}
+                            {circles.filter(c => (c.creator?._id || c.creator)?.toString() !== JSON.parse(localStorage.getItem('user'))?._id?.toString()).length > 0 && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-3">
+                                        <span className="text-[10px] font-black text-fuchsia-500 uppercase tracking-[0.15em]">Joined</span>
+                                        <div className="h-[1px] flex-1 bg-fuchsia-500/10" />
+                                    </div>
+                                    <ul className="space-y-1">
+                                        {circles
+                                            .filter(c => (c.creator?._id || c.creator)?.toString() !== JSON.parse(localStorage.getItem('user'))?._id?.toString())
+                                            .map((circle) => (
+                                                <CircleItem key={circle._id} circle={circle} />
+                                            ))
+                                        }
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 

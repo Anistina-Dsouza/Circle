@@ -112,6 +112,7 @@ function Avatar({ index }) {
       <img
         src={avatarUrl(index)}
         alt="avatar"
+        loading="lazy"
         className="w-full h-full object-cover"
       />
     </div>

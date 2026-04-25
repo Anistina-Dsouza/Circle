@@ -3,6 +3,7 @@ import { Shield, ShieldAlert, UserMinus, MoreVertical } from 'lucide-react';
 
 const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
     const isModerator = member.role === 'moderator';
+    const isAdmin = member.role === 'admin';
 
     return (
         <div className="bg-[#1A1140]/60 backdrop-blur-sm rounded-3xl p-5 border border-white/5 hover:border-purple-500/50 transition-all duration-500 group relative overflow-hidden flex items-center gap-5">
@@ -46,25 +47,29 @@ const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                    <button 
-                        onClick={() => onChangeRole(member.id, isModerator ? 'member' : 'moderator')}
-                        className={`
-                            p-3 rounded-xl transition-all border
-                            ${isModerator 
-                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white' 
-                                : 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500 hover:text-white'}
-                        `}
-                        title={isModerator ? "Remove Moderator" : "Make Moderator"}
-                    >
-                        {isModerator ? <ShieldAlert size={18} /> : <Shield size={18} />}
-                    </button>
-                    <button 
-                        onClick={() => onKick(member.id)}
-                        className="p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all"
-                        title="Remove Member"
-                    >
-                        <UserMinus size={18} />
-                    </button>
+                    {!isAdmin && (
+                        <>
+                            <button 
+                                onClick={() => onChangeRole(member.id, isModerator ? 'member' : 'moderator')}
+                                className={`
+                                    p-3 rounded-xl transition-all border
+                                    ${isModerator 
+                                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white' 
+                                        : 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500 hover:text-white'}
+                                `}
+                                title={isModerator ? "Remove Moderator" : "Make Moderator"}
+                            >
+                                {isModerator ? <ShieldAlert size={18} /> : <Shield size={18} />}
+                            </button>
+                            <button 
+                                onClick={() => onKick(member.id)}
+                                className="p-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                title="Remove Member"
+                            >
+                                <UserMinus size={18} />
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

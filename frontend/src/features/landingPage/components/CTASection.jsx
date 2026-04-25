@@ -9,22 +9,28 @@ export default function CTASection() {
       {/* ── AURORA GRADIENT BACKGROUND ─────────────────────── */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[60%] bg-violet-600/10 blur-[150px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[60%] bg-fuchsia-600/10 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[60%] bg-violet-800/10 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="relative group overflow-hidden rounded-[60px] p-1 shadow-2xl shadow-violet-900/20">
+        <div className="relative group overflow-hidden rounded-[60px] p-[1px] shadow-2xl shadow-violet-950/40">
           
           {/* Animated Border/Glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-600/50 via-fuchsia-500/50 to-violet-600/50 opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-600/50 via-violet-500/30 to-violet-600/50 opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
 
           {/* Main Card */}
-          <div className="relative bg-[#120B2F]/80 backdrop-blur-3xl rounded-[59px] py-20 px-8 md:px-24 overflow-hidden border border-white/5">
+          <div className="relative bg-[#0F0529]/90 backdrop-blur-3xl rounded-[59px] py-20 px-8 md:px-24 overflow-hidden border border-white/5">
             
             {/* Subtle Grid Overlay */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
               style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
             />
+
+            {/* Corner Shadow Boxes (Requested in dark purple shade) */}
+            <div className="absolute top-0 left-0 w-32 h-32 bg-[#050212]/40 border-r border-b border-white/5 shadow-inner" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#050212]/40 border-l border-b border-white/5 shadow-inner" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#050212]/40 border-r border-t border-white/5 shadow-inner" />
+            <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#050212]/40 border-l border-t border-white/5 shadow-inner" />
 
             <div className="relative z-10 flex flex-col items-center">
               
@@ -34,7 +40,7 @@ export default function CTASection() {
               </div>
 
               <h2 className="text-4xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-[0.95] text-center max-w-4xl">
-                Where <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-400 bg-300% animate-gradient">Meaningful</span> <br />
+                Where <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-violet-300 to-violet-400 bg-300% animate-gradient">Meaningful</span> <br />
                 Connections Begin.
               </h2>
               
