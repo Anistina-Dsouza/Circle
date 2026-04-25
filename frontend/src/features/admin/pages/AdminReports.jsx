@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Loader2, Activity, Zap, Shield, Users, BarChart3, TrendingUp, AlertTriangle, Cpu, Globe, Trophy, Medal, MessageSquare, Video, UserPlus, Plus, Calendar, Hash, ChevronLeft, ChevronRight, Clock, Info, Sparkles, Filter, List, LayoutGrid, Target, MousePointer2, Flare } from "lucide-react";
+import { Loader2, Activity, Zap, Shield, Users, BarChart3, TrendingUp, AlertTriangle, Cpu, Globe, Trophy, Medal, MessageSquare, Video, UserPlus, Plus, Calendar, Hash, ChevronLeft, ChevronRight, Clock, Info, Sparkles, Filter, List, LayoutGrid, Target, MousePointer2 } from "lucide-react";
 import AdminLayout from "../layouts/AdminLayout";
 import NetworkChart from "../components/NetworkChart";
 import GrowthTrends from "../components/GrowthTrends";
@@ -107,8 +107,8 @@ export default function AdminReports() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex flex-col items-center gap-1 min-w-[100px] px-6 py-4 rounded-[24px] transition-all duration-700 group ${activeTab === tab.id
-                                        ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10"
-                                        : "text-white/20 hover:text-white/60 hover:bg-white/[0.03]"
+                                    ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10"
+                                    : "text-white/20 hover:text-white/60 hover:bg-white/[0.03]"
                                     }`}
                             >
                                 <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'scale-100 group-hover:scale-110'}`}>
@@ -656,9 +656,9 @@ function DistributionReport({ data }) {
                     {data?.topCircles.map((circle, i) => (
                         <div key={i} className="flex items-center gap-5 p-4 rounded-[24px] bg-white/[0.01] border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative">
                             <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black border-2 border-[#0F0529] shadow-lg transition-transform group-hover:scale-110 ${i === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-[#1A0C3F]' :
-                                    i === 1 ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-[#1A0C3F]' :
-                                        i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
-                                            'bg-[#1A1140] text-purple-400'
+                                i === 1 ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-[#1A0C3F]' :
+                                    i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                                        'bg-[#1A1140] text-purple-400'
                                 }`}>
                                 {i === 0 ? <Trophy size={14} /> : i + 1}
                             </div>
