@@ -28,10 +28,12 @@ const StoryCard = ({ story }) => {
             </div>
 
             {/* Content */}
-            <div className="p-4">
-                <h3 className="text-white font-bold mb-1">{story.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{story.description}</p>
-            </div>
+            {(story.title || story.description) && (
+                <div className="p-4">
+                    {story.title && <h3 className="text-white font-bold mb-1">{story.title}</h3>}
+                    {story.description && <p className="text-gray-400 text-sm leading-relaxed">{story.description}</p>}
+                </div>
+            )}
         </div>
     );
 };
