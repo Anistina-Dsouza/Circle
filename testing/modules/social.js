@@ -2,7 +2,7 @@ const { By, until } = require('selenium-webdriver');
 const { clearAndType, click, sleep, safeClickText, typeWithEnter, getRandomMessage, safeAction } = require('../utils/helpers');
 
 async function testSocialFlow(driver, baseUrl) {
-    console.log("\nSTEP 3: Explore -> Follow -> Profile -> Message");
+    console.log("\nSTEP 3: Explore - Follow - Profile - Message");
     await driver.get(baseUrl + "/explore");
     await sleep(4000);
 
