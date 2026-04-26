@@ -75,7 +75,15 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
 
     return (
         <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
-            <p className="text-[11px] font-bold mb-1 text-violet-400">{time}</p>
+            <div className="flex items-center justify-between mb-1">
+                <p className="text-[11px] font-bold text-violet-400">{time}</p>
+                {meeting.status === 'live' && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Live Now</span>
+                    </div>
+                )}
+            </div>
             <p className="text-white font-semibold text-sm mb-1">{meeting.title}</p>
             {meeting.description && <p className="text-gray-500 text-[11px] leading-relaxed mb-4">{meeting.description}</p>}
             
@@ -99,20 +107,20 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
                 </div>
             )}
             
-            <RSVPButton 
-                meetingId={meeting._id} 
-                initialStatus={initialStatus} 
-                onStatusChange={handleStatusChange} 
-            />
-            
-            {meeting.status === 'live' && (
+            {meeting.status === 'live' ? (
                 <button 
                     onClick={() => window.open(meeting.meetingLink, '_blank')}
-                    className="w-full mt-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-400 hover:to-emerald-500 shadow-lg shadow-green-900/20"
+                    className="w-full py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-violet-900/40"
                 >
-                    <Video size={13} />
-                    Join Now
+                    <Video size={14} fill="currentColor" />
+                    JOIN LIVE SESSION
                 </button>
+            ) : (
+                <RSVPButton 
+                    meetingId={meeting._id} 
+                    initialStatus={initialStatus} 
+                    onStatusChange={handleStatusChange} 
+                />
             )}
         </div>
     );

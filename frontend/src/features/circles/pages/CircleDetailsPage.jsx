@@ -96,14 +96,16 @@ const CircleDetailsPage = () => {
     };
 
     /* derived ---------------------------------------------- */
-    const isCreator = circle && (
+    const isCreator   = circle && (
         circle.creator?._id === currentUser._id ||
         circle.creator?._id === currentUser.id  ||
         circle.creator      === currentUser._id  ||
         circle.creator      === currentUser.id
     );
 
-    const isAdmin = circle?.userRole === 'admin' || isCreator;
+    const isModerator = circle?.userRole === 'moderator';
+    const isAdmin     = circle?.userRole === 'admin' || isCreator;
+    const canManage   = isCreator || isAdmin || isModerator;
 
     const canInvite = isAdmin || circle?.settings?.allowMemberInvites !== false;
 
@@ -161,6 +163,11 @@ const CircleDetailsPage = () => {
                         <div className="pb-1">
                             <h1 className="text-2xl font-extrabold text-white leading-tight mb-1.5">
                                 {circle.name}
+                                {isModerator && (
+                                    <span className="ml-3 text-[10px] bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded-full font-black uppercase tracking-widest vertical-middle">
+                                        Moderator
+                                    </span>
+                                )}
                             </h1>
                             <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
                                 <span className="flex items-center gap-1">
@@ -201,8 +208,8 @@ const CircleDetailsPage = () => {
                             </button>
                         )}
 
-                        {/* Creator → Manage | Member → Joined + Leave */}
-                        {isCreator ? (
+                        {/* canManage (Creator/Admin/Moderator) → Manage | Member → Joined + Leave */}
+                        {canManage ? (
                             <Link
                                 to={`/circles/${slug}/manage`}
                                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold shadow-lg hover:from-violet-500 hover:to-fuchsia-500 transition-all"

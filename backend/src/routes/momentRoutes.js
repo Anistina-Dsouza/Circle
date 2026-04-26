@@ -17,5 +17,6 @@ router.get('/:momentId', cacheMiddleware(60), momentController.getMoment);
 router.post('/', upload.single('media'), momentController.createMoment);
 router.delete('/:momentId', momentController.deleteMoment);
 router.post('/:momentId/reply', momentController.replyToMoment);
+router.post('/:momentId/react', momentController.reactToMoment);
 
 module.exports = router;

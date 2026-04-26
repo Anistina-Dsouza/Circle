@@ -1,9 +1,11 @@
 import React from 'react';
-import { Shield, ShieldAlert, UserMinus, MoreVertical } from 'lucide-react';
+import { Shield, ShieldAlert, UserMinus, MoreVertical, VolumeX, Ban, Volume2 } from 'lucide-react';
 
-const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
+const MemberManagementItem = ({ member, onKick, onChangeRole, onMute, onBan }) => {
     const isModerator = member.role === 'moderator';
     const isAdmin = member.role === 'admin';
+    const isMuted = member.isMuted || (member.mutedUntil && new Date(member.mutedUntil) > new Date());
+
 
     return (
         <div className="bg-[#1A1140]/60 backdrop-blur-sm rounded-3xl p-5 border border-white/5 hover:border-purple-500/50 transition-all duration-500 group relative overflow-hidden flex items-center gap-5">
@@ -42,6 +44,11 @@ const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
                         <span className="text-[10px] text-gray-600 font-bold tracking-widest">
                             Joined {member.joinedDate}
                         </span>
+                        {isMuted && (
+                            <span className="text-[9px] font-black px-2 py-0.5 rounded-md tracking-widest border bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                MUTED {member.mutedUntil ? `UNTIL ${new Date(member.mutedUntil).toLocaleTimeString()}` : 'INDEFINITELY'}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -49,6 +56,18 @@ const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
                 <div className="flex items-center gap-2">
                     {!isAdmin && (
                         <>
+                            <button 
+                                onClick={() => onMute(member.id, !isMuted)}
+                                className={`
+                                    p-3 rounded-xl transition-all border
+                                    ${isMuted 
+                                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500 hover:text-white' 
+                                        : 'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500 hover:text-white'}
+                                `}
+                                title={isMuted ? "Unmute Member" : "Mute Member"}
+                            >
+                                {isMuted ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                            </button>
                             <button 
                                 onClick={() => onChangeRole(member.id, isModerator ? 'member' : 'moderator')}
                                 className={`
@@ -67,6 +86,13 @@ const MemberManagementItem = ({ member, onKick, onChangeRole }) => {
                                 title="Remove Member"
                             >
                                 <UserMinus size={18} />
+                            </button>
+                            <button 
+                                onClick={() => onBan(member.id)}
+                                className="p-3 bg-black/40 text-red-600 border border-red-900/50 rounded-xl hover:bg-red-600 hover:text-white transition-all"
+                                title="Ban Member"
+                            >
+                                <Ban size={18} />
                             </button>
                         </>
                     )}
