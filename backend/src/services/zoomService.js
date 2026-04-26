@@ -14,7 +14,6 @@ class ZoomService {
    * Reuses the token if it has not expired yet.
    */
   async getAccessToken() {
-    // If the token exists and is valid for at least another 5 minutes, use it
     if (this.accessToken && this.tokenExpiration && Date.now() < this.tokenExpiration - 5 * 60 * 1000) {
       return this.accessToken;
     }
@@ -38,7 +37,6 @@ class ZoomService {
       );
 
       this.accessToken = response.data.access_token;
-      // Expires_in is in seconds
       this.tokenExpiration = Date.now() + (response.data.expires_in * 1000);
       
       return this.accessToken;
@@ -50,8 +48,6 @@ class ZoomService {
 
   /**
    * Creates a Zoom meeting.
-   * @param {Object} meetingDetails - Details such as topic, start_time, duration, password, etc.
-   * @returns {Object} { id, join_url, password }
    */
   async createMeeting(meetingDetails) {
     try {
@@ -61,8 +57,8 @@ class ZoomService {
         'https://api.zoom.us/v2/users/me/meetings',
         {
           topic: meetingDetails.title,
-          type: 2, // Scheduled meeting
-          start_time: meetingDetails.startTime, // Format: yyyy-MM-dd'T'HH:mm:ss'Z'
+          type: 2,
+          start_time: meetingDetails.startTime,
           duration: meetingDetails.duration || 60,
           password: meetingDetails.password || undefined,
           agenda: meetingDetails.description || '',
@@ -72,7 +68,7 @@ class ZoomService {
             join_before_host: false,
             mute_upon_entry: true,
             waiting_room: true,
-            approval_type: 0 // Automatically approve
+            approval_type: 0
           }
         },
         {
@@ -97,7 +93,6 @@ class ZoomService {
 
   /**
    * Deletes a Zoom meeting by ID.
-   * @param {String} meetingId - The ID of the Zoom meeting
    */
   async deleteMeeting(meetingId) {
     try {
@@ -114,7 +109,6 @@ class ZoomService {
       
       return true;
     } catch (error) {
-      // If the meeting is already deleted or not found, it might throw a 404, we can ignore or log it.
       if (error.response?.status === 404) {
         console.warn(`Zoom meeting ${meetingId} not found, it might already be deleted.`);
         return true;

@@ -285,7 +285,15 @@ exports.deleteMeeting = async (req, res) => {
     
     if (meeting.roomId) {
       try {
-        await zoomService.deleteMeeting(meeting.roomId);
+        // Load user with tokens to delete the meeting from Zoom
+        const user = await User.findById(req.user._id).select('+zoomTokens.accessToken +zoomTokens.refreshToken +zoomTokens.expiresAt');
+        let accessToken;
+        try {
+          accessToken = await zoomService.getValidAccessToken(user);
+          await zoomService.deleteMeeting(meeting.roomId, accessToken);
+        } catch (tokenErr) {
+          console.warn('Could not delete meeting from Zoom (no valid token), deleting from DB only.');
+        }
       } catch (err) {
         console.warn('Failed to delete meeting on Zoom side, deleting from local DB anyway:', err);
       }

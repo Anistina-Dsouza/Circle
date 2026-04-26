@@ -40,7 +40,8 @@ const MeetingsPage = () => {
                         attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
                         plusCount: plusCount,
                         btnColor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]',
-                        meetingLink: m.meetingLink
+                        meetingLink: m.meetingLink,
+                        startLink: m.startLink
                     };
                 };
 
@@ -71,7 +72,8 @@ const MeetingsPage = () => {
                         attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
                         plusCount: plusCount,
                         btnColor: 'bg-indigo-600 hover:bg-indigo-500',
-                        meetingLink: m.meetingLink
+                        meetingLink: m.meetingLink,
+                        startLink: m.startLink
                     };
                 }
 
@@ -265,8 +267,9 @@ const MeetingsPage = () => {
                                 <button 
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        if (hosted[0].meetingLink) {
-                                            window.open(hosted[0].meetingLink, '_blank');
+                                        const linkToUse = hosted[0].startLink || hosted[0].meetingLink;
+                                        if (linkToUse) {
+                                            window.open(linkToUse, '_blank');
                                         }
                                     }}
                                     className="w-full sm:w-auto bg-white text-[#0F0529] px-10 py-3.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 shadow-xl hover:bg-gray-100"
@@ -299,17 +302,23 @@ const MeetingsPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {upcoming.map((meeting) => (
                                 <div key={meeting.id} className="cursor-pointer" onClick={() => {
-                                    if (meeting.meetingLink) {
+                                    const linkToUse = meeting.startLink || meeting.meetingLink;
+                                    if (linkToUse) {
                                         try {
                                             const userStr = localStorage.getItem('user');
                                             const user = userStr ? JSON.parse(userStr) : null;
                                             const displayName = user?.profile?.displayName || user?.username || 'Participant';
-                                            const url = new URL(meeting.meetingLink);
-                                            url.searchParams.set('uname', displayName);
-                                            url.searchParams.set('un', btoa(displayName));
+                                            const url = new URL(linkToUse);
+                                            
+                                            // Only append participant name hints if we are NOT using the startLink
+                                            if (!meeting.startLink) {
+                                                url.searchParams.set('uname', displayName);
+                                                url.searchParams.set('un', btoa(displayName));
+                                            }
+                                            
                                             window.open(url.toString(), '_blank');
                                         } catch (err) {
-                                            window.open(meeting.meetingLink, '_blank');
+                                            window.open(linkToUse, '_blank');
                                         }
                                     }
                                 }}>

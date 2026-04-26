@@ -34,7 +34,8 @@ const UpcomingMeetingsPage = () => {
                             attendees: attendees.length ? attendees : ['https://ui-avatars.com/api/?name=User&background=random'],
                             plusCount: plusCount,
                             btnColor: 'bg-[#8B5CF6] hover:bg-[#7C3AED]',
-                            meetingLink: m.meetingLink
+                            meetingLink: m.meetingLink,
+                            startLink: m.startLink
                         };
                     });
                     setMeetings(mappedData);
@@ -135,17 +136,23 @@ const UpcomingMeetingsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredMeetings.map((meeting) => (
                             <div key={meeting.id} className="group cursor-pointer" onClick={(e) => {
-                                if (meeting.meetingLink) {
+                                const linkToUse = meeting.startLink || meeting.meetingLink;
+                                if (linkToUse) {
                                     try {
                                         const userStr = localStorage.getItem('user');
                                         const user = userStr ? JSON.parse(userStr) : null;
                                         const displayName = user?.profile?.displayName || user?.username || 'Participant';
-                                        const url = new URL(meeting.meetingLink);
-                                        url.searchParams.set('uname', displayName);
-                                        url.searchParams.set('un', btoa(displayName));
+                                        const url = new URL(linkToUse);
+                                        
+                                        // Only append participant name hints if we are NOT using the startLink
+                                        if (!meeting.startLink) {
+                                            url.searchParams.set('uname', displayName);
+                                            url.searchParams.set('un', btoa(displayName));
+                                        }
+                                        
                                         window.open(url.toString(), '_blank');
                                     } catch (err) {
-                                        window.open(meeting.meetingLink, '_blank');
+                                        window.open(linkToUse, '_blank');
                                     }
                                 }
                             }}>
