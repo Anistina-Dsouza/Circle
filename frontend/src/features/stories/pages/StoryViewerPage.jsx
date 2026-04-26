@@ -23,7 +23,7 @@ const StoryViewerPage = () => {
     const [error, setError] = useState(null);
     const [burstEmoji, setBurstEmoji] = useState(null);
     const [successMsg, setSuccessMsg] = useState('');
-    
+
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
     
@@ -155,7 +155,7 @@ const StoryViewerPage = () => {
 
     useEffect(() => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
-        
+
         progressTimer.current = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 100) return 100;
@@ -170,7 +170,7 @@ const StoryViewerPage = () => {
         if (progress >= 100) {
             handleNext();
         }
-    }, [progress, handleNext]);
+    }, [progress]);
 
     useEffect(() => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
@@ -200,7 +200,7 @@ const StoryViewerPage = () => {
                 <div className="max-w-xs flex flex-col items-center">
                     <AlertCircle size={48} className="text-red-500 mb-4" />
                     <p className="text-gray-400 mb-6">{error || 'No stories available'}</p>
-                    <button 
+                    <button
                         onClick={() => navigate('/feed')}
                         className="bg-purple-600 text-white px-8 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/40"
                     >
@@ -233,9 +233,9 @@ const StoryViewerPage = () => {
                 <div className="mb-6 px-1 shrink-0 z-10 w-full relative">
                     <ProgressBar stories={stories} currentIndex={currentIndex} progress={progress} />
                     <div className="mt-4">
-                        <StoryInfo 
-                            user={currentStory.user} 
-                            createdAt={currentStory.createdAt} 
+                        <StoryInfo
+                            user={currentStory.user}
+                            createdAt={currentStory.createdAt}
                             isOwnStory={isOwnStory}
                             onDelete={handleDelete}
                             onClose={() => navigate(-1)}
@@ -271,7 +271,7 @@ const StoryViewerPage = () => {
 
                     {isOwnStory && (
                         <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
-                            <div 
+                            <div
                                 onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
                                 className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto hover:bg-[#5f4e99] transition-colors"
                             >
