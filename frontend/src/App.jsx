@@ -2,6 +2,7 @@ import React, { useEffect, Suspense } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import ScrollToTop from './components/ScrollToTop';
 const Login = React.lazy(() => import('./features/auth/Login/LoginPage'));
 const Signup = React.lazy(() => import('./features/auth/signup/SignupPage'));
 const ForgotPassword = React.lazy(() => import('./features/auth/ForgotPassword/ForgotPasswordPage'));
@@ -14,6 +15,7 @@ const AdminDashboard = React.lazy(() => import('./features/admin/pages/AdminDash
 const ManageUsers = React.lazy(() => import('./features/admin/pages/ManageUsers'));
 const ManageCommunities = React.lazy(() => import('./features/admin/pages/ManageCommunities'));
 const Announcements = React.lazy(() => import('./features/admin/pages/Announcements'));
+const LegalPage = React.lazy(() => import('./features/landingPage/pages/LegalPage'));
 
 const AdminReports =React.lazy(() => import('./features/admin/pages/AdminReports'));
 
@@ -84,6 +86,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <Suspense fallback={
@@ -97,6 +100,12 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+              
+              {/* Legal / Footer Pages */}
+              <Route path="/privacy" element={<LegalPage type="privacy" />} />
+              <Route path="/terms" element={<LegalPage type="terms" />} />
+              <Route path="/cookies" element={<LegalPage type="cookies" />} />
+              <Route path="/contact" element={<LegalPage type="contact" />} />
 
               <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />

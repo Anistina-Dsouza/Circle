@@ -1,6 +1,19 @@
 import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const userStr = localStorage.getItem('user');
+  let user = null;
+  try {
+    user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : null;
+  } catch (e) {
+    user = null;
+  }
+
+  const profileLink = user?.username ? `/profile/${user.username}` : "/login";
+  const settingsLink = user ? "/profile/edit" : "/login";
+  const messagesLink = user ? "/messages" : "/login";
+  const notificationsLink = user ? "/notifications" : "/login";
+
   return (
     <footer className="bg-[#0b0015] text-white">
 
@@ -61,10 +74,10 @@ export default function Footer() {
               Account
             </h4>
             <ul className="space-y-4 text-gray-400">
-              <li><Link to="/profile/me" className="hover:text-purple-400 transition">My Profile</Link></li>
-              <li><Link to="/messages" className="hover:text-purple-400 transition">Messages</Link></li>
-              <li><Link to="/settings" className="hover:text-purple-400 transition">Settings</Link></li>
-              <li><Link to="/notifications" className="hover:text-purple-400 transition">Notifications</Link></li>
+              <li><Link to={profileLink} className="hover:text-purple-400 transition">My Profile</Link></li>
+              <li><Link to={messagesLink} className="hover:text-purple-400 transition">Messages</Link></li>
+              <li><Link to={settingsLink} className="hover:text-purple-400 transition">Settings</Link></li>
+              <li><Link to={notificationsLink} className="hover:text-purple-400 transition">Notifications</Link></li>
             </ul>
           </div>
 
