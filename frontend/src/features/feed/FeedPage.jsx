@@ -20,10 +20,10 @@ const FeedPage = () => {
             <main className="max-w-7xl mx-auto px-6 py-8">
                 <FeedHeader />
 
-                {/* Two-column layout: feed (left) + circles panel (right) */}
-                <div className="flex gap-8 items-start">
-                    {/* Left: feed content */}
-                    <div className="flex-1 min-w-0">
+                {/* Responsive layout: feed (main) + circles panel (stacks on mobile) */}
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                    {/* feed content */}
+                    <div className="w-full lg:flex-1 min-w-0">
                         <CreateStoryBar onPostSuccess={handleRefresh} />
                         <StoriesBar key={`stories-${refreshKey}`} onPostSuccess={handleRefresh} />
                         
@@ -34,8 +34,8 @@ const FeedPage = () => {
                         <DiscoverGrid key={`discover-${refreshKey}`} />
                     </div>
 
-                    {/* Right: My Circles panel (hidden on small screens) */}
-                    <div className="hidden lg:block">
+                    {/* My Circles panel (Stacks on mobile, sticky on desktop) */}
+                    <div className="w-full lg:w-80 shrink-0 lg:sticky lg:top-24">
                         <MyCirclesPanel />
                     </div>
                 </div>

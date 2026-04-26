@@ -234,11 +234,11 @@ const CircleDetailsPage = () => {
                 </div>
             </div>
 
-            {/* 3-COLUMN BODY */}
-            <div className="max-w-[1400px] w-full mx-auto px-6 pb-10 flex gap-10 flex-1 items-start">
+            {/* 3-COLUMN BODY (Responsive Layout) */}
+            <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pb-10 flex flex-col lg:flex-row gap-6 lg:gap-10 flex-1 items-start">
 
                 {/* CENTER: stories + chat */}
-                <div className="flex-1 min-w-0 flex flex-col gap-4">
+                <div className="flex-1 min-w-0 flex flex-col gap-4 w-full">
                     <CircleStoriesBar
                         circleMemberIds={memberIds}
                         onPostSuccess={() => setRefreshKey(k => k + 1)}

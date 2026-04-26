@@ -106,13 +106,17 @@ exports.getDashboard = async (req, res) => {
 exports.getEligibleCircles = async (req, res) => {
   try {
     const circles = await Circle.find({
-      'members': {
-        $elemMatch: {
-          user: req.user._id,
-          role: 'admin'
+      isActive: true,
+      $or: [
+        { creator: req.user._id },
+        { 'members': { 
+            $elemMatch: { 
+              user: req.user._id, 
+              role: { $in: ['admin', 'moderator'] } 
+            } 
+          } 
         }
-      },
-      isActive: true
+      ]
     }).select('name _id');
 
     res.status(200).json({
@@ -145,21 +149,23 @@ exports.scheduleMeeting = async (req, res) => {
     if (circle) {
       const circleDoc = await Circle.findById(circle);
       const isCreator = circleDoc && circleDoc.creator.toString() === req.user._id.toString();
-      const isAdmin = circleDoc && circleDoc.members.some(m => m.user.toString() === req.user._id.toString() && m.role === 'admin');
+      const member = circleDoc && circleDoc.members.find(m => m.user.toString() === req.user._id.toString());
+      const isAdmin = member && member.role === 'admin';
+      const isModerator = member && member.role === 'moderator';
 
-      if (!circleDoc || !circleDoc.isActive || (!isCreator && !isAdmin)) {
-        return res.status(403).json({ success: false, message: 'You must be a community admin of this circle to schedule a meeting.' });
+      if (!circleDoc || !circleDoc.isActive || (!isCreator && !isAdmin && !isModerator)) {
+        return res.status(403).json({ success: false, message: 'You must be a community host or moderator of this circle to schedule a meeting.' });
       }
     } else {
       const userCircles = await Circle.find({
         isActive: true,
         $or: [
           { creator: req.user._id },
-          { 'members.user': req.user._id, 'members.role': 'admin' }
+          { 'members.user': req.user._id, 'members.role': { $in: ['admin', 'moderator'] } }
         ]
       });
       if (userCircles.length === 0) {
-        return res.status(403).json({ success: false, message: 'Only community admins can create meetings.' });
+        return res.status(403).json({ success: false, message: 'Only community hosts or moderators can create meetings.' });
       }
     }
 

@@ -362,6 +362,7 @@ const ManageParticipantsPage = () => {
                                                 onChangeRole={handleChangeRole} 
                                                 onMute={handleMute}
                                                 onBan={handleBan}
+                                                isCreator={member.id === (circle?.creator?._id || circle?.creator)}
                                             />
                                         ))}
                                     </div>

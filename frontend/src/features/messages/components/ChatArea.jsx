@@ -11,6 +11,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
     const isMe = msg.sender === 'me';
     const likedByMe = msg.likedByMe;
+    const [showActionsMobile, setShowActionsMobile] = useState(false);
 
     return (
         <div className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
@@ -42,13 +43,15 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
                             </div>
                         )}
 
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        <p 
+                            className="text-sm leading-relaxed whitespace-pre-wrap cursor-pointer md:cursor-auto"
+                            onClick={() => setShowActionsMobile(!showActionsMobile)}
+                        >
                             {msg.isDeleted ? <span className="italic opacity-50">This message was deleted</span> : msg.text}
                         </p>
 
                         {!msg.isDeleted && (
-                            /* Hover Actions Bar */
-                            <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 pointer-events-none group-hover:pointer-events-auto scale-90 origin-top`}>
+                            <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} ${showActionsMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 md:pointer-events-none md:group-hover:pointer-events-auto scale-90 origin-top`}>
                                 <button 
                                     onClick={() => onReply(msg)}
                                     className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all" 
@@ -521,7 +524,7 @@ const ChatArea = ({ chatId }) => {
             {showScrollButton && (
                 <button
                     onClick={scrollToBottom}
-                    className="fixed bottom-32 right-12 md:right-16 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[9999] flex items-center justify-center group"
+                    className="absolute bottom-24 right-6 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[40] flex items-center justify-center group"
                     title="Go to latest messages"
                 >
                     <ChevronDown size={24} className="group-hover:translate-y-0.5 transition-transform" />

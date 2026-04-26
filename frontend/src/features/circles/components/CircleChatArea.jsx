@@ -20,6 +20,7 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete, isModerator }) 
     const isMe = msg.isMe;
     const likedByMe = msg.likedByMe;
     const canDelete = isMe || isModerator;
+    const [showActionsMobile, setShowActionsMobile] = useState(false);
 
     return (
         <div className={`flex gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-300 ${isMe ? 'flex-row-reverse' : ''}`}>
@@ -60,13 +61,16 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete, isModerator }) 
                         </div>
                     )}
 
-                    <p className={`text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/40 ${msg.isDeleted ? 'text-gray-500' : 'text-gray-200'}`}>
+                    <p 
+                        className={`text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/40 cursor-pointer md:cursor-auto ${msg.isDeleted ? 'text-gray-500' : 'text-gray-200'}`}
+                        onClick={() => setShowActionsMobile(!showActionsMobile)}
+                    >
                         {msg.isDeleted ? 'This message was deleted because it offends this circle' : msg.text}
                     </p>
 
                     {/* Hover Actions Bar */}
                     {!msg.isDeleted && (
-                        <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 pointer-events-none group-hover:pointer-events-auto scale-90 origin-top`}>
+                        <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} ${showActionsMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 md:pointer-events-none md:group-hover:pointer-events-auto scale-90 origin-top`}>
                             <button 
                                 onClick={() => onReply(msg)}
                                 className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all" 
@@ -423,11 +427,9 @@ const CircleChatArea = ({ circle }) => {
 
     return (
         <div
-            className="flex-1 flex flex-col rounded-3xl border border-[#2A1550] overflow-hidden shadow-2xl relative"
+            className="flex-1 flex flex-col rounded-3xl border border-[#2A1550] overflow-hidden shadow-2xl relative w-full h-[600px] lg:h-[calc(100vh-380px)]"
             style={{
-                background: 'linear-gradient(160deg, #12082A 0%, #1A0D40 100%)',
-                height: 'calc(100vh - 380px)',
-                minHeight: '450px'
+                background: 'linear-gradient(160deg, #12082A 0%, #1A0D40 100%)'
             }}
         >
             {/* Chat header area */}
@@ -489,7 +491,7 @@ const CircleChatArea = ({ circle }) => {
             {showScrollButton && (
                 <button
                     onClick={scrollToBottom}
-                    className="fixed bottom-10 right-10 md:right-24 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[9999] flex items-center justify-center group"
+                    className="absolute bottom-24 right-6 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[40] flex items-center justify-center group"
                     title="Go to latest messages"
                 >
                     <ChevronDown size={28} className="group-hover:translate-y-0.5 transition-transform" />
