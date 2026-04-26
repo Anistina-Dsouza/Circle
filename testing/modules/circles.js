@@ -2,7 +2,7 @@ const { By, until, Key } = require('selenium-webdriver');
 const { clearAndType, click, sleep, safeClickText, type, typeWithEnter, safeAction } = require('../utils/helpers');
 
 async function testStoriesFlow(driver, baseUrl, username) {
-    console.log("\nSTEP 2.5: Story Discovery & Content Audit");
+    console.log("\nSTEP 2.5: Story Discovery and Audit");
     await driver.get(baseUrl + "/feed");
     await sleep(5000);
 
@@ -101,7 +101,7 @@ async function testCirclesFlow(driver, baseUrl, username) {
 
     // Wait for the redirect to the circle details page (it now happens automatically)
     await driver.wait(until.urlMatches(/\/circles\/[a-z0-9-]+/), 20000);
-    console.log("SUCCESS: Redirected to new Circle Profile.");
+    console.log("Redirected to new circle profile.");
     await sleep(5000);
 
     console.log("Action: Navigating to Home Feed to verify circle list...");

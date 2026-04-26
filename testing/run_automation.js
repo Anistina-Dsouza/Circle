@@ -10,10 +10,6 @@ const { testStoriesFlow, testCirclesFlow, testJoinCircleFlow } = require('./modu
 const { testMeetingsFlow } = require('./modules/meetings');
 const { testAdminFlow } = require('./modules/admin');
 
-/**
- * 🎯 CIRCLE MODULAR STABILITY AUDIT (V9)
- * Focus: Exact Locator Matching & Port Cleanup
- */
 
 async function cleanPorts() {
     console.log("CLEANUP: Cleaning up stale server processes...");
@@ -27,9 +23,7 @@ async function cleanPorts() {
                     const parts = line.trim().split(/\s+/);
                     if (parts.length > 4 && parts[1].endsWith(`:${port}`)) {
                         const pid = parts[parts.length - 1];
-                        // Skip PID 0 (System Idle Process)
                         if (pid !== '0') {
-                            console.log(`KILL: Stopping process tree ${pid} on port ${port}`);
                             try { execSync(`taskkill /F /T /PID ${pid}`); } catch (err) { }
                         }
                     }
@@ -61,12 +55,9 @@ async function startTests() {
 
     await cleanPorts();
 
-    // -------------------------------
-    // 🔹 START SERVERS
-    // -------------------------------
     console.log("\nLaunching Backend & Frontend...");
 
-    // Using full command string to avoid DEP0190 on Windows
+    // Start backend and frontend servers
     const backend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../backend' });
     const frontend = spawn('cmd.exe', ['/c', 'npm run dev'], { cwd: '../frontend' });
 
@@ -82,9 +73,6 @@ async function startTests() {
     }
     console.log("Servers are online.");
 
-    // -------------------------------
-    // 🔹 SETUP DRIVER
-    // -------------------------------
     const options = new chrome.Options();
     options.addArguments('--start-maximized');
     options.addArguments('--disable-blink-features=AutomationControlled');
@@ -96,13 +84,14 @@ async function startTests() {
 
     const baseUrl = "http://localhost:5173";
 
-    // Specific Identity requested
+    // Test identity configuration
     const name = "Sym Gaming";
     const username = "symgaming19";
     const email = "symgaming19@gmail.com";
     const testPass = "SecurePass123!";
 
     try {
+        // USER
         console.log(`TESTING WITH USER: ${name} (@${username})`);
 
         // Run Module 1: Auth
@@ -119,16 +108,17 @@ async function startTests() {
         await testJoinCircleFlow(driver, baseUrl);
         const { meetingCreated } = await testCirclesFlow(driver, baseUrl, username);
 
-        // Run Module 4: Meetings (Legacy RSVP & Join)
+        // Meeting flows
         await testMeetingsFlow(driver, baseUrl, meetingCreated);
 
-        // --- TRANSITION TO ADMIN TESTING ---
+        // ADMIN
         // Step 1: Logout after user part is done
         await testLogout(driver, baseUrl);
 
         // Step 2: Re-login as ADMIN for Admin Platform Audit
         const adminEmail = "admin@gmail.com";
         const adminPass = "password@123";
+        console.log(`TESTING WITH USER: ${adminEmail}`);
         await testAdminLogin(driver, baseUrl, adminEmail, adminPass);
 
         // Run Module 5: Admin Platform

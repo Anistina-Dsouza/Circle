@@ -54,12 +54,32 @@ exports.getDashboard = async (req, res) => {
       isActive: true
     });
 
+    const currentUserIdStr = userId.toString();
+
+    const safeUpcoming = upcoming.map(m => {
+      const obj = m.toObject ? m.toObject() : { ...m };
+      const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
+      if (hostIdStr !== currentUserIdStr) {
+        delete obj.startLink;
+      }
+      return obj;
+    });
+
+    const safePast = past.map(m => {
+      const obj = m.toObject ? m.toObject() : { ...m };
+      const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
+      if (hostIdStr !== currentUserIdStr) {
+        delete obj.startLink;
+      }
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
       data: {
         hosted,
-        upcoming,
-        past,
+        upcoming: safeUpcoming,
+        past: safePast,
         canHost: !!isHost
       }
     });
@@ -392,9 +412,17 @@ exports.getMeetingById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Meeting not found' });
     }
 
+    const meetingObj = meeting.toObject();
+    const currentUserIdStr = req.user._id.toString();
+    const hostIdStr = meetingObj.host?._id?.toString() || meetingObj.host?.toString();
+
+    if (hostIdStr !== currentUserIdStr) {
+      delete meetingObj.startLink;
+    }
+
     res.status(200).json({
       success: true,
-      data: meeting
+      data: meetingObj
     });
   } catch (error) {
     console.error('Error in getMeetingById:', error);

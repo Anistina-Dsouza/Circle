@@ -29,7 +29,7 @@ async function testSignup(driver, baseUrl, testEmail, testUser, testPass) {
     await click(driver, submitBtn);
     await sleep(3000);
 
-    console.log(`Performing Humanized Registration with Tags: ${testUser}`);
+    console.log(`Performing registration for: ${testUser}`);
     await clearAndType(driver, By.name("username"), testUser);
     await clearAndType(driver, By.name("email"), testEmail);
     await clearAndType(driver, By.name("password"), testPass);

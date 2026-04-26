@@ -6,6 +6,8 @@ import FeedNavbar from '../../feed/components/FeedNavbar';
 import ManagementTabs from '../components/management/ManagementTabs';
 import MemberManagementItem from '../components/management/MemberManagementItem';
 import JoinRequestItem from '../components/management/JoinRequestItem';
+import BannedUserItem from '../components/management/BannedUserItem';
+import { ShieldX } from 'lucide-react';
 
 const ManageParticipantsPage = () => {
     const { slug } = useParams();
@@ -18,6 +20,7 @@ const ManageParticipantsPage = () => {
     // Data state
     const [members, setMembers] = useState([]);
     const [requests, setRequests] = useState([]);
+    const [bannedUsers, setBannedUsers] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,6 +63,20 @@ const ManageParticipantsPage = () => {
                             message: r.introduction
                         }));
                         setRequests(transformedRequests);
+                    }
+
+                    // 4. Fetch Banned Users
+                    const bannedRes = await axios.get(`${baseUrl}/api/circles/${circleData?._id}/banned-members`, { headers });
+                    if (bannedRes.data.success) {
+                        const transformedBanned = bannedRes.data.bannedUsers.map(b => ({
+                            id: b.user?._id,
+                            name: b.user?.displayName || b.user?.username || 'Unknown User',
+                            username: b.user?.username,
+                            bannedDate: new Date(b.bannedAt).toLocaleDateString(),
+                            avatar: b.user?.profilePic,
+                            reason: b.reason
+                        }));
+                        setBannedUsers(transformedBanned);
                     }
                 }
             } catch (err) {
@@ -159,6 +176,73 @@ const ManageParticipantsPage = () => {
         }
     };
 
+    const handleMute = async (memberId, shouldMute) => {
+        try {
+            const token = localStorage.getItem('token');
+            const endpoint = shouldMute ? 'mute' : 'unmute';
+            let duration = null;
+
+            if (shouldMute) {
+                const input = window.prompt("Mute duration in minutes? (leave empty for indefinite)", "60");
+                if (input === null) return; // Cancelled
+                duration = input ? parseInt(input) : null;
+            }
+
+            const res = await axios.post(`${baseUrl}/api/circles/${circle._id}/members/${memberId}/${endpoint}`, 
+                shouldMute ? { duration } : {}, 
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.success) {
+                setMembers(prev => prev.map(m => m.id === memberId ? { ...m, isMuted: shouldMute, mutedUntil: res.data.mutedUntil } : m));
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to update mute status');
+        }
+    };
+
+    const handleBan = async (memberId) => {
+        const reason = window.prompt("Reason for banning this user?", "Violating community guidelines");
+        if (reason === null) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${baseUrl}/api/circles/${circle._id}/members/${memberId}/ban`, 
+                { reason },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.success) {
+                const bannedMember = members.find(m => m.id === memberId);
+                setMembers(prev => prev.filter(m => m.id !== memberId));
+                if (bannedMember) {
+                    setBannedUsers(prev => [...prev, {
+                        ...bannedMember,
+                        bannedDate: new Date().toLocaleDateString(),
+                        reason
+                    }]);
+                }
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to ban user');
+        }
+    };
+
+    const handleUnban = async (userId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.delete(`${baseUrl}/api/circles/${circle._id}/members/${userId}/unban`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                setBannedUsers(prev => prev.filter(u => u.id !== userId));
+            }
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to unban user');
+        }
+    };
+
     // Filtered lists
     const filteredMembers = members.filter(m => {
         const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -172,10 +256,16 @@ const ManageParticipantsPage = () => {
         r.username?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const filteredBanned = bannedUsers.filter(u => 
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const counts = {
         requests: requests.length,
         members: members.length,
-        moderators: members.filter(m => m.role === 'moderator' || m.role === 'admin').length
+        moderators: members.filter(m => m.role === 'moderator' || m.role === 'admin').length,
+        banned: bannedUsers.length
     };
 
     return (
@@ -270,6 +360,8 @@ const ManageParticipantsPage = () => {
                                                 member={member} 
                                                 onKick={handleKick} 
                                                 onChangeRole={handleChangeRole} 
+                                                onMute={handleMute}
+                                                onBan={handleBan}
                                             />
                                         ))}
                                     </div>
@@ -280,6 +372,31 @@ const ManageParticipantsPage = () => {
                                         </div>
                                         <h3 className="text-xl font-bold text-gray-400 mb-2 tracking-wide">No Members Found</h3>
                                         <p className="text-gray-600 max-w-sm text-sm">We couldn't find any members matching your current filters or search query.</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* BANNED VIEW */}
+                        {activeTab === 'banned' && (
+                            <>
+                                {filteredBanned.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {filteredBanned.map(user => (
+                                            <BannedUserItem 
+                                                key={user.id} 
+                                                user={user} 
+                                                onUnban={handleUnban} 
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-24 bg-[#1A1140]/20 border border-dashed border-white/5 rounded-[40px] text-center px-6">
+                                        <div className="p-5 bg-red-500/5 rounded-full mb-6 text-gray-700">
+                                            <ShieldX size={48} strokeWidth={1} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-400 mb-2 tracking-wide">No Banned Users</h3>
+                                        <p className="text-gray-600 max-w-sm text-sm">Your community is peaceful! There are currently no banned users in this circle.</p>
                                     </div>
                                 )}
                             </>

@@ -86,6 +86,21 @@ const momentSchema = new mongoose.Schema({
     }
   }],
 
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    emoji: {
+      type: String,
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
   isActive: {
     type: Boolean,
     default: true

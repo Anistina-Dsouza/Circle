@@ -33,7 +33,7 @@ async function safeAction(driver, locator, actionName, timeout = 10000) {
         console.log(`SUCCESS: ${actionName} found.`);
         return element;
     } catch (e) {
-        console.log(`SKIP: ${actionName} - Not present or not required at this moment.`);
+        console.log(`SKIP: ${actionName} - Not present or not required.`);
         return null;
     }
 }
@@ -130,6 +130,18 @@ function getRandomMessage() {
     return HUMAN_MESSAGES[Math.floor(Math.random() * HUMAN_MESSAGES.length)];
 }
 
+async function scrollPage(driver) {
+    console.log("Action: Scrolling page...");
+    for (let i = 0; i < 3; i++) {
+        await driver.executeScript("window.scrollBy(0, window.innerHeight / 2);");
+        await sleep(1000);
+    }
+    await driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+    await sleep(2000);
+    await driver.executeScript("window.scrollTo(0, 0);");
+    await sleep(1000);
+}
+
 module.exports = {
     sleep,
     type,
@@ -140,5 +152,6 @@ module.exports = {
     getRandomIdentity,
     getRandomMessage,
     waitForInteractable,
-    safeAction
+    safeAction,
+    scrollPage
 };

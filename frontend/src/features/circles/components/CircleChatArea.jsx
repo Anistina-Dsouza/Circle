@@ -142,6 +142,24 @@ const CircleChatArea = ({ circle }) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserId = currentUser._id || currentUser.id;
+    const [isMuted, setIsMuted] = useState(false);
+    const [mutedUntil, setMutedUntil] = useState(null);
+
+    // Check mute status
+    useEffect(() => {
+        if (!circle || !currentUserId) return;
+        const member = circle.members?.find(m => (m.user?._id || m.user) === currentUserId);
+        if (member?.isMuted) {
+            const until = member.mutedUntil ? new Date(member.mutedUntil) : null;
+            if (!until || until > new Date()) {
+                setIsMuted(true);
+                setMutedUntil(until);
+            }
+        } else {
+            setIsMuted(false);
+            setMutedUntil(null);
+        }
+    }, [circle, currentUserId]);
 
     const scrollToBottom = () => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -371,6 +389,9 @@ const CircleChatArea = ({ circle }) => {
             setMessages(prev => prev.map(m => m.id === tempId ? formatBackendMessage(res.data.message, currentUserId) : m));
         } catch (err) {
             console.error("Failed to send message", err);
+            // Remove the optimistic message on failure
+            setMessages(prev => prev.filter(m => m.id !== tempId));
+            alert(err.response?.data?.error || "Failed to send message");
         }
     };
 
@@ -486,15 +507,21 @@ const CircleChatArea = ({ circle }) => {
                         value={messageInput}
                         onChange={e => setMessageInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend(e); } }}
-                        placeholder={replyingTo ? "Type your reply..." : "Share something with the circle..."}
-                        className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2"
+                        placeholder={
+                            isMuted 
+                                ? `Muted until ${mutedUntil ? mutedUntil.toLocaleTimeString() : 'indefinite'}` 
+                                : replyingTo ? "Type your reply..." : "Share something with the circle..."
+                        }
+                        disabled={isMuted}
+                        className={`flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2 ${isMuted ? 'cursor-not-allowed opacity-50' : ''}`}
                     />
 
                     <div className="flex items-center gap-1 shrink-0 relative" ref={emojiPickerRef}>
                          <button 
                             type="button" 
+                            disabled={isMuted}
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            className={`p-2 transition-colors rounded-xl ${showEmojiPicker ? 'text-violet-400 bg-violet-400/10' : 'text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10'}`}
+                            className={`p-2 transition-colors rounded-xl ${isMuted ? 'opacity-30 cursor-not-allowed' : showEmojiPicker ? 'text-violet-400 bg-violet-400/10' : 'text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10'}`}
                         >
                             <Smile size={20} />
                         </button>
@@ -545,7 +572,7 @@ const CircleChatArea = ({ circle }) => {
                     </div>
 
                         <button
-                            disabled={!messageInput.trim()}
+                            disabled={!messageInput.trim() || isMuted}
                             onClick={handleSend}
                             className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-900/40 disabled:opacity-30 disabled:grayscale hover:scale-105 active:scale-95 transition-all"
                         >
