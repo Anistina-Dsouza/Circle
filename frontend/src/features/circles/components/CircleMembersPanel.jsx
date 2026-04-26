@@ -158,7 +158,7 @@ const CircleMembersPanel = ({ circle, slug }) => {
     }, [circle?._id]);
 
     return (
-        <aside className="w-72 shrink-0 flex flex-col gap-4 sticky top-24 self-start">
+        <aside className="w-full lg:w-72 shrink-0 hidden lg:flex flex-col gap-4 sticky top-24 self-start">
 
             {/* Upcoming Meetings */}
             <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A] min-h-[140px] flex flex-col">

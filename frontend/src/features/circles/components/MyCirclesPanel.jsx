@@ -79,7 +79,7 @@ const MyCirclesPanel = () => {
     const token = localStorage.getItem('token');
 
     return (
-        <aside className="w-72 shrink-0 sticky top-24 self-start flex flex-col gap-4">
+        <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-24 self-start flex flex-col gap-4">
             {/* Panel Card */}
             <div className="rounded-3xl border border-[#2A1550] overflow-hidden"
                 style={{ background: 'linear-gradient(145deg, #12082a 0%, #1a0d40 100%)' }}>

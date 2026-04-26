@@ -316,12 +316,12 @@ const StoryViewerPage = () => {
                 {/* Quick Reactions Bar */}
                 {!isOwnStory && (
                     <div className="mt-8 px-4 flex items-center justify-between gap-2 z-10 animate-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl">
+                        <div className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl overflow-x-auto no-scrollbar">
                             {REACTION_EMOJIS.map(emoji => (
                                 <button
                                     key={emoji}
                                     onClick={() => handleReact(emoji)}
-                                    className="text-xl hover:scale-150 active:scale-90 transition-transform duration-200 p-1"
+                                    className="text-xl hover:scale-150 active:scale-90 transition-transform duration-200 p-1 shrink-0"
                                 >
                                     {emoji}
                                 </button>

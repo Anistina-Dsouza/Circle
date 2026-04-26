@@ -25,7 +25,7 @@ export default function TrendingCommunities() {
   }, [baseUrl]);
 
   return (
-    <section className="py-24 bg-[#0F0529] relative overflow-hidden">
+    <section id="trending" className="py-24 bg-[#0F0529] relative overflow-hidden">
       {/* Subtle ambient glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-600/5 blur-[120px] rounded-full pointer-events-none" />
 

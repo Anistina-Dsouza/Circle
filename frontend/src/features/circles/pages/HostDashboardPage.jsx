@@ -22,6 +22,7 @@ const HostDashboardPage = () => {
     const [upcomingMeetings, setUpcomingMeetings] = useState([]);
     const [recentActivity, setRecentActivity] = useState([]);
     const baseUrl = import.meta.env.VITE_API_URL;
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -170,7 +171,7 @@ const HostDashboardPage = () => {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
                     {stats.map((stat, i) => (
                         <DashboardStatCard key={i} {...stat} />
                     ))}
@@ -191,7 +192,7 @@ const HostDashboardPage = () => {
                         description="Create a new gathering for the circle"
                         variant="primary"
                     />
-                    {circle?.userRole !== 'moderator' && (
+                    {(circle?.userRole === 'admin' || circle?.creator?._id === currentUser?.id || circle?.creator === currentUser?.id) && (
                         <DashboardQuickAction 
                             to={`/circles/${slug}/manage/settings`}
                             icon={Settings}
@@ -204,12 +205,12 @@ const HostDashboardPage = () => {
                 {/* Main Content Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-20">
                     {/* Activity Table */}
-                    <div className="lg:col-span-3">
+                    <div className="grid grid-cols-1 lg:col-span-3">
                         <DashboardActivityTable activities={recentActivity} />
                     </div>
 
                     {/* Schedule Sidebar */}
-                    <div className="lg:col-span-1">
+                    <div className="grid grid-cols-1 lg:col-span-1">
                         <DashboardSchedule meetings={upcomingMeetings} />
                     </div>
                 </div>
