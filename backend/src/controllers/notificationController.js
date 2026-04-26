@@ -1,4 +1,9 @@
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const Circle = require('../models/Circle');
+const Meeting = require('../models/Meeting');
+const Moment = require('../models/Moment');
+const Message = require('../models/Message');
 
 exports.getNotifications = async (req, res) => {
   try {

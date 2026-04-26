@@ -99,8 +99,10 @@ const toggleReaction = async (messageId, userId, emoji) => {
   const userIdStr = userId.toString();
   const reactionIndex = message.reactions.findIndex(r => r.emoji === emoji);
 
+  let isNew = false;
   if (reactionIndex === -1) {
     message.reactions.push({ emoji, users: [userId] });
+    isNew = true;
   } else {
     const reactionObj = message.reactions[reactionIndex];
     const userIndex = reactionObj.users.findIndex(u => u.toString() === userIdStr);
@@ -112,11 +114,12 @@ const toggleReaction = async (messageId, userId, emoji) => {
       }
     } else {
       reactionObj.users.push(userId);
+      isNew = true;
     }
   }
 
   await message.save();
-  return message.reactions;
+  return { reactions: message.reactions, message, isNew };
 };
 
 const markRead = async (circleId, userId, lastMessageId) => {

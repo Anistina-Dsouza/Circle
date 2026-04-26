@@ -33,7 +33,7 @@ exports.createMessage = async (req, res) => {
         });
 
         if (content?.text) {
-            processMentions(content.text, req.userId, 'message', message._id).catch(err => console.error(err));
+            processMentions(content.text, req.userId, 'circle', req.params.circleId).catch(err => console.error(err));
         }
 
         try {
@@ -99,11 +99,28 @@ exports.toggleReaction = async (req, res) => {
             return res.status(400).json({ error: 'emoji required' });
         }
 
-        const reactions = await CircleMessageService.toggleReaction(
+        const { reactions, message, isNew } = await CircleMessageService.toggleReaction(
             req.params.messageId,
             req.userId,
             emoji
         );
+
+        // Notify sender if it's a new reaction and not by themselves
+        if (isNew && message.sender.toString() !== req.userId) {
+            try {
+                const Notification = require('../models/Notification');
+                await Notification.createNotification({
+                    user: message.sender,
+                    type: 'reaction',
+                    title: 'New Reaction',
+                    message: `reacted to your message with ${emoji}`,
+                    sender: req.userId,
+                    relatedItem: { type: 'circle', id: req.params.circleId }
+                });
+            } catch (err) {
+                console.error('Failed to create reaction notification:', err);
+            }
+        }
 
         try {
             getIo().to(req.params.circleId).emit('circleMessageReacted', { messageId: req.params.messageId, reactions });
