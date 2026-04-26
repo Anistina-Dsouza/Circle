@@ -8,7 +8,7 @@ async function testMeetingsFlow(driver, baseUrl, meetingCreated) {
         return;
     }
 
-    console.log("\nSTEP 6: Meetings Hub & Execution Audit");
+    console.log("\nSTEP 6: Meetings Hub and Execution Audit");
     await driver.get(baseUrl + "/meetings");
     await sleep(6000); // Give time for skeleton loader to finish
 

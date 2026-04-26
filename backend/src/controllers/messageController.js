@@ -1,5 +1,6 @@
 const MessageService = require('../services/messageService');
 const { getIo } = require('../sockets');
+const { processMentions } = require('../services/notificationService');
 
 exports.getMessages = async (req, res) => {
   const { before, limit = 30 } = req.query
@@ -22,6 +23,10 @@ exports.sendMessage = async (req, res) => {
     sender: req.userId,
     content, contentType, replyTo
   })
+
+  if (content?.text) {
+    processMentions(content.text, req.userId, 'message', message._id).catch(err => console.error(err));
+  }
 
   try {
     getIo().to(req.params.conversationId).emit('newMessage', message);

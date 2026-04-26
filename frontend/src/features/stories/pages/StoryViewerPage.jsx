@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
 import StoryInfo from '../components/StoryInfo';
 import StoryViewersModal from '../components/StoryViewersModal';
 
+const REACTION_EMOJIS = ['❤️', '😂', '😮', '😢', '🔥', '👏', '🙌', '💯'];
+const STORY_DURATION = 5000;
+const PROGRESS_INTERVAL = 50;
+
 const StoryViewerPage = () => {
     const { username } = useParams();
     const navigate = useNavigate();
+    
     const [stories, setStories] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -16,15 +21,109 @@ const StoryViewerPage = () => {
     const [isPaused, setIsPaused] = useState(false);
     const [showViewers, setShowViewers] = useState(false);
     const [error, setError] = useState(null);
-
+    const [burstEmoji, setBurstEmoji] = useState(null);
     const [successMsg, setSuccessMsg] = useState('');
 
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
-    const currentUser = JSON.parse(localStorage.getItem('user'));
-    const STORY_DURATION = 5000;
-    const PROGRESS_INTERVAL = 50;
+    
+    const currentUser = (() => {
+        try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+        catch { return {}; }
+    })();
+
     const step = (PROGRESS_INTERVAL / STORY_DURATION) * 100;
+
+    /* ── Callbacks ───────────────────────────────────────── */
+    
+    const handleNext = useCallback(() => {
+        if (currentIndex < stories.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            setProgress(0);
+        } else {
+            navigate('/feed');
+        }
+    }, [currentIndex, stories.length, navigate]);
+
+    const handlePrev = useCallback(() => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setProgress(0);
+        } else {
+            setCurrentIndex(0);
+            setProgress(0);
+        }
+    }, [currentIndex]);
+
+    const handleReact = useCallback(async (emoji) => {
+        const momentId = stories[currentIndex]?._id;
+        if (!momentId) return;
+
+        // Show burst animation
+        setBurstEmoji(emoji);
+        setTimeout(() => setBurstEmoji(null), 1000);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${baseUrl}/api/moments/${momentId}/react`, 
+                { emoji },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.success) {
+                setStories(prev => prev.map((s, i) => 
+                    i === currentIndex ? { ...s, reactions: res.data.reactions } : s
+                ));
+            }
+        } catch (err) {
+            console.error('Reaction error:', err);
+        }
+    }, [currentIndex, stories, baseUrl]);
+
+    const handleDelete = useCallback(async () => {
+        const momentId = stories[currentIndex]?._id;
+        if (!momentId) return;
+
+        if (window.confirm('Are you sure you want to delete this story?')) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(`${baseUrl}/api/moments/${momentId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                setSuccessMsg('Story deleted permanently!');
+                setTimeout(() => {
+                    setSuccessMsg('');
+                    const newStories = stories.filter(s => s._id !== momentId);
+                    if (newStories.length === 0) {
+                        navigate('/feed');
+                    } else {
+                        setStories(newStories);
+                        setCurrentIndex(prev => Math.min(prev, newStories.length - 1));
+                        setProgress(0);
+                    }
+                }, 1500);
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Failed to delete story');
+            }
+        }
+    }, [currentIndex, stories, baseUrl, navigate]);
+
+    const handleContainerClick = (e) => {
+        if (e.target.closest('button')) return;
+        const { clientX } = e;
+        const cardRect = e.currentTarget.getBoundingClientRect();
+        const relativeX = clientX - cardRect.left;
+        
+        if (relativeX < cardRect.width / 3) {
+            handlePrev();
+        } else {
+            handleNext();
+        }
+    };
+
+    /* ── Effects ─────────────────────────────────────────── */
 
     useEffect(() => {
         const fetchUserStories = async () => {
@@ -42,8 +141,6 @@ const StoryViewerPage = () => {
                     } else {
                         setError('No active stories found.');
                     }
-                } else {
-                    setError('Failed to fetch stories.');
                 }
             } catch (error) {
                 console.error('Error fetching stories:', error);
@@ -60,8 +157,6 @@ const StoryViewerPage = () => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
 
         progressTimer.current = setInterval(() => {
-            if (isPaused || showViewers) return;
-
             setProgress(prev => {
                 if (prev >= 100) return 100;
                 return prev + step;
@@ -69,7 +164,7 @@ const StoryViewerPage = () => {
         }, PROGRESS_INTERVAL);
 
         return () => clearInterval(progressTimer.current);
-    }, [currentIndex, loading, stories.length, isPaused, error, showViewers, stories, step]);
+    }, [loading, stories.length, isPaused, error, showViewers, step]);
 
     useEffect(() => {
         if (progress >= 100) {
@@ -79,82 +174,17 @@ const StoryViewerPage = () => {
 
     useEffect(() => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
-            const momentId = stories[currentIndex]._id || stories[currentIndex].id;
+            const momentId = stories[currentIndex]._id;
             if (momentId) {
                 const token = localStorage.getItem('token');
                 axios.get(`${baseUrl}/api/moments/${momentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
-                }).catch(e => console.log('Silent view tracking error', e));
+                }).catch(() => {});
             }
         }
     }, [currentIndex, loading, stories, baseUrl]);
 
-    const handleNext = () => {
-        if (currentIndex < stories.length - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setProgress(0);
-        } else {
-            navigate('/feed');
-        }
-    };
-
-    const handlePrev = () => {
-        if (currentIndex > 0) {
-            setCurrentIndex(prev => prev - 1);
-            setProgress(0);
-        } else {
-            setCurrentIndex(0);
-            setProgress(0);
-        }
-    };
-
-    const handleDelete = async () => {
-        const momentId = stories[currentIndex]?._id;
-        if (!momentId) return;
-
-        if (window.confirm('Are you sure you want to delete this story?')) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`${baseUrl}/api/moments/${momentId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
-                setSuccessMsg('Story deleted permanently!');
-                setTimeout(() => {
-                    setSuccessMsg('');
-                    // Remove deleted story from state after toast starts fading
-                    const newStories = stories.filter(s => s._id !== momentId);
-                    if (newStories.length === 0) {
-                        navigate('/feed');
-                    } else {
-                        setStories(newStories);
-                        setCurrentIndex(Math.min(currentIndex, newStories.length - 1));
-                        setProgress(0);
-                    }
-                }, 1500);
-            } catch (err) {
-                console.error('Delete error:', err);
-                alert('Failed to delete story');
-            }
-        }
-    };
-
-    const handleContainerClick = (e) => {
-        if (e.target.closest('button')) return;
-
-        const { clientX } = e;
-        // const screenWidth = window.innerWidth;
-        const cardElement = e.currentTarget;
-        const cardRect = cardElement.getBoundingClientRect();
-
-        // Navigation relative to card
-        const relativeX = clientX - cardRect.left;
-        if (relativeX < cardRect.width / 3) {
-            handlePrev();
-        } else {
-            handleNext();
-        }
-    };
+    /* ── Render ──────────────────────────────────────────── */
 
     if (loading) {
         return (
@@ -182,15 +212,12 @@ const StoryViewerPage = () => {
     }
 
     const currentStory = stories[currentIndex];
-
-    // Final safeguard before render
     if (!currentStory) return null;
 
-    const isOwnStory = currentStory.user?._id === currentUser?.id || currentStory.user === currentUser?.id;
+    const isOwnStory = currentStory.user?._id === currentUser?._id || currentStory.user === currentUser?._id;
 
     return (
         <div className="fixed inset-0 bg-[#0F0529] z-[100] flex flex-col items-center justify-center overflow-hidden font-sans">
-            {/* Success Toast */}
             {successMsg && (
                 <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[200] animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="bg-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl shadow-red-900/40 flex items-center gap-3 border border-red-400/20">
@@ -200,10 +227,9 @@ const StoryViewerPage = () => {
                 </div>
             )}
 
-            {/* Stories Container (Card Style) */}
-            <div className="relative w-full max-w-[420px] h-full h-[95vh] flex flex-col py-8">
-
-                {/* Header Elements (Top of Container) */}
+            <div className="relative w-full max-w-[420px] h-[95vh] flex flex-col py-8">
+                
+                {/* Header */}
                 <div className="mb-6 px-1 shrink-0 z-10 w-full relative">
                     <ProgressBar stories={stories} currentIndex={currentIndex} progress={progress} />
                     <div className="mt-4">
@@ -217,35 +243,32 @@ const StoryViewerPage = () => {
                     </div>
                 </div>
 
-                {/* Main Card Content */}
-                <div
+                {/* Content Card */}
+                <div 
                     className="flex-1 min-h-0 bg-[#1E1B3A] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative cursor-pointer group border border-white/5"
                     onMouseDown={() => !showViewers && setIsPaused(true)}
                     onMouseUp={() => !showViewers && setIsPaused(false)}
                     onTouchStart={() => !showViewers && setIsPaused(true)}
                     onTouchEnd={() => !showViewers && setIsPaused(false)}
-                    onClick={(e) => !showViewers && handleContainerClick(e)}
+                    onClick={handleContainerClick}
                 >
-                    {/* Media */}
-                    {currentStory.media.type === 'video' ? (
+                    {currentStory.media?.type === 'video' ? (
                         <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
                     ) : (
-                        <img src={currentStory.media.url} className="w-full h-full object-cover" alt="story" />
+                        <img src={currentStory.media?.url} className="w-full h-full object-cover" alt="story" />
                     )}
 
-                    {/* Gradient Overlay for Text Visibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
 
-                    {/* STORY CONTENT Placeholder (as per ref) */}
-                    {!currentStory.media.url && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <h2 className="text-4xl font-black text-white/30 uppercase tracking-[0.5em] text-center px-12 leading-relaxed">
-                                Story Content
-                            </h2>
+                    {/* Burst Animation Overlay */}
+                    {burstEmoji && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[100]">
+                            <span className="text-8xl animate-out fade-out zoom-out-150 duration-1000 fill-mode-forwards">
+                                {burstEmoji}
+                            </span>
                         </div>
                     )}
 
-                    {/* Viewers Badge (Bottom-Center as per ref) */}
                     {isOwnStory && (
                         <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
                             <div
@@ -261,40 +284,76 @@ const StoryViewerPage = () => {
                         </div>
                     )}
 
-                    {/* Caption (Left-Bottom as per ref) */}
                     {currentStory.caption && (
-                        <div className="absolute bottom-10 left-8 right-8 pointer-events-none z-10">
-                            <p className="text-white/90 text-sm font-medium leading-relaxed drop-shadow-md line-clamp-3">
+                        <div className="absolute bottom-10 left-8 right-1/4 pointer-events-none z-10">
+                            <p className="text-white text-base font-bold leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-3">
                                 {currentStory.caption}
                             </p>
                         </div>
                     )}
+
+                    {/* Reactions Display - Fixed Position & Larger */}
+                    {currentStory.reactions && currentStory.reactions.length > 0 && (
+                        <div className="absolute bottom-10 right-6 flex items-center -space-x-3 pointer-events-none">
+                            {Array.from(new Set(currentStory.reactions.map(r => r.emoji))).slice(0, 4).map((emoji, i) => (
+                                <div 
+                                    key={i} 
+                                    className="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center text-xl border border-white/20 shadow-2xl animate-in slide-in-from-right-4 duration-500"
+                                    style={{ transitionDelay: `${i * 100}ms` }}
+                                >
+                                    {emoji}
+                                </div>
+                            ))}
+                            {new Set(currentStory.reactions.map(r => r.emoji)).size > 4 && (
+                                <div className="w-10 h-10 bg-purple-600/80 backdrop-blur-xl rounded-full flex items-center justify-center text-[10px] font-black text-white border border-white/20 shadow-2xl">
+                                    +{new Set(currentStory.reactions.map(r => r.emoji)).size - 4}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {/* Desktop Side Arrows (Subtle) - Only show if multiple stories */}
-                {stories.length > 1 && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                        className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
-                    >
-                        <ChevronLeft size={48} />
-                    </button>
+                {/* Quick Reactions Bar */}
+                {!isOwnStory && (
+                    <div className="mt-8 px-4 flex items-center justify-between gap-2 z-10 animate-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl">
+                            {REACTION_EMOJIS.map(emoji => (
+                                <button
+                                    key={emoji}
+                                    onClick={() => handleReact(emoji)}
+                                    className="text-xl hover:scale-150 active:scale-90 transition-transform duration-200 p-1"
+                                >
+                                    {emoji}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 )}
+
+                {/* Side Arrows */}
                 {stories.length > 1 && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                        className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
-                    >
-                        <ChevronRight size={48} />
-                    </button>
+                    <>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                            className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
+                        >
+                            <ChevronLeft size={48} />
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                            className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
+                        >
+                            <ChevronRight size={48} />
+                        </button>
+                    </>
                 )}
             </div>
 
-            {/* Story Viewers Modal */}
-            <StoryViewersModal
-                isOpen={showViewers}
-                onClose={() => { setShowViewers(false); setIsPaused(false); }}
-                viewers={currentStory.viewers || []}
+            <StoryViewersModal 
+                isOpen={showViewers} 
+                onClose={() => { setShowViewers(false); setIsPaused(false); }} 
+                viewers={currentStory.viewers || []} 
+                reactions={currentStory.reactions || []}
             />
         </div>
     );

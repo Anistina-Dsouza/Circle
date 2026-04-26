@@ -136,10 +136,15 @@ const HostDashboardPage = () => {
                         <div>
                             <div className="flex items-center gap-2 text-[10px] font-black text-purple-500 mb-1">
                                 <LayoutDashboard size={12} />
-                                <span>Host Control Center</span>
+                                <span>{circle?.userRole === 'moderator' ? 'Moderation Hub' : 'Host Control Center'}</span>
                             </div>
                             <h1 className="text-3xl font-black text-white tracking-tight">
                                 {circle?.name || 'Loading Circle...'}
+                                {circle?.userRole === 'moderator' && (
+                                    <span className="ml-3 text-[10px] bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded-full font-black uppercase tracking-widest align-middle">
+                                        Moderator
+                                    </span>
+                                )}
                             </h1>
                         </div>
                     </div>
@@ -186,12 +191,14 @@ const HostDashboardPage = () => {
                         description="Create a new gathering for the circle"
                         variant="primary"
                     />
-                    <DashboardQuickAction 
-                        to={`/circles/${slug}/manage/settings`}
-                        icon={Settings}
-                        title="Circle Settings"
-                        description="Privacy, branding & permissions"
-                    />
+                    {circle?.userRole !== 'moderator' && (
+                        <DashboardQuickAction 
+                            to={`/circles/${slug}/manage/settings`}
+                            icon={Settings}
+                            title="Circle Settings"
+                            description="Privacy, branding & permissions"
+                        />
+                    )}
                 </div>
 
                 {/* Main Content Layout */}
