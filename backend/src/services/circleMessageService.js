@@ -8,7 +8,6 @@ const getMessages = async (circleId, userId, { before, limit = 30 }) => {
 
   const query = {
     circleId,
-    isDeleted: false,
     isHidden:  false
   }
   if (before) query._id = { $lt: before }  // cursor — load older

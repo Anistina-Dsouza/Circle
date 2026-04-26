@@ -41,7 +41,16 @@ router.post('/:circleId/requests/:requestId/reject', circleController.rejectJoin
 // =========== MODERATION ===========
 router.post('/:circleId/moderators', circleController.addModerator);
 router.delete('/:circleId/moderators/:userId', circleController.removeModerator);
-router.delete('/:circleId/members/:userId', circleController.removeMember);
+router.delete('/:circleId/members/:userId', circleController.removeMember); // Kick
+
+// Mute/Unmute
+router.post('/:circleId/members/:userId/mute', circleController.muteMember);
+router.post('/:circleId/members/:userId/unmute', circleController.unmuteMember);
+
+// Ban/Unban
+router.post('/:circleId/members/:userId/ban', circleController.banMember);
+router.delete('/:circleId/members/:userId/unban', circleController.unbanMember);
+router.get('/:circleId/banned-members', circleController.getBannedMembers);
 
 // =========== INVITES ===========
 router.post('/:circleId/generate-invite', circleController.generateInviteCode);

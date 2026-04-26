@@ -16,9 +16,10 @@ const DateDivider = ({ date }) => (
 );
 
 /* ── single message bubble ──────────────────────────── */
-const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
+const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete, isModerator }) => {
     const isMe = msg.isMe;
     const likedByMe = msg.likedByMe;
+    const canDelete = isMe || isModerator;
 
     return (
         <div className={`flex gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-300 ${isMe ? 'flex-row-reverse' : ''}`}>
@@ -44,49 +45,53 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
 
                 {/* Bubble Container */}
                 <div className={`relative px-4 py-2.5 rounded-2xl border transition-all duration-300 group shadow-sm ${
-                    isMe
-                        ? 'bg-violet-600/30 border-violet-500/40 rounded-tr-none shadow-violet-900/10'
-                        : 'bg-[#1a1138]/60 border-white/5 backdrop-blur-md rounded-tl-none shadow-black/20'
+                    msg.isDeleted
+                        ? 'bg-red-500/5 border-red-500/20 italic'
+                        : isMe
+                            ? 'bg-violet-600/30 border-violet-500/40 rounded-tr-none shadow-violet-900/10'
+                            : 'bg-[#1a1138]/60 border-white/5 backdrop-blur-md rounded-tl-none shadow-black/20'
                 }`}>
                     
                     {/* Reply To Preview (Nested in bubble) */}
-                    {msg.replyTo && (
+                    {!msg.isDeleted && msg.replyTo && (
                         <div className={`mb-2 p-2 rounded-lg text-xs border-l-4 overflow-hidden ${isMe ? 'bg-violet-900/40 border-violet-400' : 'bg-black/20 border-gray-500'}`}>
                             <p className="font-bold text-[10px] mb-0.5 text-violet-300">{msg.replyTo.name}</p>
                             <p className="line-clamp-1 opacity-60 text-gray-300">{msg.replyTo.text}</p>
                         </div>
                     )}
 
-                    <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap selection:bg-violet-500/40">
-                        {msg.text}
+                    <p className={`text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/40 ${msg.isDeleted ? 'text-gray-500' : 'text-gray-200'}`}>
+                        {msg.isDeleted ? 'This message was deleted because it offends this circle' : msg.text}
                     </p>
 
                     {/* Hover Actions Bar */}
-                    <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 pointer-events-none group-hover:pointer-events-auto scale-90 origin-top`}>
-                        <button 
-                            onClick={() => onReply(msg)}
-                            className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all" 
-                            title="Reply"
-                        >
-                            <Reply size={12} />
-                        </button>
-                        <button 
-                            onClick={() => onToggleReaction(msg.id)}
-                            className={`p-1.5 rounded-full transition-all ${likedByMe ? 'text-red-500 bg-red-500/10' : 'text-gray-400 hover:text-red-400 hover:bg-white/10'}`} 
-                            title={likedByMe ? "Unlike" : "Like"}
-                        >
-                            <Heart size={12} fill={likedByMe ? "currentColor" : "none"} />
-                        </button>
-                        {isMe && (
+                    {!msg.isDeleted && (
+                        <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 p-0.5 bg-[#12082A] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl z-20 pointer-events-none group-hover:pointer-events-auto scale-90 origin-top`}>
                             <button 
-                                onClick={() => onDelete(msg.id)}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white/10 rounded-full transition-all" 
-                                title="Delete"
+                                onClick={() => onReply(msg)}
+                                className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all" 
+                                title="Reply"
                             >
-                                <Trash2 size={12} />
+                                <Reply size={12} />
                             </button>
-                        )}
-                    </div>
+                            <button 
+                                onClick={() => onToggleReaction(msg.id)}
+                                className={`p-1.5 rounded-full transition-all ${likedByMe ? 'text-red-500 bg-red-500/10' : 'text-gray-400 hover:text-red-400 hover:bg-white/10'}`} 
+                                title={likedByMe ? "Unlike" : "Like"}
+                            >
+                                <Heart size={12} fill={likedByMe ? "currentColor" : "none"} />
+                            </button>
+                            {canDelete && (
+                                <button 
+                                    onClick={() => onDelete(msg.id)}
+                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white/10 rounded-full transition-all" 
+                                    title="Delete"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Visible Reactions */}
@@ -144,11 +149,14 @@ const CircleChatArea = ({ circle }) => {
     const currentUserId = currentUser._id || currentUser.id;
     const [isMuted, setIsMuted] = useState(false);
     const [mutedUntil, setMutedUntil] = useState(null);
+    const [isModerator, setIsModerator] = useState(false);
 
-    // Check mute status
+    // Check permissions
     useEffect(() => {
         if (!circle || !currentUserId) return;
         const member = circle.members?.find(m => (m.user?._id || m.user) === currentUserId);
+        
+        // Mute check
         if (member?.isMuted) {
             const until = member.mutedUntil ? new Date(member.mutedUntil) : null;
             if (!until || until > new Date()) {
@@ -159,6 +167,12 @@ const CircleChatArea = ({ circle }) => {
             setIsMuted(false);
             setMutedUntil(null);
         }
+
+        // Moderator check
+        const isMod = (circle.creator?._id || circle.creator) === currentUserId || 
+                     ['admin', 'moderator'].includes(member?.role);
+        setIsModerator(isMod);
+
     }, [circle, currentUserId]);
 
     const scrollToBottom = () => {
@@ -277,7 +291,9 @@ const CircleChatArea = ({ circle }) => {
         });
 
         socketRef.current.on('circleMessageDeleted', ({ messageId }) => {
-            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+            setMessages(prev => prev.map(msg => 
+                msg.id === messageId ? { ...msg, isDeleted: true } : msg
+            ));
         });
 
         return () => {
@@ -306,6 +322,7 @@ const CircleChatArea = ({ circle }) => {
             avatar: msg.sender?.profilePic || `https://ui-avatars.com/api/?name=${msg.sender?.username || 'U'}&background=random`,
             isMe,
             likedByMe,
+            isDeleted: msg.isDeleted,
             replyTo: msg.replyTo ? {
                 id: msg.replyTo._id,
                 name: (msg.replyTo.sender?._id || msg.replyTo.sender) === myUserId ? 'You' : (msg.replyTo.sender?.displayName || msg.replyTo.sender?.username || 'Unknown'),
@@ -346,7 +363,9 @@ const CircleChatArea = ({ circle }) => {
             await axios.delete(`${backendUrl}/api/circlemessages/${circleId}/messages/${messageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setMessages(prev => prev.filter(msg => msg.id !== messageId));
+            setMessages(prev => prev.map(msg => 
+                msg.id === messageId ? { ...msg, isDeleted: true } : msg
+            ));
         } catch (err) {
             console.error("Failed to delete message", err);
         }
@@ -457,6 +476,7 @@ const CircleChatArea = ({ circle }) => {
                                     onToggleReaction={handleToggleReaction}
                                     onReply={setReplyingTo}
                                     onDelete={handleDeleteMessage}
+                                    isModerator={isModerator}
                                 />
                             ))}
                         </div>

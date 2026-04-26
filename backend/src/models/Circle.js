@@ -139,6 +139,23 @@ const circleSchema = new mongoose.Schema({
     rejectionReason: String
   }],
 
+  bannedUsers: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    reason: String,
+    bannedAt: {
+      type: Date,
+      default: Date.now
+    },
+    bannedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  }],
+
   stats: {
     memberCount: { type: Number, default: 0 },
     messageCount: { type: Number, default: 0 },   // ← already existed, now actually used
