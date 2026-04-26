@@ -16,9 +16,9 @@ const StoryViewerPage = () => {
     const [isPaused, setIsPaused] = useState(false);
     const [showViewers, setShowViewers] = useState(false);
     const [error, setError] = useState(null);
-    
+
     const [successMsg, setSuccessMsg] = useState('');
-    
+
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
     const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -58,10 +58,10 @@ const StoryViewerPage = () => {
 
     useEffect(() => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
-        
+
         progressTimer.current = setInterval(() => {
             if (isPaused || showViewers) return;
-            
+
             setProgress(prev => {
                 if (prev >= 100) return 100;
                 return prev + step;
@@ -75,7 +75,7 @@ const StoryViewerPage = () => {
         if (progress >= 100) {
             handleNext();
         }
-    }, [progress, handleNext]);
+    }, [progress]);
 
     useEffect(() => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
@@ -118,7 +118,7 @@ const StoryViewerPage = () => {
                 await axios.delete(`${baseUrl}/api/moments/${momentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 setSuccessMsg('Story deleted permanently!');
                 setTimeout(() => {
                     setSuccessMsg('');
@@ -146,7 +146,7 @@ const StoryViewerPage = () => {
         // const screenWidth = window.innerWidth;
         const cardElement = e.currentTarget;
         const cardRect = cardElement.getBoundingClientRect();
-        
+
         // Navigation relative to card
         const relativeX = clientX - cardRect.left;
         if (relativeX < cardRect.width / 3) {
@@ -170,7 +170,7 @@ const StoryViewerPage = () => {
                 <div className="max-w-xs flex flex-col items-center">
                     <AlertCircle size={48} className="text-red-500 mb-4" />
                     <p className="text-gray-400 mb-6">{error || 'No stories available'}</p>
-                    <button 
+                    <button
                         onClick={() => navigate('/feed')}
                         className="bg-purple-600 text-white px-8 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/40"
                     >
@@ -182,7 +182,7 @@ const StoryViewerPage = () => {
     }
 
     const currentStory = stories[currentIndex];
-    
+
     // Final safeguard before render
     if (!currentStory) return null;
 
@@ -202,14 +202,14 @@ const StoryViewerPage = () => {
 
             {/* Stories Container (Card Style) */}
             <div className="relative w-full max-w-[420px] h-full h-[95vh] flex flex-col py-8">
-                
+
                 {/* Header Elements (Top of Container) */}
                 <div className="mb-6 px-1 shrink-0 z-10 w-full relative">
                     <ProgressBar stories={stories} currentIndex={currentIndex} progress={progress} />
                     <div className="mt-4">
-                        <StoryInfo 
-                            user={currentStory.user} 
-                            createdAt={currentStory.createdAt} 
+                        <StoryInfo
+                            user={currentStory.user}
+                            createdAt={currentStory.createdAt}
                             isOwnStory={isOwnStory}
                             onDelete={handleDelete}
                             onClose={() => navigate(-1)}
@@ -218,7 +218,7 @@ const StoryViewerPage = () => {
                 </div>
 
                 {/* Main Card Content */}
-                <div 
+                <div
                     className="flex-1 min-h-0 bg-[#1E1B3A] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative cursor-pointer group border border-white/5"
                     onMouseDown={() => !showViewers && setIsPaused(true)}
                     onMouseUp={() => !showViewers && setIsPaused(false)}
@@ -248,7 +248,7 @@ const StoryViewerPage = () => {
                     {/* Viewers Badge (Bottom-Center as per ref) */}
                     {isOwnStory && (
                         <div className="absolute bottom-24 left-0 right-0 flex justify-center pointer-events-none">
-                            <div 
+                            <div
                                 onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
                                 className="bg-[#4C3E7C]/80 backdrop-blur-md px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/10 shadow-lg pointer-events-auto hover:bg-[#5f4e99] transition-colors"
                             >
@@ -273,7 +273,7 @@ const StoryViewerPage = () => {
 
                 {/* Desktop Side Arrows (Subtle) - Only show if multiple stories */}
                 {stories.length > 1 && (
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); handlePrev(); }}
                         className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
                     >
@@ -281,7 +281,7 @@ const StoryViewerPage = () => {
                     </button>
                 )}
                 {stories.length > 1 && (
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); handleNext(); }}
                         className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
                     >
@@ -291,10 +291,10 @@ const StoryViewerPage = () => {
             </div>
 
             {/* Story Viewers Modal */}
-            <StoryViewersModal 
-                isOpen={showViewers} 
-                onClose={() => { setShowViewers(false); setIsPaused(false); }} 
-                viewers={currentStory.viewers || []} 
+            <StoryViewersModal
+                isOpen={showViewers}
+                onClose={() => { setShowViewers(false); setIsPaused(false); }}
+                viewers={currentStory.viewers || []}
             />
         </div>
     );

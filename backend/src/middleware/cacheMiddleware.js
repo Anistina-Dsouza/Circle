@@ -14,7 +14,7 @@ const cacheMiddleware = (duration = 3600) => {
     try {
       // Use the request URL as the base key
       let key = `__express__${req.originalUrl || req.url}`;
-      
+
       // If the user is authenticated, append their ID to the key
       // This ensures personalized feeds/data aren't leaked to other users
       if (req.user && req.user._id) {
