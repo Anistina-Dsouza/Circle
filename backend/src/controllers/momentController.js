@@ -164,7 +164,8 @@ exports.getUserMoments = async (req, res) => {
     const moments = await Moment.find(query)
       .sort({ createdAt: -1 })
       .populate('user', 'username displayName profilePic')
-      .populate('viewers', 'username displayName profilePic');
+      .populate('viewers', 'username displayName profilePic')
+      .populate('reactions.user', 'username displayName profilePic');
 
     res.json({
       success: true,
@@ -182,7 +183,8 @@ exports.getMoment = async (req, res) => {
     const moment = await Moment.findById(req.params.momentId)
       .populate('user', 'username displayName profilePic')
       .populate('replies.user', 'username displayName')
-      .populate('viewers', 'username displayName profilePic');
+      .populate('viewers', 'username displayName profilePic')
+      .populate('reactions.user', 'username displayName profilePic');
 
     if (!moment) {
       return res.status(404).json({ error: 'Moment not found' });
@@ -268,6 +270,50 @@ exports.replyToMoment = async (req, res) => {
     res.json({
       success: true,
       message: 'Reply added'
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== REACT TO MOMENT ===========
+exports.reactToMoment = async (req, res) => {
+  try {
+    const { emoji } = req.body;
+    const { momentId } = req.params;
+
+    const moment = await Moment.findById(momentId);
+    if (!moment) {
+      return res.status(404).json({ error: 'Moment not found' });
+    }
+
+    const userIdStr = req.userId.toString();
+    const existingReactionIndex = moment.reactions.findIndex(r => r.user.toString() === userIdStr);
+
+    if (existingReactionIndex > -1) {
+      if (moment.reactions[existingReactionIndex].emoji === emoji) {
+        // Toggle off if same emoji
+        moment.reactions.splice(existingReactionIndex, 1);
+      } else {
+        // Update to new emoji
+        moment.reactions[existingReactionIndex].emoji = emoji;
+        moment.reactions[existingReactionIndex].createdAt = new Date();
+      }
+    } else {
+      // Add new reaction
+      moment.reactions.push({
+        user: req.userId,
+        emoji,
+        createdAt: new Date()
+      });
+    }
+
+    await moment.save();
+
+    res.json({
+      success: true,
+      reactions: moment.reactions
     });
 
   } catch (error) {
