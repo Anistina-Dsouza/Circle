@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Eye, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const StoryViewersModal = ({ viewers = [], isOpen, onClose }) => {
+const StoryViewersModal = ({ viewers = [], reactions = [], isOpen, onClose }) => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -100,9 +100,19 @@ const StoryViewersModal = ({ viewers = [], isOpen, onClose }) => {
                                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#160D33] rounded-full shadow-lg" title="Online" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-extrabold text-white group-hover:text-purple-300 transition-colors">
-                                            {viewer.displayName || viewer.username}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-extrabold text-white group-hover:text-purple-300 transition-colors">
+                                                {viewer.displayName || viewer.username}
+                                            </span>
+                                            {(() => {
+                                                const reaction = reactions.find(r => (r.user?._id || r.user) === viewer._id);
+                                                return reaction ? (
+                                                    <span className="text-base animate-in zoom-in duration-300">
+                                                        {reaction.emoji}
+                                                    </span>
+                                                ) : null;
+                                            })()}
+                                        </div>
                                         <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
                                             @{viewer.username}
                                         </span>
