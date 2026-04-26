@@ -56,53 +56,65 @@ const MemberRow = ({ m }) => {
 
 /* ───────── upcoming meeting card ───────── */
 const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
-    const time = new Date(meeting.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const startDate = new Date(meeting.startTime);
+    const time = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateDisplay = startDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const isToday = new Date().toDateString() === startDate.toDateString();
+
     const members = meeting.participants || [];
     const acceptedMembers = members.filter(m => m.status === 'accepted' || m.status === 'attended');
     
-    // Find initial status for current user
     const userParticipant = members.find(m => {
-        const pId = m.user?._id || m.user;
+        const pId = m.user?._id || m.user?.id || m.user;
         return pId?.toString() === currentUserId?.toString();
     });
     const initialStatus = userParticipant ? userParticipant.status : 'invited';
 
-    const handleStatusChange = (updatedMeeting) => {
-        if (onMeetingUpdated) {
-            onMeetingUpdated(updatedMeeting);
-        }
-    };
-
     return (
-        <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
-            <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-bold text-violet-400">{time}</p>
+        <div className="p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-white/10 transition-all group/card">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-400 text-[9px] font-black uppercase tracking-wider">
+                        {isToday ? 'Today' : dateDisplay}
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-500">{time}</span>
+                </div>
                 {meeting.status === 'live' && (
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Live Now</span>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
+                        <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                        <span className="text-[8px] font-black text-red-500 uppercase tracking-widest">Live</span>
                     </div>
                 )}
             </div>
-            <p className="text-white font-semibold text-sm mb-1">{meeting.title}</p>
-            {meeting.description && <p className="text-gray-500 text-[11px] leading-relaxed mb-4">{meeting.description}</p>}
+
+            <h4 
+                onClick={() => window.open(meeting.meetingLink, '_blank')}
+                className="text-white font-bold text-sm mb-1 group-hover/card:text-violet-400 transition-colors cursor-pointer hover:underline decoration-violet-500/50"
+            >
+                {meeting.title}
+            </h4>
+            {meeting.description && (
+                <p className="text-gray-500 text-[10px] leading-relaxed mb-3 line-clamp-2">
+                    {meeting.description}
+                </p>
+            )}
             
             {/* Social Context / Avatars */}
             {acceptedMembers.length > 0 && (
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="flex items-center -space-x-2">
+                <div className="flex items-center gap-2 mb-4 bg-white/[0.02] p-1.5 rounded-xl border border-white/5">
+                    <div className="flex items-center -space-x-1.5">
                         {acceptedMembers.slice(0, 3).map((m, i) => (
                             <img
                                 key={m._id || i}
                                 src={getMemberPic(m.user)}
                                 alt=""
-                                className="w-6 h-6 rounded-full object-cover border-2 border-[#12082A] relative z-10"
+                                className="w-5 h-5 rounded-full object-cover border-2 border-[#12082A] relative z-10"
                             />
                         ))}
                     </div>
-                    <p className="text-[10px] text-gray-400">
-                        <span className="font-semibold text-gray-300">{getMemberName(acceptedMembers[0].user)}</span>
-                        {acceptedMembers.length > 1 && ` and ${acceptedMembers.length - 1} other${acceptedMembers.length - 1 > 1 ? 's' : ''}`} going
+                    <p className="text-[9px] text-gray-500 truncate">
+                        <span className="font-bold text-gray-300">{getMemberName(acceptedMembers[0].user)}</span>
+                        {acceptedMembers.length > 1 && ` +${acceptedMembers.length - 1} more`}
                     </p>
                 </div>
             )}
@@ -110,16 +122,16 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
             {meeting.status === 'live' ? (
                 <button 
                     onClick={() => window.open(meeting.meetingLink, '_blank')}
-                    className="w-full py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-violet-900/40"
+                    className="w-full py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:shadow-lg hover:shadow-violet-900/20 active:scale-95"
                 >
-                    <Video size={14} fill="currentColor" />
+                    <Video size={12} fill="currentColor" />
                     JOIN LIVE SESSION
                 </button>
             ) : (
                 <RSVPButton 
                     meetingId={meeting._id} 
                     initialStatus={initialStatus} 
-                    onStatusChange={handleStatusChange} 
+                    onStatusChange={onMeetingUpdated} 
                 />
             )}
         </div>
@@ -142,6 +154,7 @@ const CircleMembersPanel = ({ circle, slug }) => {
         if (circle?._id) {
             const fetchMeetings = async () => {
                 try {
+                    console.log('Fetching meetings for circle:', circle._id);
                     setLoadingMeetings(true);
                     const res = await meetingService.getCircleMeetings(circle._id);
                     if (res?.success) {
