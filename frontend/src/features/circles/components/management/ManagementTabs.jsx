@@ -5,6 +5,7 @@ const ManagementTabs = ({ activeTab, onTabChange, counts }) => {
         { id: 'requests', label: 'Join Requests', count: counts.requests },
         { id: 'members', label: 'Active Members', count: counts.members },
         { id: 'moderators', label: 'Moderators', count: counts.moderators },
+        { id: 'banned', label: 'Banned', count: counts.banned },
     ];
 
     return (
