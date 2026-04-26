@@ -40,4 +40,7 @@ router.get('/:id', meetingController.getMeetingById);
 // PUT /api/meetings/:id/rsvp - Update RSVP status
 router.put('/:id/rsvp', meetingController.updateRSVP);
 
+// GET /api/meetings/circle/:circleId - Meetings for a specific circle
+router.get('/circle/:circleId', meetingController.getCircleMeetings);
+
 module.exports = router;

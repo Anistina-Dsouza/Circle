@@ -26,7 +26,7 @@ exports.getDashboard = async (req, res) => {
     const userCircles = await Circle.find({ 'members.user': userId }).select('_id');
     const circleIds = userCircles.map(c => c._id);
 
-    const upcoming = await Meeting.find({ 
+    const upcoming = await Meeting.find({
       startTime: { $gte: now },
       $or: [
         { 'participants.user': userId },
@@ -41,7 +41,7 @@ exports.getDashboard = async (req, res) => {
     const past = await Meeting.find({
       endTime: { $lt: now },
       $or: [
-        { host: userId }, 
+        { host: userId },
         { 'participants.user': userId },
         { circle: { $in: circleIds } }
       ]
@@ -57,7 +57,7 @@ exports.getDashboard = async (req, res) => {
       const obj = m.toObject ? m.toObject() : { ...m };
       const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
       // Even for hosts, we use the join link (meetingLink) to hide the admin identity
-      obj.startLink = obj.meetingLink; 
+      obj.startLink = obj.meetingLink;
       if (hostIdStr !== currentUserIdStr) {
         delete obj.startLink;
       }
@@ -133,7 +133,7 @@ exports.getEligibleCircles = async (req, res) => {
 exports.scheduleMeeting = async (req, res) => {
   try {
     const { title, description, circle, startTime, scheduledDuration, settings } = req.body;
-    
+
     if (!title || !startTime) {
       return res.status(400).json({ success: false, message: 'Title and startTime are required' });
     }
@@ -171,7 +171,7 @@ exports.scheduleMeeting = async (req, res) => {
       duration: scheduledDuration || 60,
       password: settings?.requirePassword ? settings.password : undefined
     });
-    
+
     let endTime = new Date(startTime);
     endTime.setMinutes(endTime.getMinutes() + parseInt(scheduledDuration || 60, 10));
 
@@ -197,7 +197,7 @@ exports.scheduleMeeting = async (req, res) => {
     }
 
     const meeting = await Meeting.create(meetingData);
-    
+
     // Increment meeting count for circle dashboard stats
     if (circle) {
       await Circle.findByIdAndUpdate(circle, { $inc: { 'stats.meetingCount': 1 } });
@@ -224,7 +224,7 @@ exports.scheduleMeeting = async (req, res) => {
 exports.getMyMeetings = async (req, res) => {
   try {
     const now = new Date(Date.now() - 5 * 60 * 1000);
-    const meetings = await Meeting.find({ 
+    const meetings = await Meeting.find({
       host: req.user._id,
       endTime: { $gte: now }
     })
@@ -255,18 +255,18 @@ exports.getMyMeetings = async (req, res) => {
 exports.startMeeting = async (req, res) => {
   try {
     const meeting = await Meeting.findOne({ _id: req.params.id, host: req.user._id });
-    
+
     if (!meeting) {
       return res.status(404).json({ success: false, message: 'Meeting not found or you are not authorized' });
     }
-    
+
     meeting.status = 'live';
     meeting.startTime = new Date();
     await meeting.save();
-    
+
     // Add host as an attended participant
     await meeting.updateParticipantStatus(req.user._id, 'attended');
-    
+
     res.status(200).json({
       success: true,
       data: meeting
@@ -285,11 +285,11 @@ exports.startMeeting = async (req, res) => {
 exports.deleteMeeting = async (req, res) => {
   try {
     const meeting = await Meeting.findOne({ _id: req.params.id, host: req.user._id });
-    
+
     if (!meeting) {
       return res.status(404).json({ success: false, message: 'Meeting not found or you are not authorized' });
     }
-    
+
     if (meeting.roomId) {
       try {
         await zoomService.deleteMeeting(meeting.roomId);
@@ -299,7 +299,7 @@ exports.deleteMeeting = async (req, res) => {
     }
 
     await meeting.deleteOne();
-    
+
     res.status(200).json({
       success: true,
       message: 'Meeting deleted successfully'
@@ -319,16 +319,16 @@ exports.getUpcomingMeetings = async (req, res) => {
   try {
     const now = new Date(Date.now() - 5 * 60 * 1000);
     const { circleId } = req.query;
-    
+
     let query = { startTime: { $gte: now } };
-    
+
     if (circleId) {
       query.circle = circleId;
     } else {
       // Get all circles the user is a member of
       const userCircles = await Circle.find({ 'members.user': req.user._id }).select('_id');
       const circleIds = userCircles.map(c => c._id);
-      
+
       query.$or = [
         { 'participants.user': req.user._id },
         { circle: { $in: circleIds } }
@@ -447,7 +447,7 @@ exports.getMeetingById = async (req, res) => {
 exports.updateRSVP = async (req, res) => {
   try {
     const { status } = req.body;
-    
+
     // Only support going/not going mapped to accepted/declined right now
     if (!['accepted', 'declined'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid RSVP status' });
@@ -498,7 +498,10 @@ exports.getCircleMeetings = async (req, res) => {
 
     const meetings = await Meeting.find({
       circle: circleId,
-      startTime: { $gte: now }
+      $or: [
+        { startTime: { $gte: now } },
+        { status: 'live' }
+      ]
     })
       .populate('host', 'username displayName profilePic')
       .populate('participants.user', 'username displayName profilePic')
