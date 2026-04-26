@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { io } from 'socket.io-client';
 const Login = React.lazy(() => import('./features/auth/Login/LoginPage'));
-const Signup = React.lazy(() => import('./features/auth/Signup/SignupPage'));
+const Signup = React.lazy(() => import('./features/auth/signup/SignupPage'));
 const ForgotPassword = React.lazy(() => import('./features/auth/ForgotPassword/ForgotPasswordPage'));
 const ResetPasswordPage = React.lazy(() => import('./features/auth/ForgotPassword/ResetPasswordPage'));
 const Landing = React.lazy(() => import('./features/landingPage/pages/Landing'));
