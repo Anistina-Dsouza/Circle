@@ -26,10 +26,12 @@ const cacheMiddleware = (duration = 3600) => {
       if (cachedResponse) {
         // If data exists in Redis, return it immediately
         console.log(`[Cache Hit] Serving ${key} from Redis`);
+        res.set('X-Source', 'cache');
         return res.json(JSON.parse(cachedResponse));
       } else {
         // If not in Redis, hijack res.json to store the response before sending it
         console.log(`[Cache Miss] Fetching ${key} from MongoDB`);
+        res.set('X-Source', 'database');
         res.originalJson = res.json;
         res.json = (body) => {
           // Store in Redis (duration is in seconds)
