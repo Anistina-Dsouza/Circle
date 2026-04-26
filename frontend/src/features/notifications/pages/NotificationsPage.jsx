@@ -1,15 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const NotificationsPage = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
     const [notifications, setNotifications] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+    const handleNotifClick = (noti) => {
+        // Mark as read
+        if (!noti.isRead) {
+            markAsRead(noti._id || noti.id);
+        }
+
+        // Handle Redirection
+        switch (noti.type) {
+            case 'follow':
+                if (noti.sender?.username) {
+                    navigate(`/profile/${noti.sender.username}`);
+                }
+                break;
+            case 'reaction':
+            case 'message':
+            case 'mention':
+                if (noti.relatedItem?.type === 'circle' && noti.relatedItem?.id) {
+                    // Navigate to circle chat
+                    // Assuming you have circle slug in related item or can fetch it
+                    // For now, let's just go to the circles list or if id is slug
+                    navigate(`/circles`); 
+                }
+                break;
+            default:
+                break;
+        }
+    };
 
     const fetchNotifications = async () => {
         try {
@@ -108,7 +137,7 @@ const NotificationsPage = () => {
         // Group similar types for tabs
         if (activeTab === 'like') return n.type === 'reaction' || n.type === 'like';
         if (activeTab === 'mention') return n.type === 'mention' || n.type === 'message' || n.type === 'flash_reply';
-        if (activeTab === 'circle_invite') return n.type === 'circle_invite' || n.type === 'circle_join';
+        if (activeTab === 'followers') return n.type === 'follow';
         return n.type === activeTab;
     });
 
@@ -149,7 +178,7 @@ const NotificationsPage = () => {
 
                 {/* Tabs / Filter Area */}
                 <div className="flex items-center gap-1 bg-[#12082A] p-1.5 rounded-2xl border border-white/5 mb-6 overflow-x-auto no-scrollbar">
-                    {['all', 'unread', 'mention', 'like', 'circle_invite', 'announcements'].map(tab => (
+                    {['all', 'unread', 'mention', 'like', 'followers', 'announcements'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -214,7 +243,7 @@ const NotificationsPage = () => {
                         filteredNotifications.map((noti) => (
                             <div 
                                 key={noti._id || noti.id}
-                                onClick={() => !noti.isRead && markAsRead(noti._id || noti.id)}
+                                onClick={() => handleNotifClick(noti)}
                                 className={`group relative bg-[#12082A] border transition-all duration-300 p-4 rounded-3xl flex gap-4 items-start cursor-pointer active:scale-[0.98] ${
                                     noti.isRead 
                                     ? 'border-white/5 opacity-80' 

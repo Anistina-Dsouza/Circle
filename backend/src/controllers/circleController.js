@@ -287,6 +287,11 @@ exports.joinCircle = async (req, res) => {
     if (circle.isMember(req.userId)) {
       return res.status(400).json({ error: 'Already a member' });
     }
+
+    // Check if banned
+    if (circle.bannedUsers && circle.bannedUsers.some(b => b.user && b.user.toString() === req.userId.toString())) {
+      return res.status(403).json({ error: 'You are banned from this circle' });
+    }
     
     // Direct joining via this endpoint now strictly requires an invite code for BOTH public and private
     // Otherwise, users must use the request system (/request-join)
@@ -597,6 +602,11 @@ exports.joinWithInvite = async (req, res) => {
     // Check if already member
     if (circle.isMember(req.userId)) {
       return res.status(400).json({ error: 'Already a member' });
+    }
+
+    // Check if banned
+    if (circle.bannedUsers && circle.bannedUsers.some(b => b.user && b.user.toString() === req.userId.toString())) {
+      return res.status(403).json({ error: 'You are banned from this circle' });
     }
     
     // Add member
@@ -1005,6 +1015,185 @@ exports.rejectJoinRequest = async (req, res) => {
     
   } catch (error) {
     console.error('Reject request error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== MUTE MEMBER ===========
+exports.muteMember = async (req, res) => {
+  try {
+    const { circleId, userId } = req.params;
+    const { duration = 1440 } = req.body; // duration in minutes, default 24h
+
+    const circle = await Circle.findById(circleId);
+    if (!circle) return res.status(404).json({ error: 'Circle not found' });
+
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    const targetMember = circle.members.find(m => m.user.toString() === userId);
+
+    if (!targetMember) return res.status(404).json({ error: 'Member not found' });
+
+    // Permission checks
+    if (circle.creator.toString() !== req.userId && !['admin', 'moderator'].includes(requesterRole)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (targetMember.role === 'admin' && circle.creator.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Cannot mute an admin' });
+    }
+
+    targetMember.isMuted = true;
+    targetMember.mutedUntil = new Date(Date.now() + duration * 60000);
+    await circle.save();
+
+    res.json({ success: true, message: 'Member muted successfully', mutedUntil: targetMember.mutedUntil });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== UNMUTE MEMBER ===========
+exports.unmuteMember = async (req, res) => {
+  try {
+    const { circleId, userId } = req.params;
+
+    const circle = await Circle.findById(circleId);
+    if (!circle) return res.status(404).json({ error: 'Circle not found' });
+
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    if (circle.creator.toString() !== req.userId && !['admin', 'moderator'].includes(requesterRole)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const targetMember = circle.members.find(m => m.user.toString() === userId);
+    if (targetMember) {
+      targetMember.isMuted = false;
+      targetMember.mutedUntil = null;
+      await circle.save();
+    }
+
+    res.json({ success: true, message: 'Member unmuted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== BAN MEMBER ===========
+exports.banMember = async (req, res) => {
+  try {
+    const { circleId, userId } = req.params;
+    const { reason = 'Breaking community rules' } = req.body;
+
+    const circle = await Circle.findById(circleId);
+    if (!circle) return res.status(404).json({ error: 'Circle not found' });
+
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    const targetMember = circle.members.find(m => m.user.toString() === userId);
+
+    if (circle.creator.toString() !== req.userId && !['admin', 'moderator'].includes(requesterRole)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (userId === circle.creator.toString()) {
+      return res.status(403).json({ error: 'Cannot ban the creator' });
+    }
+
+    if (targetMember && targetMember.role === 'admin' && circle.creator.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Cannot ban an admin' });
+    }
+
+    // Remove from members
+    await circle.removeMember(userId);
+
+    // Add to bannedUsers
+    if (!circle.bannedUsers) circle.bannedUsers = [];
+    const alreadyBanned = circle.bannedUsers.some(b => b.user && b.user.toString() === userId.toString());
+    if (!alreadyBanned) {
+      circle.bannedUsers.push({
+        user: userId,
+        reason,
+        bannedBy: req.userId
+      });
+    }
+
+    await circle.save();
+
+    // Update user's circle count
+    await User.findByIdAndUpdate(userId, {
+      $inc: { 'stats.circleCount': -1 }
+    });
+
+    res.json({ success: true, message: 'User banned from circle successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== UNBAN MEMBER ===========
+exports.unbanMember = async (req, res) => {
+  try {
+    const { circleId, userId } = req.params;
+
+    const circle = await Circle.findById(circleId);
+    if (!circle) return res.status(404).json({ error: 'Circle not found' });
+
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    const isCreator = circle.creator.toString() === req.userId;
+    
+    if (!isCreator && !['admin', 'moderator'].includes(requesterRole)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Ensure bannedUsers exists
+    if (!circle.bannedUsers) {
+        circle.bannedUsers = [];
+        await circle.save();
+        return res.json({ success: true, message: 'User unbanned successfully (was not banned)' });
+    }
+
+    // Find the user and remove them
+    const initialLength = circle.bannedUsers.length;
+    circle.bannedUsers = circle.bannedUsers.filter(b => 
+        b.user && b.user.toString() !== userId.toString()
+    );
+    
+    if (circle.bannedUsers.length === initialLength) {
+        // Double check with direct comparison if string conversion failed
+        circle.bannedUsers = circle.bannedUsers.filter(b => b.user != userId);
+    }
+
+    await circle.save();
+
+    res.json({ success: true, message: 'User unbanned successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// =========== GET BANNED MEMBERS ===========
+exports.getBannedMembers = async (req, res) => {
+  try {
+    const { circleId } = req.params;
+
+    const circle = await Circle.findById(circleId)
+      .populate({
+        path: 'bannedUsers.user',
+        select: 'username displayName profilePic'
+      });
+
+    if (!circle) return res.status(404).json({ error: 'Circle not found' });
+
+    // Check permissions (admin or moderator)
+    const requesterRole = circle.members.find(m => m.user.toString() === req.userId)?.role;
+    if (circle.creator.toString() !== req.userId && !['admin', 'moderator'].includes(requesterRole)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    res.json({
+      success: true,
+      bannedUsers: circle.bannedUsers || []
+    });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };

@@ -51,16 +51,6 @@ exports.getDashboard = async (req, res) => {
       .sort({ endTime: -1 })
       .limit(5);
 
-    const isHost = await Circle.exists({
-      'members': {
-        $elemMatch: {
-          user: userId,
-          role: { $in: ['admin', 'moderator'] }
-        }
-      },
-      isActive: true
-    });
-
     const currentUserIdStr = userId.toString();
 
     const safeUpcoming = upcoming.map(m => {
@@ -84,13 +74,22 @@ exports.getDashboard = async (req, res) => {
       return obj;
     });
 
+    const circles = await Circle.find({
+      isActive: true,
+      $or: [
+        { creator: userId },
+        { 'members.user': userId, 'members.role': 'admin' }
+      ]
+    });
+    const canHost = circles.length > 0;
+
     res.status(200).json({
       success: true,
       data: {
         hosted: safeHosted,
         upcoming: safeUpcoming,
         past: safePast,
-        canHost: !!isHost
+        canHost
       }
     });
   } catch (error) {
@@ -110,7 +109,7 @@ exports.getEligibleCircles = async (req, res) => {
       'members': {
         $elemMatch: {
           user: req.user._id,
-          role: { $in: ['admin', 'moderator'] }
+          role: 'admin'
         }
       },
       isActive: true
@@ -144,31 +143,23 @@ exports.scheduleMeeting = async (req, res) => {
     }
 
     if (circle) {
-      const isCircleAdmin = await Circle.exists({
-        _id: circle,
-        'members': {
-          $elemMatch: {
-            user: req.user._id,
-            role: { $in: ['admin', 'moderator'] }
-          }
-        },
-        isActive: true
-      });
-      if (!isCircleAdmin) {
-        return res.status(403).json({ success: false, message: 'You must be a community host (admin or moderator) of this circle to schedule a meeting.' });
+      const circleDoc = await Circle.findById(circle);
+      const isCreator = circleDoc && circleDoc.creator.toString() === req.user._id.toString();
+      const isAdmin = circleDoc && circleDoc.members.some(m => m.user.toString() === req.user._id.toString() && m.role === 'admin');
+
+      if (!circleDoc || !circleDoc.isActive || (!isCreator && !isAdmin)) {
+        return res.status(403).json({ success: false, message: 'You must be a community admin of this circle to schedule a meeting.' });
       }
     } else {
-      const isGeneralHost = await Circle.exists({
-        'members': {
-          $elemMatch: {
-            user: req.user._id,
-            role: { $in: ['admin', 'moderator'] }
-          }
-        },
-        isActive: true
+      const userCircles = await Circle.find({
+        isActive: true,
+        $or: [
+          { creator: req.user._id },
+          { 'members.user': req.user._id, 'members.role': 'admin' }
+        ]
       });
-      if (!isGeneralHost) {
-        return res.status(403).json({ success: false, message: 'Only community hosts can create meetings.' });
+      if (userCircles.length === 0) {
+        return res.status(403).json({ success: false, message: 'Only community admins can create meetings.' });
       }
     }
 
