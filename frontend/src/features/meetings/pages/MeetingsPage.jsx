@@ -304,22 +304,7 @@ const MeetingsPage = () => {
                                 <div key={meeting.id} className="cursor-pointer" onClick={() => {
                                     const linkToUse = meeting.startLink || meeting.meetingLink;
                                     if (linkToUse) {
-                                        try {
-                                            const userStr = localStorage.getItem('user');
-                                            const user = userStr ? JSON.parse(userStr) : null;
-                                            const displayName = user?.profile?.displayName || user?.username || 'Participant';
-                                            const url = new URL(linkToUse);
-                                            
-                                            // Only append participant name hints if we are NOT using the startLink
-                                            if (!meeting.startLink) {
-                                                url.searchParams.set('uname', displayName);
-                                                url.searchParams.set('un', btoa(displayName));
-                                            }
-                                            
-                                            window.open(url.toString(), '_blank');
-                                        } catch (err) {
-                                            window.open(linkToUse, '_blank');
-                                        }
+                                        window.open(linkToUse, '_blank');
                                     }
                                 }}>
                                     <UpcomingMeetingCard meeting={meeting} />

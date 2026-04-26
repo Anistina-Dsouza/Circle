@@ -31,9 +31,6 @@ router.put('/:id/start', meetingController.startMeeting);
 // GET /api/meetings/upcoming - All upcoming meetings in user's circles (UpcomingMeetingsPage)
 router.get('/upcoming', meetingController.getUpcomingMeetings);
 
-// GET /api/meetings/circle/:circleId - Meetings for a specific circle
-router.get('/circle/:circleId', meetingController.getCircleMeetings);
-
 // GET /api/meetings/history - Past meetings with search + pagination (MeetingHistoryPage)
 router.get('/history', meetingController.getMeetingHistory);
 
