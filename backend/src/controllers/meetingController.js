@@ -1,5 +1,6 @@
 const Meeting = require('../models/Meeting');
 const Circle = require('../models/Circle');
+const User = require('../models/User');
 const zoomService = require('../services/zoomService');
 
 /**
@@ -15,6 +16,12 @@ exports.getDashboard = async (req, res) => {
     const hosted = await Meeting.find({ host: userId, startTime: { $gte: now } })
       .sort({ startTime: 1 })
       .limit(3);
+
+    const safeHosted = hosted.map(m => {
+      const obj = m.toObject ? m.toObject() : { ...m };
+      obj.startLink = obj.meetingLink;
+      return obj;
+    });
 
     const userCircles = await Circle.find({ 'members.user': userId }).select('_id');
     const circleIds = userCircles.map(c => c._id);
@@ -59,6 +66,8 @@ exports.getDashboard = async (req, res) => {
     const safeUpcoming = upcoming.map(m => {
       const obj = m.toObject ? m.toObject() : { ...m };
       const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
+      // Even for hosts, we use the join link (meetingLink) to hide the admin identity
+      obj.startLink = obj.meetingLink; 
       if (hostIdStr !== currentUserIdStr) {
         delete obj.startLink;
       }
@@ -68,6 +77,7 @@ exports.getDashboard = async (req, res) => {
     const safePast = past.map(m => {
       const obj = m.toObject ? m.toObject() : { ...m };
       const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
+      obj.startLink = obj.meetingLink;
       if (hostIdStr !== currentUserIdStr) {
         delete obj.startLink;
       }
@@ -77,7 +87,7 @@ exports.getDashboard = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        hosted,
+        hosted: safeHosted,
         upcoming: safeUpcoming,
         past: safePast,
         canHost: !!isHost
@@ -183,7 +193,7 @@ exports.scheduleMeeting = async (req, res) => {
       endTime,
       roomId: zoomMeeting.id,
       meetingLink: zoomMeeting.joinUrl,
-      startLink: zoomMeeting.startUrl,
+      startLink: zoomMeeting.joinUrl, // Use join link instead of start link to prevent host being identified as admin
       status: 'scheduled',
       settings: {
         ...settings,
@@ -230,9 +240,15 @@ exports.getMyMeetings = async (req, res) => {
       .populate('circle', 'name slug coverImage')
       .sort({ startTime: 1 });
 
+    const safeMeetings = meetings.map(m => {
+      const obj = m.toObject();
+      obj.startLink = obj.meetingLink;
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      data: meetings
+      data: safeMeetings
     });
   } catch (error) {
     console.error('Error in getMyMeetings:', error);
@@ -339,6 +355,7 @@ exports.getUpcomingMeetings = async (req, res) => {
     const safeMeetings = meetings.map(m => {
       const obj = m.toObject ? m.toObject() : { ...m };
       const hostId = obj.host?._id?.toString() || obj.host?.toString();
+      obj.startLink = obj.meetingLink;
       if (hostId !== currentUserId) {
         delete obj.startLink;
       }
@@ -416,6 +433,7 @@ exports.getMeetingById = async (req, res) => {
     const currentUserIdStr = req.user._id.toString();
     const hostIdStr = meetingObj.host?._id?.toString() || meetingObj.host?.toString();
 
+    meetingObj.startLink = meetingObj.meetingLink;
     if (hostIdStr !== currentUserIdStr) {
       delete meetingObj.startLink;
     }
