@@ -147,36 +147,46 @@ const CreateCirclePage = () => {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-6 items-start">
-                <div className={`relative ${field === 'profilePic' ? 'w-24 h-24' : 'w-full h-40'} bg-[#0F0529] rounded-2xl border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 group`}>
+            <div className="space-y-6">
+                {/* Image Preview Area */}
+                <div className={`relative ${field === 'profilePic' ? 'w-24 h-24 rounded-full' : 'w-full h-48 rounded-2xl'} bg-[#0F0529] border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 group shadow-inner`}>
                     {previews[field] ? (
                         <>
                             <img src={previews[field]} alt="Preview" className="w-full h-full object-cover" />
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setPreviews(prev => ({ ...prev, [field]: '' }));
-                                    setFormData(prev => ({ ...prev, [field]: '' }));
-                                    setFiles(prev => ({ ...prev, [field]: null }));
-                                }}
-                                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <X size={14} />
-                            </button>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setPreviews(prev => ({ ...prev, [field]: '' }));
+                                        setFormData(prev => ({ ...prev, [field]: '' }));
+                                        setFiles(prev => ({ ...prev, [field]: null }));
+                                    }}
+                                    className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-xl transition-all hover:scale-110 border border-red-500/30"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
                         </>
                     ) : (
-                        <ImageIcon size={32} className="text-gray-600" />
+                        <div className="flex flex-col items-center text-gray-600">
+                            <ImageIcon size={field === 'profilePic' ? 24 : 40} className="mb-2 opacity-50" />
+                            <span className="text-[10px] font-bold uppercase tracking-tighter opacity-50">No {label.toLowerCase()} set</span>
+                        </div>
                     )}
                 </div>
 
-                <div className="flex-1 w-full">
+                {/* Input Area (Below Image) */}
+                <div className="w-full transition-all duration-500 ease-in-out">
                     {uploadModes[field] === 'upload' ? (
                         <div
                             onClick={() => inputRef.current?.click()}
-                            className="w-full h-full border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group min-h-[100px]"
+                            className="w-full border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-purple-500/5 bg-[#0F0529] rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all group"
                         >
-                            <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-400 transition-colors" />
-                            <p className="text-xs font-bold text-gray-500 group-hover:text-gray-400 transition-colors text-center">Click to upload {label.toLowerCase()}</p>
+                            <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <Camera size={24} className="text-purple-500" />
+                            </div>
+                            <p className="text-sm font-bold text-gray-400 group-hover:text-gray-300 transition-colors">Click to browse files</p>
+                            <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-widest">Supports JPG, PNG, WEBP</p>
                             <input
                                 type="file"
                                 ref={inputRef}
@@ -186,17 +196,23 @@ const CreateCirclePage = () => {
                             />
                         </div>
                     ) : (
-                        <div className="relative group/input">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/input:text-purple-500 transition-colors">
-                                <LinkIcon size={18} />
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between px-1">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Image URL Source</label>
+                                <span className="text-[10px] text-purple-500/60 font-medium italic">Direct links only</span>
                             </div>
-                            <input
-                                type="text"
-                                placeholder={`Paste ${label.toLowerCase()} URL...`}
-                                value={formData[field]}
-                                onChange={(e) => handleUrlChange(e.target.value, field)}
-                                className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm text-gray-200 placeholder:text-gray-600 shadow-inner"
-                            />
+                            <div className="relative group/input">
+                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/input:text-purple-500 transition-colors">
+                                    <LinkIcon size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={`https://example.com/image.jpg`}
+                                    value={formData[field]}
+                                    onChange={(e) => handleUrlChange(e.target.value, field)}
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-14 pr-6 py-5 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm text-gray-200 placeholder:text-gray-700 shadow-2xl"
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
