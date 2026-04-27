@@ -287,8 +287,19 @@ exports.searchUsers = async (req, res) => {
       return res.json({ success: true, users: [] });
     }
 
+    // Get IDs of users already followed to exclude them
+    const following = await Follow.find({ follower: req.userId }).select('following');
+    const excludeIds = following.map(f => f.following.toString());
+    excludeIds.push(req.userId.toString()); // Exclude self
+    excludeIds.push('admin'); // Special case for username exclusion if we mixed IDs and usernames, but better to use _id
+
+    // Better approach: find admin's ID first or handle it by username
+    const admin = await User.findOne({ username: 'admin' }).select('_id');
+    if (admin) excludeIds.push(admin._id.toString());
+
     const users = await User.find({
-      username: { $ne: 'admin' }, // Exclude admin
+      _id: { $nin: excludeIds },
+      role: { $ne: 'admin' }, // Exclude all admins by role
       $or: [
         { username: { $regex: q, $options: 'i' } },
         { displayName: { $regex: q, $options: 'i' } }
@@ -366,8 +377,9 @@ exports.getSuggestedUsers = async (req, res) => {
     
     // Fetch full profiles for the top suggestions
     const suggestedUsers = await User.find({
-      _id: { $in: allSuggestedIds.slice(0, 20) },
-      username: { $ne: 'admin' } // Exclude admin
+      _id: { $in: allSuggestedIds.slice(0, 20), $nin: followingIds }, // Double check exclusion
+      role: { $ne: 'admin' }, // Exclude all admins by role
+      username: { $ne: 'admin' } 
     })
       .select('username displayName profilePic bio stats')
       .limit(12);
