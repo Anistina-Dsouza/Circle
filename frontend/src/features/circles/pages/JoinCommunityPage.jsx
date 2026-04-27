@@ -254,24 +254,25 @@ const JoinCommunityPage = () => {
                         <div className="md:col-span-3 px-8 py-10">
                              <h2 className="text-xl font-bold text-white mb-1">
                                 {inviteCode ? 'Verifying Invite...' : 'Ready to join?'}
-                            <                            <p className="text-gray-500 text-xs mb-7">
+                            </h2>
+                            <p className="text-gray-500 text-xs mb-7">
                                 {inviteCode 
-                                     ? `Please wait while we add you to ${circle.name}...`
-                                     : circle.type === 'private'
-                                         ? 'This is a private circle. Joining is usually via invite link, but you can send a request to the admins.'
-                                         : 'This is a public community. You can join directly or leave a note for the members.'}
+                                    ? `Please wait while we add you to ${circle.name}...`
+                                    : circle.type === 'private'
+                                        ? 'This is a private circle. Joining is usually via invite link, but you can send a request to the admins.'
+                                        : 'This community requires membership approval. Introduce yourself to get started.'}
                             </p>
 
                             {/* Textarea */}
                             <div className="mb-5">
                                 <label className="block text-sm font-semibold text-gray-200 mb-2">
-                                    {circle.type === 'public' ? 'Say hello! (Optional)' : 'Introduce yourself to the admins'}
+                                    Introduce yourself to the admins
                                 </label>
                                 <div className="relative">
                                     <textarea
                                         value={introduction}
                                         onChange={(e) => setIntroduction(e.target.value.slice(0, 300))}
-                                        placeholder={circle.type === 'public' ? 'Hi everyone! Happy to be here.' : `Tell the community why you'd like to join ${circle.name}...`}
+                                        placeholder={`Tell the community why you'd like to join ${circle.name}...`}
                                         rows={5}
                                         className="w-full bg-[#0A0420]/70 border border-[#2A1550] rounded-2xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/60 resize-none transition-colors leading-relaxed"
                                     />
@@ -287,9 +288,7 @@ const JoinCommunityPage = () => {
                                     <Info size={11} className="text-white" />
                                 </div>
                                 <p className="text-xs text-gray-400 leading-relaxed">
-                                    {circle.type === 'public' 
-                                        ? 'As a public community, your membership is granted instantly. Your introduction will be posted to the general chat.'
-                                        : 'Your profile and introduction will be reviewed by the moderators. You\'ll receive a notification once they\'ve made a decision.'}
+                                    Your profile and introduction will be reviewed by the moderators. You'll receive a notification once they've made a decision.
                                 </p>
                             </div>
 
@@ -303,29 +302,12 @@ const JoinCommunityPage = () => {
                             {/* Buttons */}
                             <div className="space-y-3">
                                 <button
-                                    onClick={circle.type === 'public' ? async () => {
-                                        setJoinLoading(true);
-                                        setError(null);
-                                        try {
-                                            const token = localStorage.getItem('token');
-                                            const res = await axios.post(`${baseUrl}/api/circles/${circle._id || circle.id}/join`, {}, {
-                                                headers: { Authorization: `Bearer ${token}` }
-                                            });
-                                            if (res.data.success) {
-                                                setSuccessMsg('Joined successfully!');
-                                                setTimeout(() => navigate(`/circles/${slug}`), 1000);
-                                            }
-                                        } catch (err) {
-                                            setError(err.response?.data?.error || 'Failed to join community.');
-                                        } finally {
-                                            setJoinLoading(false);
-                                        }
-                                    } : handleJoinRequest}
-                                    disabled={joinLoading || (circle.type !== 'public' && introduction.trim().length === 0)}
+                                    onClick={handleJoinRequest}
+                                    disabled={joinLoading || introduction.trim().length === 0}
                                     className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-violet-900/30 flex items-center justify-center space-x-2"
                                 >
                                     {joinLoading && <Loader2 size={17} className="animate-spin" />}
-                                    <span>{circle.type === 'public' ? 'Join Community' : 'Send Join Request'}</span>
+                                    <span>Send Join Request</span>
                                 </button>
                                 <button
                                     onClick={() => navigate('/circles')}

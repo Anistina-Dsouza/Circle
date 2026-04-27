@@ -291,32 +291,4 @@ exports.searchUsers = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-// GET /api/users/suggested
-exports.getSuggestedUsers = async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 10;
-    
-    // Find users who are public, active, and not the current user
-    const query = { 
-      isActive: true,
-      'privacy.profileVisibility': 'public'
-    };
-    
-    if (req.userId) {
-      query._id = { $ne: req.userId };
-    }
 
-    const users = await User.find(query)
-      .select('username displayName profilePic stats bio')
-      .sort({ 'stats.followerCount': -1, createdAt: -1 })
-      .limit(limit);
-
-    res.json({
-      success: true,
-      users
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};

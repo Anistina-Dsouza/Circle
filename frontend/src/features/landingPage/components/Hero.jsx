@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 
 const AVATAR_COUNT = 60;
 const AVATAR_SIZE = 80; // slightly smaller
@@ -7,19 +6,9 @@ const AVATAR_SIZE = 80; // slightly smaller
 // Better DiceBear avatars (clean & aesthetic)
 const avatarUrl = (i) =>
   `https://api.dicebear.com/7.x/personas/svg?seed=user${i}&radius=50&backgroundColor=f1ecff,e9d5ff,ddd6fe`;
+
 export default function Hero() {
   const ref = useRef(null);
-  const navigate = useNavigate();
-  const [avatarCount, setAvatarCount] = useState(AVATAR_COUNT);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setAvatarCount(window.innerWidth < 768 ? 20 : AVATAR_COUNT);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const onMove = (e) => {
@@ -46,7 +35,7 @@ export default function Hero() {
 
       {/* AVATAR FIELD */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: avatarCount }).map((_, i) => (
+        {Array.from({ length: AVATAR_COUNT }).map((_, i) => (
           <Avatar key={i} index={i} />
         ))}
       </div>
@@ -65,12 +54,9 @@ export default function Hero() {
           A calm, flowing social space designed for meaningful circles.
         </p>
 
-        <button 
-          onClick={() => navigate('/circles')}
-          className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold
+        <button className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold
                            bg-[#7C3AED]/90 hover:bg-[#6D28D9]
-                           transition shadow-md hover:shadow-lg active:scale-95"
-        >
+                           transition shadow-md hover:shadow-lg">
           Join Circle
         </button>
       </div>

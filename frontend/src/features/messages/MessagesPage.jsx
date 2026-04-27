@@ -7,12 +7,6 @@ import { useLocation } from 'react-router-dom';
 const MessagesPage = () => {
     const location = useLocation();
     const [selectedChat, setSelectedChat] = useState(location.state?.selectedChat || null);
-    
-    React.useEffect(() => {
-        if (location.state?.selectedChat) {
-            setSelectedChat(location.state.selectedChat);
-        }
-    }, [location.state]);
 
 
     return (
@@ -29,7 +23,14 @@ const MessagesPage = () => {
                 <div className={`flex-1 flex-col h-full transition-all duration-300 ${selectedChat ? 'flex' : 'hidden md:flex'}`}>
                     {selectedChat ? (
                         <div className="flex-1 flex flex-col h-full relative">
-                            <ChatArea chatId={selectedChat} onBack={() => setSelectedChat(null)} />
+                            {/* Mobile Back Button Overlay */}
+                            <button 
+                                onClick={() => setSelectedChat(null)}
+                                className="md:hidden absolute top-4 left-4 z-[60] p-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            </button>
+                            <ChatArea chatId={selectedChat} />
                         </div>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center bg-[#1A1140]/10 text-gray-500">

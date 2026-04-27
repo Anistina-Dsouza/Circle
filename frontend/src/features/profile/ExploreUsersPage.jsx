@@ -16,36 +16,18 @@ const ExploreUsersPage = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const { following: currentUserFollowing, followUser, unfollowUser } = useFollowData(currentUser.username);
 
-    const fetchSuggestedUsers = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/suggested`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.data.success) {
-                setUsers(response.data.users || []);
-            }
-        } catch (err) {
-            console.error('Error fetching suggested users:', err);
-            // Don't set error here, just let it be empty or fallback
-        } finally {
-            setLoading(false);
-        }
-    }, [baseUrl]);
-
     const fetchUsers = useCallback(async (query = '') => {
-        if (!query || query.length < 2) {
-            fetchSuggestedUsers();
-            return;
-        }
+        // If query is empty, we search for a common letter to get some "suggested" users
+        // since the backend requires 2 characters for search.
+        const searchQueryToUse = query.length < 2 ? (query.length === 0 ? 'a' : query) : query;
+
+        if (searchQueryToUse.length < 2) return;
 
         setLoading(true);
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/search?q=${query}`, {
+            const response = await axios.get(`${baseUrl}/api/users/search?q=${searchQueryToUse}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -58,12 +40,12 @@ const ExploreUsersPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [baseUrl, fetchSuggestedUsers]);
+    }, [baseUrl]);
 
     // Initial load: Fetch suggested users
     useEffect(() => {
-        fetchSuggestedUsers();
-    }, [fetchSuggestedUsers]);
+        fetchUsers('');
+    }, [fetchUsers]);
 
     // Debounced search
     useEffect(() => {
