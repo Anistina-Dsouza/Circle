@@ -189,7 +189,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                         mediaType === 'image' ? (
                                             <img src={previewUrl} className="w-full h-full object-cover" />
                                         ) : (
-                                            <video src={previewUrl} className="w-full h-full object-cover" autoPlay muted loop />
+                                            <video src={previewUrl} className="w-full h-full object-cover" autoPlay loop playsInline />
                                         )
                                     ) : (
                                         <div className="flex flex-col items-center text-center px-6">

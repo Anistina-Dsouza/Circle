@@ -350,7 +350,7 @@ const StoryViewerPage = () => {
                             </p>
                         </div>
                     ) : currentStory.media?.type === 'video' ? (
-                        <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                        <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay loop playsInline />
                     ) : (
                         <img src={currentStory.media?.url} className="w-full h-full object-cover" alt="story" />
                     )}
