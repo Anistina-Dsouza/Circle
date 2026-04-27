@@ -8,6 +8,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [messageUnreadCount, setMessageUnreadCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
@@ -23,10 +24,16 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
 
         window.addEventListener('socketConnected', handleSocketConnected);
         window.addEventListener('socketDisconnected', handleSocketDisconnected);
+        window.addEventListener('messagesRead', loadUnreadCount);
+
+        // Periodically refresh counts
+        const interval = setInterval(loadUnreadCount, 30000); // Every 30s
 
         return () => {
             window.removeEventListener('socketConnected', handleSocketConnected);
             window.removeEventListener('socketDisconnected', handleSocketDisconnected);
+            window.removeEventListener('messagesRead', loadUnreadCount);
+            clearInterval(interval);
         };
     }, []);
 
@@ -69,12 +76,20 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
             const token = localStorage.getItem('token');
             if (!token) return;
             const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await axios.get(`${baseUrl}/api/notifications/unread-count`);
-            if (response.data.success) {
-                setUnreadCount(response.data.count);
+            
+            // Load Notifications unread
+            const notifResponse = await axios.get(`${baseUrl}/api/notifications/unread-count`);
+            if (notifResponse.data.success) {
+                setUnreadCount(notifResponse.data.count);
+            }
+
+            // Load Messages unread
+            const msgResponse = await axios.get(`${baseUrl}/api/conversations/unread-count`);
+            if (msgResponse.data.success) {
+                setMessageUnreadCount(msgResponse.data.count);
             }
         } catch (err) {
-            console.error('Could not load unread count:', err);
+            console.error('Could not load unread counts:', err);
         }
     };
 
@@ -99,16 +114,21 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
         }
     };
 
-    const NavItem = ({ icon: Icon, label, to, active, isMobile = false }) => (
+    const NavItem = ({ icon: Icon, label, to, active, unread = 0, isMobile = false }) => (
         <Link
             to={to}
             onClick={() => isMobile && setIsOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-full cursor-pointer transition-all ${active 
+            className={`flex items-center space-x-3 px-4 py-3 rounded-full cursor-pointer transition-all relative ${active 
                 ? 'bg-[#7C3AED] text-white shadow-lg shadow-purple-500/20' 
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
         >
-            <Icon size={20} />
+            <div className="relative">
+                <Icon size={20} />
+                {unread > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0F0529]"></span>
+                )}
+            </div>
             <span className={`font-semibold ${isMobile ? 'block' : 'hidden lg:block'}`}>{label}</span>
         </Link>
     );
@@ -148,7 +168,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                         <NavItem icon={Compass} label="Explore" to="/explore" active={activePage === 'Explore'} />
                         <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} />
                         <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} />
-                        <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} />
+                        <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} unread={messageUnreadCount} />
                     </div>
                 </div>
 
@@ -227,7 +247,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                     <NavItem icon={Compass} label="Explore" to="/explore" active={activePage === 'Explore'} isMobile />
                     <NavItem icon={Users} label="Circles" to="/circles" active={activePage === 'Circles'} isMobile />
                     <NavItem icon={Video} label="Meetings" to="/meetings" active={activePage === 'Meetings'} isMobile />
-                    <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} isMobile />
+                    <NavItem icon={MessageSquare} label="Messages" to="/messages" active={activePage === 'Messages'} unread={messageUnreadCount} isMobile />
 
                     {user && (
                         <div className="pt-6 mt-2 border-t border-white/5">

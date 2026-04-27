@@ -221,6 +221,29 @@ const ChatArea = ({ chatId, onBack }) => {
         fetchData();
     }, [chatId, currentUserId]);
 
+    useEffect(() => {
+        if (!chatId || !messages.length) return;
+        
+        const markRead = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                // Find the last message that isn't from me
+                const lastMsg = [...messages].reverse().find(m => m.sender === 'them');
+                if (!lastMsg || lastMsg.isDeleted) return;
+
+                await axios.post(`${BACKEND_URL}/api/dm/conversations/${chatId}/messages/${lastMsg.id}/read`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                // Update navbar via event
+                window.dispatchEvent(new CustomEvent('messagesRead'));
+            } catch (err) {
+                console.error("Failed to mark messages as read", err);
+            }
+        };
+        markRead();
+    }, [chatId, messages.length]);
+
 
     useEffect(() => {
         // Initialize socket connection
@@ -518,7 +541,7 @@ const ChatArea = ({ chatId, onBack }) => {
                                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#0F0529]"></div>
                                 )}
                             </Link>
-                            <div>
+                            <div className="ml-4">
                                 <Link to={`/profile/${otherParticipant.username}`} className="font-bold text-white text-lg hover:text-violet-400 transition-colors">
                                     {chatUser}
                                 </Link>
@@ -674,7 +697,7 @@ const ChatArea = ({ chatId, onBack }) => {
 
                     <button
                         type="submit"
-                        className="p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all"
+                        className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl text-white shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0 disabled:opacity-30"
                     >
                         <Send size={18} className="ml-0.5" />
                     </button>

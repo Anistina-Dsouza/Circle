@@ -57,3 +57,16 @@ exports.deleteConversation = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+exports.getUnreadMessageCount = async (req, res) => {
+  try {
+    const conversations = await ConversationService.getMyList(req.userId);
+    const totalUnread = conversations.reduce((acc, convo) => {
+      const p = convo.participants.find(p => p.user?._id?.toString() === req.userId.toString() || p.user?.toString() === req.userId.toString());
+      return acc + (p?.unreadCount || 0);
+    }, 0);
+    res.status(200).json({ success: true, count: totalUnread });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
