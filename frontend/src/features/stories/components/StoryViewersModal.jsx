@@ -9,6 +9,7 @@ const StoryViewersModal = ({ viewers = [], reactions = [], isOpen, onClose }) =>
     if (!isOpen) return null;
 
     const currentUserId = (() => {
+        if (typeof window === 'undefined') return null;
         try { return JSON.parse(localStorage.getItem('user') || '{}')._id; }
         catch { return null; }
     })();

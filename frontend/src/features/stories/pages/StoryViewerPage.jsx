@@ -34,6 +34,7 @@ const StoryViewerPage = () => {
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     
     const currentUser = (() => {
+        if (typeof window === 'undefined') return {};
         try { return JSON.parse(localStorage.getItem('user') || '{}'); }
         catch { return {}; }
     })();
@@ -181,7 +182,7 @@ const StoryViewerPage = () => {
             }
             
             try {
-                const token = localStorage.getItem('token');
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
                 const response = await axios.get(`${baseUrl}/api/moments/feed`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -189,12 +190,24 @@ const StoryViewerPage = () => {
                     const follows = response.data.followingMoments || [];
                     const list = follows.map(s => s.user?.username).filter(Boolean);
                     setUserList(list);
-                    window._stories_list = list;
+                    if (typeof window !== 'undefined') window._stories_list = list;
                 }
             } catch (err) {
                 console.error('Error fetching user list:', err);
             }
         };
+
+        const currentUserId = (() => {
+        if (typeof window === 'undefined') return null;
+        try {
+            const userStr = localStorage.getItem('user');
+            if (!userStr || userStr === 'undefined') return null;
+            return JSON.parse(userStr)?._id;
+        } catch (err) {
+            console.error("Error parsing user from localStorage", err);
+            return null;
+        }
+    })();
 
         fetchUserList();
     }, [location.state, username, baseUrl]);

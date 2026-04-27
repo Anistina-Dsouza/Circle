@@ -12,6 +12,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
 
     // Safe user ID retrieval
     const currentUserId = (() => {
+        if (typeof window === 'undefined') return null;
         try {
             const userStr = localStorage.getItem('user');
             if (!userStr || userStr === 'undefined') return null;

@@ -3,7 +3,11 @@ import { Link as LinkIcon, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } 
 import axios from 'axios';
 
 const CreateStoryBar = ({ onPostSuccess }) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = (() => {
+        if (typeof window === 'undefined') return {};
+        try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+        catch { return {}; }
+    })();
     const [caption, setCaption] = useState('');
     const [loading, setLoading] = useState(false);
     const [mediaUrl, setMediaUrl] = useState('');
