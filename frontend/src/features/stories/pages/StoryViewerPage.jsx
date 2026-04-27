@@ -364,12 +364,12 @@ const StoryViewerPage = () => {
                 {/* Quick Reactions Bar */}
                 {!isOwnStory && (
                     <div className="mt-8 px-4 flex items-center justify-between gap-2 z-10 animate-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl overflow-x-auto no-scrollbar">
+                        <div className="flex-1 bg-white/10 border border-white/20 rounded-full px-5 py-2.5 flex justify-between items-center shadow-2xl backdrop-blur-2xl">
                             {REACTION_EMOJIS.map(emoji => (
                                 <button
                                     key={emoji}
                                     onClick={() => handleReact(emoji)}
-                                    className="text-xl hover:scale-150 active:scale-90 transition-transform duration-200 p-1 shrink-0"
+                                    className="text-xl sm:text-2xl hover:scale-150 active:scale-90 transition-transform duration-200 shrink-0 drop-shadow-lg"
                                 >
                                     {emoji}
                                 </button>
@@ -381,12 +381,14 @@ const StoryViewerPage = () => {
                 {/* Side Arrows */}
                 {stories.length > 1 && (
                     <>
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                            className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
-                        >
-                            <ChevronLeft size={48} />
-                        </button>
+                        {!(currentIndex === 0 && userList.indexOf(username) <= 0) && (
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                                className="absolute -left-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
+                            >
+                                <ChevronLeft size={48} />
+                            </button>
+                        )}
                         <button 
                             onClick={(e) => { e.stopPropagation(); handleNext(); }}
                             className="absolute -right-20 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-purple-500 transition-all hidden xl:block"
