@@ -98,7 +98,7 @@ const StoriesBar = ({ onPostSuccess }) => {
     return (
         <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-                <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest bg-purple-500/10 px-2 py-0.5 rounded">Friends</span>
+                <span className="text-[10px] font-black text-purple-500 tracking-widest bg-purple-500/10 px-2 py-0.5 rounded">Friends</span>
                 <span className="text-xs font-bold text-gray-500">Stories from people you follow</span>
             </div>
             
@@ -179,7 +179,7 @@ export const DiscoverGrid = () => {
     return (
         <div className="mt-4">
             <div className="flex items-center gap-2 mb-6">
-                <span className="text-[10px] font-black text-fuchsia-500 uppercase tracking-widest bg-fuchsia-500/10 px-2 py-0.5 rounded">Discover</span>
+                <span className="text-[10px] font-black text-fuchsia-500 tracking-widest bg-fuchsia-500/10 px-2 py-0.5 rounded">Discover</span>
                 <span className="text-xs font-bold text-gray-500">Stories from around the world</span>
             </div>
 

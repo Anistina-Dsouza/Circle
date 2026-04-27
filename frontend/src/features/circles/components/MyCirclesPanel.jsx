@@ -147,8 +147,8 @@ const MyCirclesPanel = () => {
                             {circles.filter(c => (c.creator?._id || c.creator)?.toString() === JSON.parse(localStorage.getItem('user'))?._id?.toString()).length > 0 && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 px-3">
-                                        <span className="text-[10px] font-black text-violet-500 uppercase tracking-[0.15em]">Admin</span>
-                                        <div className="h-[1px] flex-1 bg-violet-500/10" />
+                                        <span className="text-[10px] font-black text-violet-400 tracking-[0.2em] bg-violet-400/10 px-2 py-0.5 rounded">Admin</span>
+                                        <div className="h-[1px] flex-1 bg-violet-400/10" />
                                     </div>
                                     <ul className="space-y-1">
                                         {circles
@@ -165,8 +165,8 @@ const MyCirclesPanel = () => {
                             {circles.filter(c => (c.creator?._id || c.creator)?.toString() !== JSON.parse(localStorage.getItem('user'))?._id?.toString()).length > 0 && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 px-3">
-                                        <span className="text-[10px] font-black text-fuchsia-500 uppercase tracking-[0.15em]">Joined</span>
-                                        <div className="h-[1px] flex-1 bg-fuchsia-500/10" />
+                                        <span className="text-[10px] font-black text-fuchsia-400 tracking-[0.2em] bg-fuchsia-400/10 px-2 py-0.5 rounded">Joined</span>
+                                        <div className="h-[1px] flex-1 bg-fuchsia-400/10" />
                                     </div>
                                     <ul className="space-y-1">
                                         {circles

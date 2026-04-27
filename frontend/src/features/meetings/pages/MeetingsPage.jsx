@@ -52,7 +52,8 @@ const MeetingsPage = () => {
                         id: m._id,
                         title: m.title,
                         description: `Held with ${attendeesCount} attendees • ${m.duration || m.scheduledDuration || 60}m duration`,
-                        date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        canViewReport: m.canViewReport
                     };
                 };
 

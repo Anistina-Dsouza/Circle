@@ -23,18 +23,30 @@ exports.getDashboard = async (req, res) => {
       return obj;
     });
 
-    const userCircles = await Circle.find({ 'members.user': userId }).select('_id');
-    const circleIds = userCircles.map(c => c._id);
+    const userCirclesFull = await Circle.find({ 'members.user': userId }).select('_id creator members');
+    const circleIds = userCirclesFull.map(c => c._id);
+
+    // Build a map of circle permissions for the current user
+    const circlePermissions = {};
+    userCirclesFull.forEach(c => {
+      const isCreator = c.creator.toString() === userId.toString();
+      const member = c.members.find(m => m.user.toString() === userId.toString());
+      const role = member ? member.role : null;
+      circlePermissions[c._id.toString()] = {
+        isHostOrMod: isCreator || role === 'admin' || role === 'moderator'
+      };
+    });
 
     const upcoming = await Meeting.find({
       startTime: { $gte: now },
       $or: [
+        { host: userId },
         { 'participants.user': userId },
         { circle: { $in: circleIds } }
       ]
     })
       .populate('host', 'username displayName profilePic')
-      .populate('circle', 'name slug coverImage')
+      .populate('circle', 'name slug coverImage creator')
       .sort({ startTime: 1 })
       .limit(5);
 
@@ -47,38 +59,41 @@ exports.getDashboard = async (req, res) => {
       ]
     })
       .populate('host', 'username displayName profilePic')
-      .populate('circle', 'name slug coverImage')
+      .populate('circle', 'name slug coverImage creator')
       .sort({ endTime: -1 })
-      .limit(5);
+      .limit(10);
 
     const currentUserIdStr = userId.toString();
 
-    const safeUpcoming = upcoming.map(m => {
+    const mapMeeting = (m) => {
       const obj = m.toObject ? m.toObject() : { ...m };
       const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
-      // Even for hosts, we use the join link (meetingLink) to hide the admin identity
+      const circleIdStr = obj.circle?._id?.toString() || obj.circle?.toString();
+      
+      const isMeetingHost = hostIdStr === currentUserIdStr;
+      const circlePerm = circleIdStr ? circlePermissions[circleIdStr] : null;
+      const isCircleAdmin = circlePerm ? circlePerm.isHostOrMod : false;
+      
+      obj.canViewReport = isMeetingHost || isCircleAdmin;
+      
+      // startLink logic
       obj.startLink = obj.meetingLink;
-      if (hostIdStr !== currentUserIdStr) {
+      if (!isMeetingHost) {
         delete obj.startLink;
       }
+      
       return obj;
-    });
+    };
 
-    const safePast = past.map(m => {
-      const obj = m.toObject ? m.toObject() : { ...m };
-      const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
-      obj.startLink = obj.meetingLink;
-      if (hostIdStr !== currentUserIdStr) {
-        delete obj.startLink;
-      }
-      return obj;
-    });
+    const safeUpcoming = upcoming.map(mapMeeting);
+    const safePast = past.map(mapMeeting);
+    const safeHosted = hosted.map(mapMeeting);
 
     const circles = await Circle.find({
       isActive: true,
       $or: [
         { creator: userId },
-        { 'members.user': userId, 'members.role': 'admin' }
+        { 'members.user': userId, 'members.role': { $in: ['admin', 'moderator'] } }
       ]
     });
     const canHost = circles.length > 0;
@@ -394,9 +409,34 @@ exports.getMeetingHistory = async (req, res) => {
       .skip(startIndex)
       .limit(limit);
 
+    const userCirclesFull = await Circle.find({ 'members.user': req.user._id }).select('_id creator members');
+    const circlePermissions = {};
+    userCirclesFull.forEach(c => {
+      const isCreator = c.creator.toString() === req.user._id.toString();
+      const member = c.members.find(m => m.user.toString() === req.user._id.toString());
+      const role = member ? member.role : null;
+      circlePermissions[c._id.toString()] = {
+        isHostOrMod: isCreator || role === 'admin' || role === 'moderator'
+      };
+    });
+
+    const currentUserIdStr = req.user._id.toString();
+    const safeMeetings = meetings.map(m => {
+      const obj = m.toObject();
+      const hostIdStr = obj.host?._id?.toString() || obj.host?.toString();
+      const circleIdStr = obj.circle?._id?.toString() || obj.circle?.toString();
+      
+      const isMeetingHost = hostIdStr === currentUserIdStr;
+      const circlePerm = circleIdStr ? circlePermissions[circleIdStr] : null;
+      const isCircleAdmin = circlePerm ? circlePerm.isHostOrMod : false;
+      
+      obj.canViewReport = isMeetingHost || isCircleAdmin;
+      return obj;
+    });
+
     res.status(200).json({
       success: true,
-      data: meetings,
+      data: safeMeetings,
       pagination: {
         page,
         limit,
@@ -429,6 +469,28 @@ exports.getMeetingById = async (req, res) => {
     const meetingObj = meeting.toObject();
     const currentUserIdStr = req.user._id.toString();
     const hostIdStr = meetingObj.host?._id?.toString() || meetingObj.host?.toString();
+
+    // Check circle permissions
+    let isCircleAdmin = false;
+    if (meetingObj.circle) {
+      const circleId = meetingObj.circle._id || meetingObj.circle;
+      const circleDoc = await Circle.findById(circleId);
+      if (circleDoc) {
+        const isCreator = circleDoc.creator.toString() === currentUserIdStr;
+        const member = circleDoc.members.find(m => m.user.toString() === currentUserIdStr);
+        const role = member ? member.role : null;
+        isCircleAdmin = isCreator || role === 'admin' || role === 'moderator';
+      }
+    }
+
+    const canViewReport = hostIdStr === currentUserIdStr || isCircleAdmin;
+    meetingObj.canViewReport = canViewReport;
+
+    // If not authorized for report, strip sensitive data (participants list)
+    if (!canViewReport) {
+      delete meetingObj.participants;
+      // You might also want to strip other sensitive fields if they exist
+    }
 
     meetingObj.startLink = meetingObj.meetingLink;
     if (hostIdStr !== currentUserIdStr) {

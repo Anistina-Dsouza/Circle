@@ -124,22 +124,26 @@ const PastMeetingRow = ({ meeting }) => {
                     <p className="text-sm font-semibold text-gray-300">{meeting.date}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button 
-                        onClick={handleView}
-                        disabled={viewing}
-                        className="text-gray-500 hover:text-purple-400 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="View Details"
-                    >
-                        {viewing ? <Loader size={20} className="animate-spin text-purple-400" /> : <Eye size={20} />}
-                    </button>
-                    <button 
-                        onClick={handleDownload}
-                        disabled={downloading}
-                        className="text-gray-500 hover:text-white transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Download Report"
-                    >
-                        {downloading ? <Loader size={20} className="animate-spin text-purple-400" /> : <Download size={20} />}
-                    </button>
+                    {meeting.canViewReport && (
+                        <>
+                            <button 
+                                onClick={handleView}
+                                disabled={viewing}
+                                className="text-gray-500 hover:text-purple-400 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="View Details"
+                            >
+                                {viewing ? <Loader size={20} className="animate-spin text-purple-400" /> : <Eye size={20} />}
+                            </button>
+                            <button 
+                                onClick={handleDownload}
+                                disabled={downloading}
+                                className="text-gray-500 hover:text-white transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Download Report"
+                            >
+                                {downloading ? <Loader size={20} className="animate-spin text-purple-400" /> : <Download size={20} />}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

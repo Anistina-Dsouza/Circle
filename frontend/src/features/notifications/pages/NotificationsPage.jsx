@@ -202,7 +202,7 @@ const NotificationsPage = () => {
                 </div>
 
                 {/* Tabs / Filter Area */}
-                <div className="flex items-center gap-1 bg-white/2 backdrop-blur-xl p-1.5 rounded-2xl border border-white/5 mb-8 overflow-x-auto no-scrollbar">
+                <div className="flex flex-wrap items-center justify-center gap-2 bg-white/2 backdrop-blur-xl p-2 rounded-3xl border border-white/5 mb-8 shadow-xl">
                     {['all', 'unread', 'mention', 'like', 'followers', 'announcements'].map(tab => (
                         <button
                             key={tab}

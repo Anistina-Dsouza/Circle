@@ -12,7 +12,7 @@ const categories = [
 
 const FilterBar = ({ selectedCategory, onSelectCategory }) => {
     return (
-        <div className="flex items-center gap-2 mb-12 bg-white/2 backdrop-blur-xl p-2 rounded-[24px] border border-white/5 max-w-4xl mx-auto overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-12 bg-white/2 backdrop-blur-xl p-3 rounded-[32px] border border-white/5 max-w-4xl mx-auto shadow-2xl">
             {categories.map((category) => (
                 <button
                     key={category}
