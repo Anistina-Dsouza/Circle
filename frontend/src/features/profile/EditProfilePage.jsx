@@ -467,52 +467,50 @@ const EditProfilePage = () => {
                     </div>
 
                     {/* Privacy Settings */}
-                    <div className="max-w-xl mx-auto w-full">
-                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 space-y-6 shadow-xl">
-                            <div className="flex items-center space-x-3 mb-2">
-                                <div className="p-2 bg-purple-500/10 rounded-xl">
-                                    <Shield size={20} className="text-purple-400" />
-                                </div>
-                                <h2 className="text-lg font-bold tracking-tight">Privacy & Safety</h2>
+                    <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 space-y-6 shadow-xl">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-purple-500/10 rounded-xl">
+                                <Shield size={20} className="text-purple-400" />
                             </div>
-                            
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Profile Visibility</label>
-                                    <select
-                                        name="privacy.profileVisibility"
-                                        value={formData.privacy.profileVisibility}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
-                                    >
-                                        <option value="public">Public (Everyone can see)</option>
-                                        <option value="followers">Followers Only</option>
-                                        <option value="private">Private (Only you)</option>
-                                    </select>
-                                </div>
+                            <h2 className="text-lg font-bold tracking-tight">Privacy &amp; Safety</h2>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            <div>
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Profile Visibility</label>
+                                <select
+                                    name="privacy.profileVisibility"
+                                    value={formData.privacy.profileVisibility}
+                                    onChange={handleChange}
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
+                                >
+                                    <option value="public">Public (Everyone can see)</option>
+                                    <option value="followers">Followers Only</option>
+                                    <option value="private">Private (Only you)</option>
+                                </select>
+                            </div>
 
-                                <div>
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Message Privacy</label>
-                                    <select
-                                        name="privacy.messagePrivacy"
-                                        value={formData.privacy.messagePrivacy}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
-                                    >
-                                        <option value="everyone">Allow DMs from Everyone</option>
-                                        <option value="followers">Followers Only</option>
-                                        <option value="none">Disable DMs</option>
-                                    </select>
-                                </div>
+                            <div>
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Message Privacy</label>
+                                <select
+                                    name="privacy.messagePrivacy"
+                                    value={formData.privacy.messagePrivacy}
+                                    onChange={handleChange}
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
+                                >
+                                    <option value="everyone">Allow DMs from Everyone</option>
+                                    <option value="followers">Followers Only</option>
+                                    <option value="none">Disable DMs</option>
+                                </select>
+                            </div>
 
-                                <div className="flex items-center justify-between p-4 bg-[#0F0529] rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group cursor-pointer" onClick={() => handleChange({ target: { name: 'privacy.showOnlineStatus', type: 'checkbox', checked: !formData.privacy.showOnlineStatus }})}>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-gray-200">Show Online Status</span>
-                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">Let others see when you're active</span>
-                                    </div>
-                                    <div className={`w-12 h-6 rounded-full transition-all relative ${formData.privacy.showOnlineStatus ? 'bg-purple-600' : 'bg-gray-700'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-lg ${formData.privacy.showOnlineStatus ? 'right-1' : 'left-1'}`} />
-                                    </div>
+                            <div className="flex items-center justify-between p-4 bg-[#0F0529] rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group cursor-pointer" onClick={() => handleChange({ target: { name: 'privacy.showOnlineStatus', type: 'checkbox', checked: !formData.privacy.showOnlineStatus }})}>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-gray-200">Show Online Status</span>
+                                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">Let others see when you're active</span>
+                                </div>
+                                <div className={`w-12 h-6 rounded-full transition-all relative ${formData.privacy.showOnlineStatus ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-lg ${formData.privacy.showOnlineStatus ? 'right-1' : 'left-1'}`} />
                                 </div>
                             </div>
                         </div>
