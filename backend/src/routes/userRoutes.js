@@ -14,6 +14,7 @@ const {
 const cacheMiddleware = require('../middleware/cacheMiddleware');
 
 // Public routes
+router.get('/ping', (req, res) => res.json({ message: 'User router is alive' }));
 router.get('/suggestions', protect, getSuggestedUsers);
 router.get('/suggested-list', protect, getSuggestedUsers); // Alias for backward compatibility
 // Cache search results for 1 minute

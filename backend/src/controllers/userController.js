@@ -293,7 +293,7 @@ exports.searchUsers = async (req, res) => {
   }
 };
 
-// GET /api/users/suggested
+// GET /api/users/suggestions
 exports.getSuggestedUsers = async (req, res) => {
   try {
     const currentUserId = req.userId;
@@ -303,7 +303,24 @@ exports.getSuggestedUsers = async (req, res) => {
     const followingIds = following.map(f => f.following.toString());
     followingIds.push(currentUserId.toString()); // Exclude self
 
-    // 2. Find mutual friends (users followed by people I follow)
+    // 2. Find Interests (Categories of circles I've joined)
+    const myJoinedCircles = await Circle.find({ 'members.user': currentUserId }).select('category members.user');
+    const myCategories = [...new Set(myJoinedCircles.map(c => c.category).filter(Boolean))];
+
+    // 3. Find people in SAME INTEREST/CATEGORY circles
+    let interestIds = [];
+    if (myCategories.length > 0) {
+      const similarCircles = await Circle.find({ 
+        category: { $in: myCategories },
+        'members.user': { $ne: currentUserId }
+      }).select('members.user').limit(20);
+      
+      interestIds = similarCircles
+        .flatMap(c => c.members.map(m => m.user.toString()))
+        .filter(id => !followingIds.includes(id));
+    }
+
+    // 4. Find mutual friends (users followed by people I follow)
     const mutuals = await Follow.find({ 
       follower: { $in: following.map(f => f.following) } 
     })
@@ -314,13 +331,12 @@ exports.getSuggestedUsers = async (req, res) => {
       .map(f => f.following.toString())
       .filter(id => !followingIds.includes(id));
 
-    // 3. Find people in same circles
-    const myCircles = await Circle.find({ 'members.user': currentUserId }).select('members.user');
-    const circleMemberIds = myCircles
+    // 5. Find people in EXACT same circles
+    const circleMemberIds = myJoinedCircles
       .flatMap(c => c.members.map(m => m.user.toString()))
       .filter(id => !followingIds.includes(id));
 
-    // 4. Fallback: Popular users
+    // 6. Fallback: Popular users
     const popularUsers = await User.find({ 
       _id: { $nin: followingIds } 
     })
@@ -331,11 +347,12 @@ exports.getSuggestedUsers = async (req, res) => {
     const popularIds = popularUsers.map(u => u._id.toString());
 
     // Combine all and shuffle/limit
-    const allSuggestedIds = [...new Set([...mutualIds, ...circleMemberIds, ...popularIds])];
+    // Weight: Interests > Mutuals > Same Circles > Popular
+    const allSuggestedIds = [...new Set([...interestIds, ...mutualIds, ...circleMemberIds, ...popularIds])];
     
     // Fetch full profiles for the top suggestions
     const suggestedUsers = await User.find({
-      _id: { $in: allSuggestedIds.slice(0, 15) }
+      _id: { $in: allSuggestedIds.slice(0, 20) }
     })
     .select('username displayName profilePic bio stats')
     .limit(12);
@@ -346,6 +363,7 @@ exports.getSuggestedUsers = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('getSuggestedUsers Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
