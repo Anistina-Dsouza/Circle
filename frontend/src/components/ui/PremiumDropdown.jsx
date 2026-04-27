@@ -18,7 +18,7 @@ const PremiumDropdown = ({ value, onChange, options, icon: Icon, placeholder = "
     const selectedOption = options.find(opt => opt.value === value) || options[0];
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className={`relative ${isOpen ? 'z-[60]' : 'z-10'}`} ref={dropdownRef}>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}

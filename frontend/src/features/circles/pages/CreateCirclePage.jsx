@@ -97,19 +97,19 @@ const CreateCirclePage = () => {
             // Profile Pic
             if (uploadModes.profilePic === 'upload' && files.profilePic) {
                 submitData.append('profilePic', files.profilePic);
-            } else {
-                submitData.append('profilePic', formData.profilePic);
+            } else if (formData.profilePic) {
+                submitData.append('profilePicUrl', formData.profilePic);
             }
 
             // Cover Image
             if (uploadModes.coverImage === 'upload' && files.coverImage) {
                 submitData.append('coverImage', files.coverImage);
-            } else {
-                submitData.append('coverImage', formData.coverImage);
+            } else if (formData.coverImage) {
+                submitData.append('coverImageUrl', formData.coverImage);
             }
 
             const response = await axios.post(`${baseUrl}/api/circles`, submitData, {
-                headers: { 
+                headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
@@ -128,7 +128,7 @@ const CreateCirclePage = () => {
             <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-400 ml-1">{label}</label>
                 <div className="flex bg-[#0F0529] p-1 rounded-xl border border-white/5">
-                    <button 
+                    <button
                         type="button"
                         onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'upload' }))}
                         className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'upload' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
@@ -136,7 +136,7 @@ const CreateCirclePage = () => {
                         <Camera size={14} />
                         <span>Upload</span>
                     </button>
-                    <button 
+                    <button
                         type="button"
                         onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'link' }))}
                         className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'link' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
@@ -152,7 +152,7 @@ const CreateCirclePage = () => {
                     {previews[field] ? (
                         <>
                             <img src={previews[field]} alt="Preview" className="w-full h-full object-cover" />
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => {
                                     setPreviews(prev => ({ ...prev, [field]: '' }));
@@ -171,17 +171,17 @@ const CreateCirclePage = () => {
 
                 <div className="flex-1 w-full">
                     {uploadModes[field] === 'upload' ? (
-                        <div 
+                        <div
                             onClick={() => inputRef.current?.click()}
                             className="w-full h-full border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
                         >
                             <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-400 transition-colors" />
                             <p className="text-xs font-bold text-gray-500">Click to upload {label.toLowerCase()}</p>
-                            <input 
-                                type="file" 
-                                ref={inputRef} 
-                                onChange={(e) => handleFileSelect(e, field)} 
-                                className="hidden" 
+                            <input
+                                type="file"
+                                ref={inputRef}
+                                onChange={(e) => handleFileSelect(e, field)}
+                                className="hidden"
                                 accept="image/*"
                             />
                         </div>
@@ -259,7 +259,7 @@ const CreateCirclePage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl flex flex-col">
                             <label htmlFor="category" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
-                            <PremiumDropdown 
+                            <PremiumDropdown
                                 value={formData.category}
                                 onChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
                                 options={categoryOptions}
