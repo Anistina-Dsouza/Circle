@@ -1,12 +1,36 @@
 const Circle = require('../models/Circle');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('../utils/cloudinary');
+
+// Helper for Cloudinary Uploads
+const uploadToCloudinary = (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto", folder: `circle/${folder}` },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(fileBuffer);
+  });
+};
 
 // =========== CREATE CIRCLE ===========
 exports.createCircle = async (req, res) => {
   try {
-    const { name, description, type, coverImage, profilePic, icon, category } = req.body;
+    let { name, description, type, category, settings, profilePic, coverImage } = req.body;
     
+    // Parse settings if string (from FormData)
+    if (typeof settings === 'string') {
+      try {
+        settings = JSON.parse(settings);
+      } catch (e) {
+        settings = {};
+      }
+    }
+
     // Validation
     if (!name || name.length < 3) {
       return res.status(400).json({ 
@@ -23,6 +47,18 @@ exports.createCircle = async (req, res) => {
         error: 'Circle with this name already exists' 
       });
     }
+
+    // Handle File Uploads
+    if (req.files) {
+      if (req.files.profilePic) {
+        const result = await uploadToCloudinary(req.files.profilePic[0].buffer, 'profiles');
+        profilePic = result.secure_url;
+      }
+      if (req.files.coverImage) {
+        const result = await uploadToCloudinary(req.files.coverImage[0].buffer, 'covers');
+        coverImage = result.secure_url;
+      }
+    }
     
     // Create circle
     const circle = new Circle({
@@ -31,8 +67,9 @@ exports.createCircle = async (req, res) => {
       type: type || 'public',
       category: category || 'Technology',
       coverImage: coverImage || 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop',
-      profilePic: profilePic || icon || 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg',
+      profilePic: profilePic || 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg',
       creator: req.userId,
+      settings: settings || {},
       members: [{
         user: req.userId,
         role: 'admin',

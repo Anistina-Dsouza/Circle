@@ -23,19 +23,26 @@ const FeedPage = () => {
                 {/* Responsive layout: feed (main) + circles panel (stacks on mobile) */}
                 <div className="flex flex-col lg:flex-row gap-8 items-start">
                     {/* feed content */}
-                    <div className="w-full lg:flex-1 min-w-0">
-                        <CreateStoryBar onPostSuccess={handleRefresh} />
-                        <StoriesBar key={`stories-${refreshKey}`} onPostSuccess={handleRefresh} />
-                        
-                        {/* Highlights/Feed Section */}
-                        <FeedGrid key={`feed-${refreshKey}`} />
+                    <div className="w-full lg:flex-1 min-w-0 flex flex-col">
+                        <div className="contents">
+                            <CreateStoryBar onPostSuccess={handleRefresh} />
+                            <StoriesBar key={`stories-${refreshKey}`} onPostSuccess={handleRefresh} />
+                            
+                            {/* Highlights/Feed Section */}
+                            <FeedGrid key={`feed-${refreshKey}`} />
 
-                        {/* Snapchat Style Discover Grid */}
-                        <DiscoverGrid key={`discover-${refreshKey}`} />
+                            {/* My Circles panel (Mobile ONLY: shown before discover public stories) */}
+                            <div className="block lg:hidden mb-8">
+                                <MyCirclesPanel />
+                            </div>
+
+                            {/* Snapchat Style Discover Grid */}
+                            <DiscoverGrid key={`discover-${refreshKey}`} />
+                        </div>
                     </div>
 
-                    {/* My Circles panel (Stacks on mobile, sticky on desktop) */}
-                    <div className="w-full lg:w-80 shrink-0 lg:sticky lg:top-24">
+                    {/* My Circles panel (Desktop ONLY: sticky on desktop) */}
+                    <div className="hidden lg:block w-80 shrink-0 lg:sticky lg:top-24">
                         <MyCirclesPanel />
                     </div>
                 </div>

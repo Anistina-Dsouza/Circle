@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const circleController = require('../controllers/circleController');
+const upload = require('../middleware/upload');
 
 const cacheMiddleware = require('../middleware/cacheMiddleware');
 
@@ -15,7 +16,10 @@ router.get('/:circleId/members', circleController.getCircleMembers);
 router.use(protect); // All routes below require authentication
 
 // Circle CRUD
-router.post('/', circleController.createCircle);
+router.post('/', upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+]), circleController.createCircle);
 router.get('/my-circles/list', circleController.getMyCircles);
 router.put('/:circleId', circleController.updateCircle);
 router.delete('/:circleId', circleController.deleteCircle);

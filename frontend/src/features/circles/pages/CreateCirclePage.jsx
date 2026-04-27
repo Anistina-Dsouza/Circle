@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Plus, Globe, Lock, Shield, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Globe, Lock, Shield, Image as ImageIcon, Camera, Link as LinkIcon, X } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 
 const CreateCirclePage = () => {
@@ -11,13 +11,32 @@ const CreateCirclePage = () => {
         description: '',
         category: 'Technology',
         visibility: 'public',
-        icon: '',
+        profilePic: '',
+        coverImage: '',
         settings: {
             allowMemberPosts: true,
             allowMemberInvites: true,
             requirePostApproval: false
         }
     });
+
+    const [uploadModes, setUploadModes] = useState({
+        profilePic: 'link', // 'link' or 'upload'
+        coverImage: 'link'
+    });
+
+    const [files, setFiles] = useState({
+        profilePic: null,
+        coverImage: null
+    });
+
+    const [previews, setPreviews] = useState({
+        profilePic: '',
+        coverImage: ''
+    });
+
+    const profilePicInputRef = useRef(null);
+    const coverImageInputRef = useRef(null);
 
     const handleSettingToggle = (setting) => {
         setFormData(prev => ({
@@ -34,24 +53,60 @@ const CreateCirclePage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleFileSelect = (e, field) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFiles(prev => ({ ...prev, [field]: file }));
+            const url = URL.createObjectURL(file);
+            setPreviews(prev => ({ ...prev, [field]: url }));
+            setFormData(prev => ({ ...prev, [field]: url }));
+        }
+    };
+
+    const handleUrlChange = (url, field) => {
+        setFormData(prev => ({ ...prev, [field]: url }));
+        setPreviews(prev => ({ ...prev, [field]: url }));
+        setFiles(prev => ({ ...prev, [field]: null }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/circles`, {
-                name: formData.name,
-                description: formData.description,
-                category: formData.category,
-                type: formData.visibility,
-                coverImage: formData.icon,
-                settings: formData.settings
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
+            const baseUrl = import.meta.env.VITE_API_URL;
+
+            // Use FormData to support file uploads
+            const submitData = new FormData();
+            submitData.append('name', formData.name);
+            submitData.append('description', formData.description);
+            submitData.append('category', formData.category);
+            submitData.append('type', formData.visibility);
+            submitData.append('settings', JSON.stringify(formData.settings));
+
+            // Profile Pic
+            if (uploadModes.profilePic === 'upload' && files.profilePic) {
+                submitData.append('profilePic', files.profilePic);
+            } else {
+                submitData.append('profilePic', formData.profilePic);
+            }
+
+            // Cover Image
+            if (uploadModes.coverImage === 'upload' && files.coverImage) {
+                submitData.append('coverImage', files.coverImage);
+            } else {
+                submitData.append('coverImage', formData.coverImage);
+            }
+
+            const response = await axios.post(`${baseUrl}/api/circles`, submitData, {
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
             if (response.data.success) {
-                navigate(`/circles`);
+                navigate(`/circles/${response.data.circle.slug}`);
             }
         } catch (error) {
             console.error('Error creating circle:', error);
@@ -59,11 +114,87 @@ const CreateCirclePage = () => {
         }
     };
 
+    const ImageSection = ({ label, field, inputRef }) => (
+        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-400 ml-1">{label}</label>
+                <div className="flex bg-[#0F0529] p-1 rounded-xl border border-white/5">
+                    <button 
+                        type="button"
+                        onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'upload' }))}
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'upload' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        <Camera size={14} />
+                        <span>Upload</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'link' }))}
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'link' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        <LinkIcon size={14} />
+                        <span>Link</span>
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className={`relative ${field === 'profilePic' ? 'w-24 h-24' : 'w-full h-40'} bg-[#0F0529] rounded-2xl border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 group`}>
+                    {previews[field] ? (
+                        <>
+                            <img src={previews[field]} alt="Preview" className="w-full h-full object-cover" />
+                            <button 
+                                type="button"
+                                onClick={() => {
+                                    setPreviews(prev => ({ ...prev, [field]: '' }));
+                                    setFormData(prev => ({ ...prev, [field]: '' }));
+                                    setFiles(prev => ({ ...prev, [field]: null }));
+                                }}
+                                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <X size={14} />
+                            </button>
+                        </>
+                    ) : (
+                        <ImageIcon size={32} className="text-gray-600" />
+                    )}
+                </div>
+
+                <div className="flex-1 w-full">
+                    {uploadModes[field] === 'upload' ? (
+                        <div 
+                            onClick={() => inputRef.current?.click()}
+                            className="w-full h-full border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                        >
+                            <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-400 transition-colors" />
+                            <p className="text-xs font-bold text-gray-500">Click to upload {label.toLowerCase()}</p>
+                            <input 
+                                type="file" 
+                                ref={inputRef} 
+                                onChange={(e) => handleFileSelect(e, field)} 
+                                className="hidden" 
+                                accept="image/*"
+                            />
+                        </div>
+                    ) : (
+                        <input
+                            type="text"
+                            placeholder={`Paste ${label.toLowerCase()} URL...`}
+                            value={formData[field]}
+                            onChange={(e) => handleUrlChange(e.target.value, field)}
+                            className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all font-medium text-sm"
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-[#0F0529] text-white font-sans">
             <FeedNavbar activePage="Circles" />
 
-            <main className="max-w-3xl mx-auto px-6 py-12">
+            <main className="max-w-4xl mx-auto px-6 py-12">
                 <div className="flex items-center space-x-4 mb-10">
                     <button
                         onClick={() => navigate(-1)}
@@ -73,7 +204,7 @@ const CreateCirclePage = () => {
                     </button>
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight">Create a New Circle</h1>
-                        <p className="text-gray-400">Set the stage for your new circle.</p>
+                        <p className="text-gray-400">Set the stage for your new community.</p>
                     </div>
                 </div>
 
@@ -102,11 +233,17 @@ const CreateCirclePage = () => {
                                 value={formData.description}
                                 onChange={handleChange}
                                 placeholder="What is this circle about?"
-                                rows="4"
+                                rows="3"
                                 className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all text-lg resize-none"
                                 required
                             ></textarea>
                         </div>
+                    </div>
+
+                    {/* Media Selection */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <ImageSection label="Profile Picture" field="profilePic" inputRef={profilePicInputRef} />
+                        <ImageSection label="Cover Image" field="coverImage" inputRef={coverImageInputRef} />
                     </div>
 
                     {/* Settings */}
@@ -153,29 +290,6 @@ const CreateCirclePage = () => {
                                     </label>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Icon URL */}
-                    <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 shadow-2xl">
-                        <label htmlFor="icon" className="block text-sm font-semibold text-gray-400 mb-4 ml-1">Circle Icon URL</label>
-                        <div className="flex items-center space-x-4">
-                            <div className="w-20 h-20 rounded-2xl bg-[#0F0529] border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-                                {formData.icon ? (
-                                    <img src={formData.icon} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
-                                ) : (
-                                    <ImageIcon size={32} className="text-gray-600" />
-                                )}
-                            </div>
-                            <input
-                                id="icon"
-                                type="text"
-                                name="icon"
-                                value={formData.icon}
-                                onChange={handleChange}
-                                placeholder="Paste an image URL for the circle icon..."
-                                className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all font-medium"
-                            />
                         </div>
                     </div>
 
