@@ -31,7 +31,7 @@ const StoryViewerPage = () => {
     const [translateY, setTranslateY] = useState(0);
 
     const progressTimer = useRef(null);
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
     
     const currentUser = (() => {
         if (typeof window === 'undefined') return {};
@@ -105,7 +105,7 @@ const StoryViewerPage = () => {
         const momentId = stories[currentIndex]?._id;
         if (!momentId) return;
 
-        if (window.confirm('Are you sure you want to delete this story?')) {
+                if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete this story?')) {
             try {
                 const token = localStorage.getItem('token');
                 await axios.delete(`${baseUrl}/api/moments/${momentId}`, {
@@ -176,7 +176,7 @@ const StoryViewerPage = () => {
                 setUserList(location.state.userList);
                 return;
             }
-            if (window._stories_list && window._stories_list.length > 0) {
+            if (typeof window !== 'undefined' && window._stories_list && window._stories_list.length > 0) {
                 setUserList(window._stories_list);
                 return;
             }
@@ -207,7 +207,7 @@ const StoryViewerPage = () => {
             setProgress(0);
             setCurrentIndex(0);
             try {
-                const token = localStorage.getItem('token');
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
                 const response = await axios.get(`${baseUrl}/api/moments/user/${username}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -262,7 +262,7 @@ const StoryViewerPage = () => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
             const momentId = stories[currentIndex]._id;
             if (momentId) {
-                const token = localStorage.getItem('token');
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
                 axios.get(`${baseUrl}/api/moments/${momentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }).catch(() => {});

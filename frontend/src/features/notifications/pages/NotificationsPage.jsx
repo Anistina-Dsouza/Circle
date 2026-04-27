@@ -10,7 +10,7 @@ const NotificationsPage = () => {
     const [notifications, setNotifications] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
     const handleNotifClick = (noti) => {
         // Mark as read
@@ -111,7 +111,7 @@ const NotificationsPage = () => {
     };
 
     const clearAll = async () => {
-        if (window.confirm('Clear all notifications?')) {
+        if (typeof window !== 'undefined' && window.confirm('Clear all notifications?')) {
             try {
                 const token = localStorage.getItem('token');
                 await axios.delete(`${backendUrl}/api/notifications/clear-all`, {
