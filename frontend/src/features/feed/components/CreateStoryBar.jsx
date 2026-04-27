@@ -99,7 +99,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     };
 
     return (
-        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10">
+        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-4 mb-8 shadow-lg shadow-purple-900/10">
             <div className="flex flex-col sm:flex-row gap-4">
                 {/* Content Section (Avatar + Input) */}
                 <div className="flex items-start space-x-4 flex-1">
@@ -117,7 +117,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
                     <div className="flex-1">
                         {/* Caption Input */}
-                        <div className="bg-[#2D2A4A]/50 rounded-2xl px-4 sm:px-6 py-2 sm:py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
+                        <div className="bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
                             <textarea
                                 rows="1"
                                 value={caption}
