@@ -190,7 +190,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
 
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 no-scrollbar">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500/40">
                 {loading ? (
                     <div className="text-gray-400 text-center py-10 flex flex-col items-center">
                         <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />

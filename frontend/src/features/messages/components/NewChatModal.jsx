@@ -89,7 +89,7 @@ const NewChatModal = ({ onClose, onStartChat }) => {
                         />
                     </div>
 
-                    <div className="max-h-[400px] overflow-y-auto no-scrollbar space-y-2">
+                    <div className="max-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500/40 space-y-2">
                         {loading ? (
                             <div className="py-10 flex flex-col items-center justify-center text-gray-500">
                                 <Loader2 size={24} className="animate-spin mb-2" />

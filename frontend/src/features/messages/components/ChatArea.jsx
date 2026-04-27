@@ -547,7 +547,7 @@ const ChatArea = ({ chatId, onBack }) => {
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-8 py-6 space-y-2 no-scrollbar relative"
+                className="flex-1 overflow-y-auto px-8 py-6 space-y-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500/40 relative"
                 style={{
                     background: 'linear-gradient(160deg, #12082A 0%, #1A0D40 100%)'
                 }}
@@ -642,7 +642,7 @@ const ChatArea = ({ chatId, onBack }) => {
                                 </div>
                                 
                                 {/* Emoji Grid */}
-                                <div className="p-4 max-h-56 overflow-y-auto custom-scrollbar grid grid-cols-6 gap-3 bg-[#12082A]">
+                                <div className="p-4 max-h-56 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500/40 grid grid-cols-6 gap-3 bg-[#12082A]">
                                     {emojiCategories.find(cat => cat.id === activeEmojiCategory).emojis.map((emoji, idx) => (
                                         <button
                                             key={`${emoji}-${idx}`}
