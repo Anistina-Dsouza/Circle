@@ -62,17 +62,30 @@ exports.createCircle = async (req, res) => {
       });
     }
 
-    // Handle File Uploads
+    // --- ROBUST IMAGE HANDLING ---
+    const DEFAULTS = {
+      profile: 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg',
+      cover: 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop'
+    };
+
+    let finalProfilePic = profilePic || profilePicUrl || DEFAULTS.profile;
+    let finalCoverImage = coverImage || coverImageUrl || DEFAULTS.cover;
+
+    // Handle File Uploads (Overrides Links)
     if (req.files) {
-      if (req.files.profilePic) {
+      if (req.files.profilePic && req.files.profilePic.length > 0) {
         const result = await uploadToCloudinary(req.files.profilePic[0].buffer, 'profiles');
-        profilePic = result.secure_url;
+        finalProfilePic = result.secure_url;
       }
-      if (req.files.coverImage) {
+      if (req.files.coverImage && req.files.coverImage.length > 0) {
         const result = await uploadToCloudinary(req.files.coverImage[0].buffer, 'covers');
-        coverImage = result.secure_url;
+        finalCoverImage = result.secure_url;
       }
     }
+
+    // Ensure we don't save empty strings
+    if (!finalProfilePic || finalProfilePic === "") finalProfilePic = DEFAULTS.profile;
+    if (!finalCoverImage || finalCoverImage === "") finalCoverImage = DEFAULTS.cover;
 
     // Create circle
     const circle = new Circle({
@@ -80,8 +93,8 @@ exports.createCircle = async (req, res) => {
       description,
       type: type || 'public',
       category: category || 'Technology',
-      coverImage: coverImage || 'https://images.unsplash.com/photo-1557682260-96773eb01377?q=80&w=2629&auto=format&fit=crop',
-      profilePic: profilePic || 'https://i.pinimg.com/1200x/4f/59/66/4f5966cf08f5ac93469c4db2b7f86c17.jpg',
+      coverImage: finalCoverImage,
+      profilePic: finalProfilePic,
       creator: req.userId,
       settings: settings || {},
       members: [{
@@ -286,19 +299,30 @@ exports.updateCircle = async (req, res) => {
 
     // Handle File Uploads
     if (req.files) {
-      if (req.files.profilePic) {
+      if (req.files.profilePic && req.files.profilePic.length > 0) {
         const result = await uploadToCloudinary(req.files.profilePic[0].buffer, 'profiles');
         circle.profilePic = result.secure_url;
       }
-      if (req.files.coverImage) {
+      if (req.files.coverImage && req.files.coverImage.length > 0) {
         const result = await uploadToCloudinary(req.files.coverImage[0].buffer, 'covers');
         circle.coverImage = result.secure_url;
       }
     }
 
     if (description !== undefined) circle.description = description;
-    if (coverImage && (!req.files || !req.files.coverImage)) circle.coverImage = coverImage;
-    if (profilePic && (!req.files || !req.files.profilePic)) circle.profilePic = profilePic;
+
+    // Handle Links (if no new files uploaded)
+    if (profilePicUrl && (!req.files || !req.files.profilePic)) {
+        circle.profilePic = profilePicUrl;
+    } else if (profilePic && profilePic !== "" && (!req.files || !req.files.profilePic)) {
+        circle.profilePic = profilePic;
+    }
+
+    if (coverImageUrl && (!req.files || !req.files.coverImage)) {
+        circle.coverImage = coverImageUrl;
+    } else if (coverImage && coverImage !== "" && (!req.files || !req.files.coverImage)) {
+        circle.coverImage = coverImage;
+    }
 
     if (settings) {
       let parsedSettings = settings;

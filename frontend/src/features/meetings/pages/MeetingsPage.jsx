@@ -26,8 +26,9 @@ const MeetingsPage = () => {
             if (res.success && res.data) {
                 const mapUpcoming = (m) => {
                     const dateObj = new Date(m.startTime);
-                    const attendees = m.participants?.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3) || [];
-                    const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
+                    const rsvpUsers = m.participants?.filter(p => ['accepted', 'maybe', 'attended'].includes(p.status)) || [];
+                    const attendees = rsvpUsers.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3);
+                    const plusCount = rsvpUsers.length > 3 ? rsvpUsers.length - 3 : 0;
                     return {
                         id: m._id,
                         status: 'UPCOMING',
@@ -59,8 +60,9 @@ const MeetingsPage = () => {
 
                 const mapHosted = (m) => {
                     const dateObj = new Date(m.startTime);
-                    const attendees = m.participants?.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3) || [];
-                    const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
+                    const rsvpUsers = m.participants?.filter(p => ['accepted', 'maybe', 'attended'].includes(p.status)) || [];
+                    const attendees = rsvpUsers.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3);
+                    const plusCount = rsvpUsers.length > 3 ? rsvpUsers.length - 3 : 0;
                     return {
                         id: m._id,
                         status: 'HOSTING',

@@ -14,6 +14,8 @@ exports.getDashboard = async (req, res) => {
     const now = new Date(Date.now() - 5 * 60 * 1000);
 
     const hosted = await Meeting.find({ host: userId, startTime: { $gte: now } })
+      .populate('circle', 'name slug coverImage creator')
+      .populate('participants.user', 'username displayName profilePic')
       .sort({ startTime: 1 })
       .limit(3);
 
