@@ -1,37 +1,23 @@
-import { Zap, Users, ShieldAlert, Sparkles } from "lucide-react";
-
 export default function CommunityStats({ newCircles = 0, engagement = '0', reportedItems = 0 }) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-12 sm:mt-16">
+      <div className="grid md:grid-cols-3 gap-8 mt-10">
   
         <StatCard
-          title="Growth Velocity"
+          title="New Circles Today"
           value={`+${newCircles}`}
-          subtitle="New Clusters"
-          icon={<Zap size={20} />}
-          color="text-amber-400"
-          border="border-amber-500/20"
-          bg="bg-amber-500/5"
+          positive
         />
   
         <StatCard
-          title="Avg Node Density"
+          title="Avg. Members per Circle"
           value={engagement}
-          subtitle="Nodes per Circle"
-          icon={<Users size={20} />}
-          color="text-indigo-400"
-          border="border-indigo-500/20"
-          bg="bg-indigo-500/5"
+          positive
         />
   
         <StatCard
-          title="Integrity Audit"
+          title="Reported Items"
           value={reportedItems}
-          subtitle="Pending Flags"
-          icon={<ShieldAlert size={20} />}
-          color="text-red-400"
-          border="border-red-500/20"
-          bg="bg-red-500/5"
+          subtitle="Pending Review"
           danger
         />
   
@@ -39,35 +25,32 @@ export default function CommunityStats({ newCircles = 0, engagement = '0', repor
     );
   }
   
-  function StatCard({ title, value, subtitle, icon, color, border, bg, danger }) {
+  function StatCard({ title, value, trend, subtitle, positive, danger }) {
     return (
-      <div className={`relative overflow-hidden p-8 sm:p-10 rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border ${border} group transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl`}>
-        {/* Glow */}
-        <div className={`absolute -right-10 -top-10 w-32 h-32 ${bg} blur-[60px] group-hover:opacity-100 transition-opacity`} />
-        
-        <div className="flex flex-col gap-6 relative z-10">
-            <div className={`w-12 h-12 rounded-2xl ${bg} ${color} flex items-center justify-center border ${border} shadow-lg transition-transform duration-500 group-hover:scale-110`}>
-                {icon}
-            </div>
-
-            <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                    {title}
-                </p>
-                <div className="flex items-end gap-3">
-                    <span className={`text-4xl sm:text-5xl font-black tabular-nums tracking-tighter ${danger ? "text-red-500" : "text-white"}`}>
-                        {value}
-                    </span>
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1.5 whitespace-nowrap">
-                        {subtitle}
-                    </span>
-                </div>
-            </div>
+      <div className="bg-[#240046]/60 border border-purple-900/40 p-8 rounded-3xl">
+  
+        <p className="text-purple-300 text-sm uppercase tracking-widest mb-4">
+          {title}
+        </p>
+  
+        <div className="flex items-end gap-4">
+          <span className={`text-4xl font-bold ${danger ? "text-red-400" : ""}`}>
+            {value}
+          </span>
+  
+          {trend && (
+            <span className="text-green-400 text-sm">
+              {trend}
+            </span>
+          )}
+  
+          {subtitle && (
+            <span className="text-purple-300 text-sm">
+              {subtitle}
+            </span>
+          )}
         </div>
-
-        <div className="absolute bottom-6 right-8">
-            <Sparkles size={16} className="text-white/5 group-hover:text-white/20 transition-colors" />
-        </div>
+  
       </div>
     );
-  }
+  }
