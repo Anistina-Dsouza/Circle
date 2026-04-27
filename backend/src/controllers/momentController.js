@@ -76,44 +76,39 @@ exports.getFeed = async (req, res) => {
       follower: req.userId,
       status: 'accepted'
     }).select('following');
-    const followingIds = follows.map(f => f.following);
-    followingIds.push(req.userId); // Include my own moments
+    const followingIds = follows.map(f => f.following.toString());
+    followingIds.push(req.userId.toString()); // Include my own moments
 
-    const moments = await Moment.find({
-      $or: [
-        { audience: 'public' },
-        { 
-          user: { $in: followingIds }, 
-          audience: 'followers' 
-        }
-      ],
+    // 1. Get followed users' moments (unlimited/sufficiently high to find all friends)
+    const followingMomentsRaw = await Moment.find({
+      user: { $in: followingIds },
       expiresAt: { $gt: new Date() },
       isActive: true
     })
       .sort({ createdAt: -1 })
-      .limit(50)
-      .populate('user', 'username displayName profilePic')
-      .populate('viewers', 'username displayName profilePic');
+      .populate('user', 'username displayName profilePic');
 
-    // Separate followed stories from discover stories
     const followingMoments = [];
-    const discoverMoments = [];
     const seenUsers = new Set();
-
-    moments.forEach(m => {
+    followingMomentsRaw.forEach(m => {
       if (!m.user) return;
       const uid = m.user._id.toString();
-      const isFriend = followingIds.some(id => id.toString() === uid);
-      
-      if (isFriend) {
-        if (!seenUsers.has(uid)) {
-          followingMoments.push(m);
-          seenUsers.add(uid);
-        }
-      } else {
-        discoverMoments.push(m);
+      if (!seenUsers.has(uid)) {
+        followingMoments.push(m);
+        seenUsers.add(uid);
       }
     });
+
+    // 2. Get public moments for Discover (excluding friends)
+    const discoverMoments = await Moment.find({
+      user: { $nin: followingIds },
+      audience: 'public',
+      expiresAt: { $gt: new Date() },
+      isActive: true
+    })
+      .sort({ createdAt: -1 })
+      .limit(30)
+      .populate('user', 'username displayName profilePic');
 
     res.json({
       success: true,

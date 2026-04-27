@@ -31,13 +31,10 @@ const FeedPage = () => {
                             {/* Highlights/Feed Section */}
                             <FeedGrid key={`feed-${refreshKey}`} />
 
-                            {/* My Circles panel (Mobile ONLY: shown before discover public stories) */}
+                            {/* My Circles panel (Mobile ONLY) */}
                             <div className="block lg:hidden mb-8">
                                 <MyCirclesPanel />
                             </div>
-
-                            {/* Snapchat Style Discover Grid */}
-                            <DiscoverGrid key={`discover-${refreshKey}`} />
                         </div>
                     </div>
 
