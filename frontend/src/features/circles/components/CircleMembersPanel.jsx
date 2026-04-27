@@ -70,6 +70,9 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
     });
     const initialStatus = userParticipant ? userParticipant.status : 'invited';
 
+    const isFinished = meeting.endTime ? new Date() > new Date(meeting.endTime) : false;
+    const isActuallyLive = meeting.status === 'live' && !isFinished;
+
     return (
         <div className="p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-white/10 transition-all group/card">
             <div className="flex items-center justify-between mb-2">
@@ -79,7 +82,7 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
                     </span>
                     <span className="text-[10px] font-bold text-gray-500">{time}</span>
                 </div>
-                {meeting.status === 'live' && (
+                {isActuallyLive && (
                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
                         <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
                         <span className="text-[8px] font-black text-red-500 uppercase tracking-widest">Live</span>
@@ -119,7 +122,7 @@ const MeetingCard = ({ meeting, currentUserId, onMeetingUpdated }) => {
                 </div>
             )}
             
-            {meeting.status === 'live' ? (
+            {isActuallyLive ? (
                 <button 
                     onClick={() => window.open(meeting.meetingLink, '_blank')}
                     className="w-full py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:shadow-lg hover:shadow-violet-900/20 active:scale-95"
@@ -170,8 +173,11 @@ const CircleMembersPanel = ({ circle, slug }) => {
         }
     }, [circle?._id]);
 
+    const now = new Date();
+    const validMeetings = upcomingMeetings.filter(m => !m.endTime || new Date(m.endTime) > now);
+
     return (
-        <aside className="w-full lg:w-72 shrink-0 hidden lg:flex flex-col gap-4 sticky top-24 self-start">
+        <aside className="w-full lg:w-72 shrink-0 flex flex-col gap-4 lg:sticky lg:top-24 self-start">
 
             {/* Upcoming Meetings */}
             <div className="rounded-3xl border border-[#2A1550] overflow-hidden bg-[#12082A] min-h-[140px] flex flex-col">
@@ -190,8 +196,8 @@ const CircleMembersPanel = ({ circle, slug }) => {
                             <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mb-2" />
                             <p className="text-[10px] text-gray-600">Gathering sessions...</p>
                         </div>
-                    ) : upcomingMeetings.length > 0 ? (
-                        upcomingMeetings.map((meeting) => (
+                    ) : validMeetings.length > 0 ? (
+                        validMeetings.map((meeting) => (
                             <MeetingCard
                                 key={meeting._id}
                                 meeting={meeting}

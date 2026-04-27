@@ -369,9 +369,15 @@ const StoryViewerPage = () => {
                     )}
 
                     {currentStory.caption && (
+<<<<<<< HEAD
                         <div className="absolute bottom-10 left-0 right-0 px-8 z-20 pointer-events-none">
                             <div className="bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/10 pointer-events-auto shadow-2xl">
                                 <p className="text-white text-sm md:text-base font-medium leading-relaxed drop-shadow-md max-h-32 overflow-y-auto custom-scrollbar">
+=======
+                        <div className="absolute bottom-16 left-0 w-[80%] pl-6 pr-2 z-20 pointer-events-none">
+                            <div className="bg-black/30 backdrop-blur-md p-3 rounded-2xl border border-white/10 pointer-events-auto shadow-xl inline-block max-w-full">
+                                <p className="text-white text-xs md:text-sm font-medium leading-relaxed drop-shadow-lg max-h-24 overflow-y-auto custom-scrollbar">
+>>>>>>> 3234804590d4fa9268410b63584e67438f0c443d
                                     {currentStory.caption.split(/(@[a-zA-Z0-9_]+)/g).map((part, i) => {
                                         if (part.startsWith('@')) {
                                             const username = part.substring(1);
@@ -395,19 +401,33 @@ const StoryViewerPage = () => {
 
                     {/* Reactions Display - Safe Position & Higher Contrast */}
                     {currentStory.reactions && currentStory.reactions.length > 0 && (
+<<<<<<< HEAD
                         <div className="absolute bottom-32 right-6 flex items-center -space-x-3 pointer-events-none z-30">
                             {Array.from(new Set(currentStory.reactions.map(r => r.emoji))).slice(0, 4).map((emoji, i) => (
                                 <div 
                                     key={i} 
                                     className="w-10 h-10 bg-white/20 backdrop-blur-2xl rounded-full flex items-center justify-center text-xl border border-white/30 shadow-2xl animate-in slide-in-from-right-4 duration-500"
+=======
+                        <div className="absolute bottom-16 right-4 flex items-center -space-x-2 pointer-events-none z-30">
+                            {Array.from(new Set(currentStory.reactions.map(r => r.emoji))).slice(0, 3).map((emoji, i) => (
+                                <div 
+                                    key={i} 
+                                    className="w-8 h-8 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center text-base border border-white/20 shadow-2xl animate-in slide-in-from-right-4 duration-500"
+>>>>>>> 3234804590d4fa9268410b63584e67438f0c443d
                                     style={{ transitionDelay: `${i * 100}ms` }}
                                 >
                                     {emoji}
                                 </div>
                             ))}
+<<<<<<< HEAD
                             {new Set(currentStory.reactions.map(r => r.emoji)).size > 4 && (
                                 <div className="w-10 h-10 bg-purple-600/90 backdrop-blur-2xl rounded-full flex items-center justify-center text-[10px] font-black text-white border border-white/30 shadow-2xl">
                                     +{new Set(currentStory.reactions.map(r => r.emoji)).size - 4}
+=======
+                            {new Set(currentStory.reactions.map(r => r.emoji)).size > 3 && (
+                                <div className="w-8 h-8 bg-purple-600/80 backdrop-blur-xl rounded-full flex items-center justify-center text-[10px] font-black text-white border border-white/20 shadow-2xl">
+                                    +{new Set(currentStory.reactions.map(r => r.emoji)).size - 3}
+>>>>>>> 3234804590d4fa9268410b63584e67438f0c443d
                                 </div>
                             )}
                         </div>

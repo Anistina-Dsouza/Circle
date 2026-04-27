@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import CircleHeader from '../components/CircleHeader';
@@ -15,11 +15,20 @@ const CirclesPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [pagination, setPagination] = useState({ page: 1, hasMore: false });
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
         return () => clearTimeout(timer);
     }, [searchQuery]);
+
+    useEffect(() => {
+        const query = searchParams.get('search');
+        if (query) {
+            setSearchQuery(query);
+            setDebouncedSearch(query);
+        }
+    }, [searchParams]);
 
     const baseUrl = import.meta.env.VITE_API_URL;
 

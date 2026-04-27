@@ -184,28 +184,53 @@ const CircleChatArea = ({ circle }) => {
         setHasNewMessages(false);
     };
 
-    const handleScroll = () => {
-        const element = scrollRef.current;
-        if (!element) return;
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e?.currentTarget || scrollRef.current || {};
+        if (scrollHeight === undefined) return;
         
-        const { scrollTop, scrollHeight, clientHeight } = element;
-        // Check internal scroll distance from bottom
         const distance = scrollHeight - scrollTop - clientHeight;
-        if (distance > 100) {
+        
+        // Also check if container bottom is offscreen
+        const container = scrollRef.current?.parentElement;
+        let isBottomOffscreen = false;
+        if (container) {
+            const rect = container.getBoundingClientRect();
+            isBottomOffscreen = rect.bottom > window.innerHeight + 10;
+        }
+        
+        if (distance > 20 || isBottomOffscreen) {
             setShowScrollButton(true);
         } else {
             setShowScrollButton(false);
-            setHasNewMessages(false); // Clear notification if we reach bottom manually
+            setHasNewMessages(false);
         }
     };
 
+    // Add a window scroll listener to catch page scrolls
     useEffect(() => {
-        const element = scrollRef.current;
-        if (element) {
-            element.addEventListener('scroll', handleScroll);
-            return () => element.removeEventListener('scroll', handleScroll);
-        }
+        const handleWinScroll = () => {
+            if (scrollRef.current) {
+                const container = scrollRef.current.parentElement;
+                const rect = container.getBoundingClientRect();
+                const isBottomOffscreen = rect.bottom > window.innerHeight + 10;
+                
+                const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+                const distance = scrollHeight - scrollTop - clientHeight;
+                
+                if (isBottomOffscreen || distance > 20) {
+                    setShowScrollButton(true);
+                } else {
+                    setShowScrollButton(false);
+                }
+            }
+        };
+        window.addEventListener('scroll', handleWinScroll);
+        // Run once on mount to set initial state
+        handleWinScroll();
+        return () => window.removeEventListener('scroll', handleWinScroll);
     }, []);
+
+
 
     // Also listen to window scroll as a fallback
     useEffect(() => {
@@ -218,17 +243,9 @@ const CircleChatArea = ({ circle }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    useEffect(() => {
-        const handleWindowScroll = () => {
-            if (window.scrollY > 300) {
-                setShowScrollButton(true);
-            } else if (scrollRef.current && scrollRef.current.scrollHeight - scrollRef.current.scrollTop - scrollRef.current.clientHeight < 50) {
-                setShowScrollButton(false);
-            }
-        };
-        window.addEventListener('scroll', handleWindowScroll);
-        return () => window.removeEventListener('scroll', handleWindowScroll);
-    }, []);
+
+
+
 
     useEffect(() => {
         scrollToBottom();
@@ -461,7 +478,7 @@ const CircleChatArea = ({ circle }) => {
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar scroll-smooth"
+                className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar relative"
             >
                 {Object.keys(groupedMessages).length === 0 ? (
                     <div className="flex justify-center mt-10 text-gray-500">
@@ -489,16 +506,25 @@ const CircleChatArea = ({ circle }) => {
 
             {/* Scroll to latest button */}
             {showScrollButton && (
-                <button
-                    onClick={scrollToBottom}
-                    className="absolute bottom-24 right-6 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all z-[40] flex items-center justify-center group"
-                    title="Go to latest messages"
-                >
-                    <ChevronDown size={28} className="group-hover:translate-y-0.5 transition-transform" />
-                    {hasNewMessages && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#12082A] animate-pulse" />
-                    )}
-                </button>
+                <div className="fixed bottom-28 left-0 right-0 pointer-events-none z-[100] flex justify-center px-4 sm:px-6">
+                    <div className="w-full max-w-[1400px] relative">
+                        {/* 
+                            On lg screens, the right panel is 288px (w-72) + 40px gap. 
+                            We add 24px for the chat area's internal padding so it sits nicely inside.
+                            On smaller screens, we just use right-6.
+                        */}
+                        <button
+                            onClick={scrollToBottom}
+                            className="absolute right-6 lg:right-[calc(288px+40px+24px)] bottom-0 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all pointer-events-auto flex items-center justify-center group"
+                            title="Go to latest messages"
+                        >
+                            <ChevronDown size={24} className="group-hover:translate-y-0.5 transition-transform" />
+                            {hasNewMessages && (
+                                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#12082A] animate-pulse" />
+                            )}
+                        </button>
+                    </div>
+                </div>
             )}
 
             {/* Input bar area */}

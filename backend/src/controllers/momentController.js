@@ -126,6 +126,46 @@ exports.getFeed = async (req, res) => {
   }
 };
 
+// =========== GET MOMENTS FOR SPECIFIC MEMBERS ===========
+exports.getMembersMoments = async (req, res) => {
+  try {
+    const { userIds } = req.body;
+    if (!userIds || !Array.isArray(userIds)) {
+      return res.status(400).json({ error: 'userIds array is required' });
+    }
+
+    // Fetch moments for these users that are:
+    // 1. Not expired
+    // 2. Active
+    // 3. Public OR (Followers-only AND current user is a follower/self)
+    // NOTE: For simplicity in circles, we'll show Public & Followers stories to circle members.
+    const moments = await Moment.find({
+      user: { $in: userIds },
+      expiresAt: { $gt: new Date() },
+      isActive: true,
+      audience: { $in: ['public', 'followers'] }
+    })
+      .sort({ createdAt: -1 })
+      .populate('user', 'username displayName profilePic');
+
+    // Group by user (show only the latest moment per user in the bar)
+    const uniqueUsers = new Map();
+    moments.forEach(m => {
+      if (m.user && !uniqueUsers.has(m.user._id.toString())) {
+        uniqueUsers.set(m.user._id.toString(), m);
+      }
+    });
+
+    res.json({
+      success: true,
+      moments: Array.from(uniqueUsers.values())
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // =========== GET USER MOMENTS ===========
 exports.getUserMoments = async (req, res) => {
   try {
