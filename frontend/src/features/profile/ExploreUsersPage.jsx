@@ -17,11 +17,16 @@ const ExploreUsersPage = () => {
     const { following: currentUserFollowing, followUser, unfollowUser } = useFollowData(currentUser.username);
 
     const fetchSuggestedUsers = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/suggested-list`, {
+            const response = await axios.get(`${baseUrl}/api/users/suggestions`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -162,19 +167,31 @@ const ExploreUsersPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-24 bg-[#1E1B3A]/30 border border-dashed border-white/10 rounded-3xl">
-                                {searchQuery.length < 2 ? (
+                                {!localStorage.getItem('token') ? (
                                     <>
-                                        <Compass size={48} className="text-white/10 mx-auto mb-4" />
-                                        <h3 className="text-xl font-bold text-gray-400 mb-2">Search to find users</h3>
-                                        <p className="text-gray-600 max-w-xs mx-auto">Enter at least 2 characters to start searching for people.</p>
+                                        <Users size={48} className="text-white/10 mx-auto mb-4" />
+                                        <h3 className="text-xl font-bold text-gray-300 mb-2">Join the Community</h3>
+                                        <p className="text-gray-500 max-w-xs mx-auto mb-6">Log in to see personalized suggestions and connect with people in your circles.</p>
+                                        <Link 
+                                            to="/login"
+                                            className="inline-flex items-center px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all active:scale-95"
+                                        >
+                                            Log In Now
+                                        </Link>
                                     </>
-                                ) : (
-                                    <>
-                                        <Search size={48} className="text-gray-700 mx-auto mb-4" />
-                                        <h3 className="text-xl font-bold text-white mb-2">No users found</h3>
-                                        <p className="text-gray-500 max-w-xs mx-auto">No users match your criteria. Try searching for someone else!</p>
-                                    </>
-                                )}
+                                ) : searchQuery.length < 2 ? (
+                                     <>
+                                         <Compass size={48} className="text-white/10 mx-auto mb-4" />
+                                         <h3 className="text-xl font-bold text-gray-400 mb-2">Search to find users</h3>
+                                         <p className="text-gray-600 max-w-xs mx-auto">Enter at least 2 characters to start searching for people.</p>
+                                     </>
+                                 ) : (
+                                     <>
+                                         <Search size={48} className="text-gray-700 mx-auto mb-4" />
+                                         <h3 className="text-xl font-bold text-white mb-2">No users found</h3>
+                                         <p className="text-gray-500 max-w-xs mx-auto">No users match your criteria. Try searching for someone else!</p>
+                                     </>
+                                 )}
                             </div>
                         )}
                     </>

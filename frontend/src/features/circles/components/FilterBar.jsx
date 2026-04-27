@@ -26,7 +26,7 @@ const FilterBar = ({ selectedCategory, onSelectCategory }) => {
     }, []);
 
     return (
-        <div className="mb-12 max-w-4xl mx-auto flex flex-col items-center gap-4">
+        <div className="mb-12 max-w-4xl mx-auto flex flex-col items-stretch gap-4">
             {/* Desktop View: Horizontal List */}
             <div className="hidden md:flex flex-wrap items-center justify-center gap-3 bg-white/2 backdrop-blur-xl p-3 rounded-[32px] border border-white/5 shadow-2xl">
                 {categories.map((category) => (
