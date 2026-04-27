@@ -173,10 +173,10 @@ const CreateCirclePage = () => {
                     {uploadModes[field] === 'upload' ? (
                         <div
                             onClick={() => inputRef.current?.click()}
-                            className="w-full h-full border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                            className="w-full h-full border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group min-h-[100px]"
                         >
                             <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-400 transition-colors" />
-                            <p className="text-xs font-bold text-gray-500">Click to upload {label.toLowerCase()}</p>
+                            <p className="text-xs font-bold text-gray-500 group-hover:text-gray-400 transition-colors text-center">Click to upload {label.toLowerCase()}</p>
                             <input
                                 type="file"
                                 ref={inputRef}
@@ -186,13 +186,18 @@ const CreateCirclePage = () => {
                             />
                         </div>
                     ) : (
-                        <input
-                            type="text"
-                            placeholder={`Paste ${label.toLowerCase()} URL...`}
-                            value={formData[field]}
-                            onChange={(e) => handleUrlChange(e.target.value, field)}
-                            className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all font-medium text-sm"
-                        />
+                        <div className="relative group/input">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/input:text-purple-500 transition-colors">
+                                <LinkIcon size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder={`Paste ${label.toLowerCase()} URL...`}
+                                value={formData[field]}
+                                onChange={(e) => handleUrlChange(e.target.value, field)}
+                                className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm text-gray-200 placeholder:text-gray-600 shadow-inner"
+                            />
+                        </div>
                     )}
                 </div>
             </div>

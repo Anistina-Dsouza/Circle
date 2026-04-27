@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FeedNavbar from '../../feed/components/FeedNavbar';
-import { Calendar, Clock, Video, Users, ArrowLeft, Check, Loader, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, Video, Users, ArrowLeft, Check, Loader, AlertCircle, LayoutGrid } from 'lucide-react';
 import meetingService from '../services/meetingService';
 import axios from 'axios';
+import PremiumDropdown from '../../../components/ui/PremiumDropdown';
+
+const durationOptions = [
+    { value: 15, label: '15 mins' },
+    { value: 30, label: '30 mins' },
+    { value: 45, label: '45 mins' },
+    { value: 60, label: '1 hour' },
+    { value: 90, label: '1.5 hours' },
+    { value: 120, label: '2 hours' }
+];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -159,22 +169,18 @@ const ScheduleMeetingPage = () => {
                                 )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                            <div className="space-y-2 relative z-[20]">
                                 <label className="text-sm font-semibold text-gray-400 ml-1 flex items-center gap-2">
                                     <Users size={14} /> Select Circle (Optional)
                                 </label>
-                                <select
-                                    id="meeting-circle"
-                                    className={`w-full bg-[#0F0529] border rounded-xl px-4 py-3 focus:outline-none transition-colors appearance-none ${errors.circle ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-purple-500/50'}`}
+                                <PremiumDropdown 
                                     value={formData.circle}
-                                    onChange={handleChange}
-                                >
-                                    <option value="" disabled>Choose a community to host for</option>
-                                    {myCircles.map(circle => (
-                                        <option key={circle.id || circle._id} value={circle._id}>{circle.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => setFormData(prev => ({ ...prev, circle: val }))}
+                                    options={myCircles.map(c => ({ value: c._id, label: c.name }))}
+                                    icon={LayoutGrid}
+                                    placeholder="Choose a community"
+                                />
                                 {errors.circle && (
                                     <div className="flex items-center mt-1 text-red-500 text-xs gap-1 ml-1">
                                         <AlertCircle size={12} />
@@ -183,20 +189,18 @@ const ScheduleMeetingPage = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2 relative z-[10]">
                                 <label className="text-sm font-semibold text-gray-400 ml-1 flex items-center gap-2">
                                     <Video size={14} /> Platform
                                 </label>
-                                <select
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
-                                    disabled
-                                >
-                                    <option>Zoom (Auto-connected)</option>
-                                </select>
+                                <div className="w-full bg-[#0F0529]/50 border border-white/5 rounded-2xl px-5 py-3 text-sm font-medium text-gray-500 flex items-center gap-3">
+                                    <Video size={16} className="text-gray-600" />
+                                    <span>Zoom (Auto-connected)</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-400 ml-1 flex items-center gap-2">
                                     <Calendar size={14} /> Date
@@ -236,24 +240,16 @@ const ScheduleMeetingPage = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2 relative z-[15]">
                                 <label className="text-sm font-semibold text-gray-400 ml-1 flex items-center gap-2">
                                     <Clock size={14} /> Duration
                                 </label>
-                                <select
-                                    id="meeting-duration"
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
+                                <PremiumDropdown 
                                     value={formData.scheduledDuration}
-                                    onChange={(e) => setFormData({ ...formData, scheduledDuration: parseInt(e.target.value) })}
-                                    required
-                                >
-                                    <option value="15">15 mins</option>
-                                    <option value="30">30 mins</option>
-                                    <option value="45">45 mins</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="90">1.5 hours</option>
-                                    <option value="120">2 hours</option>
-                                </select>
+                                    onChange={(val) => setFormData(prev => ({ ...prev, scheduledDuration: val }))}
+                                    options={durationOptions}
+                                    icon={Clock}
+                                />
                             </div>
                         </div>
 

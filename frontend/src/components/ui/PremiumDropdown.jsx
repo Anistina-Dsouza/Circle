@@ -18,7 +18,7 @@ const PremiumDropdown = ({ value, onChange, options, icon: Icon, placeholder = "
     const selectedOption = options.find(opt => opt.value === value) || options[0];
 
     return (
-        <div className={`relative ${isOpen ? 'z-[60]' : 'z-10'}`} ref={dropdownRef}>
+        <div className={`relative ${isOpen ? 'z-[999]' : 'z-10'}`} ref={dropdownRef}>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
@@ -32,7 +32,7 @@ const PremiumDropdown = ({ value, onChange, options, icon: Icon, placeholder = "
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-3 w-full min-w-[200px] bg-[#1A1140]/95 border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 mt-3 w-full min-w-[200px] bg-[#1A1140]/95 border border-white/10 rounded-2xl shadow-2xl z-[999] overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="p-2 space-y-1">
                         {options.map((opt) => (
                             <button
@@ -42,7 +42,7 @@ const PremiumDropdown = ({ value, onChange, options, icon: Icon, placeholder = "
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${value === opt.value ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${value === opt.value ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg scale-[1.02]' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
                             >
                                 {opt.label}
                             </button>
