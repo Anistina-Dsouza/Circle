@@ -12,6 +12,7 @@ const {
   getSuggestedUsers
 } = require('../controllers/userController');
 const cacheMiddleware = require('../middleware/cacheMiddleware');
+const upload = require('../middleware/upload');
 
 // Public routes
 router.get('/ping', (req, res) => res.json({ message: 'User router is alive' }));
@@ -25,7 +26,10 @@ router.get('/:username/followers', getFollowers);
 router.get('/:username/following', getFollowing);
 
 // Protected routes
-router.put('/profile', protect, updateProfile);
+router.put('/profile', protect, upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+]), updateProfile);
 router.post('/:userId/follow', protect, followUser);
 router.delete('/:userId/unfollow', protect, unfollowUser);
 

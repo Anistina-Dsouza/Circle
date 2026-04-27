@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Save, Shield, Palette, User } from 'lucide-react';
+import { ArrowLeft, Camera, Save, Shield, Palette, User, Image as ImageIcon, Link as LinkIcon, X } from 'lucide-react';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import axios from 'axios';
+import { useRef } from 'react';
 
 const EditProfilePage = () => {
     const navigate = useNavigate();
@@ -28,6 +27,24 @@ const EditProfilePage = () => {
         }
     });
 
+    const [uploadModes, setUploadModes] = useState({
+        profilePic: 'link',
+        coverImage: 'link'
+    });
+
+    const [files, setFiles] = useState({
+        profilePic: null,
+        coverImage: null
+    });
+
+    const [previews, setPreviews] = useState({
+        profilePic: '',
+        coverImage: ''
+    });
+
+    const profilePicInputRef = useRef(null);
+    const coverImageInputRef = useRef(null);
+
     useEffect(() => {
         const loadUserData = () => {
             try {
@@ -48,6 +65,10 @@ const EditProfilePage = () => {
                             messagePrivacy: user.privacy?.messagePrivacy || 'everyone',
                             showOnlineStatus: user.privacy?.showOnlineStatus ?? true
                         }
+                    });
+                    setPreviews({
+                        profilePic: user.profilePic || '',
+                        coverImage: user.coverImage || ''
                     });
                 }
             } catch (error) {
@@ -82,6 +103,22 @@ const EditProfilePage = () => {
         setSuccess('');
     };
 
+    const handleFileSelect = (e, field) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFiles(prev => ({ ...prev, [field]: file }));
+            const url = URL.createObjectURL(file);
+            setPreviews(prev => ({ ...prev, [field]: url }));
+            setFormData(prev => ({ ...prev, [field]: url }));
+        }
+    };
+
+    const handleUrlChange = (url, field) => {
+        setFormData(prev => ({ ...prev, [field]: url }));
+        setPreviews(prev => ({ ...prev, [field]: url }));
+        setFiles(prev => ({ ...prev, [field]: null }));
+    };
+
     const validateForm = () => {
         if (formData.displayName && formData.displayName.length > 25) {
             setError('Display name must be less than 25 characters');
@@ -110,38 +147,33 @@ const EditProfilePage = () => {
                 throw new Error('No authentication token found');
             }
 
-            // Prepare data for backend - match controller's expected fields
-            const updateData = {
-                displayName: formData.displayName || undefined,
-                bio: formData.bio || undefined,
-                profilePic: formData.profilePic || undefined,
-                coverImage: formData.coverImage || undefined,
-                preferences: {
-                    theme: formData.preferences.theme,
-                    language: formData.preferences.language
-                },
-                privacy: {
-                    profileVisibility: formData.privacy.profileVisibility,
-                    messagePrivacy: formData.privacy.messagePrivacy,
-                    showOnlineStatus: formData.privacy.showOnlineStatus
-                }
-            };
+            // Use FormData for file support
+            const submitData = new FormData();
+            submitData.append('displayName', formData.displayName || '');
+            submitData.append('bio', formData.bio || '');
+            submitData.append('preferences', JSON.stringify(formData.preferences));
+            submitData.append('privacy', JSON.stringify(formData.privacy));
 
-            // Remove undefined values
-            Object.keys(updateData).forEach(key => {
-                if (updateData[key] === undefined) {
-                    delete updateData[key];
-                }
-            });
+            // Handle Images
+            if (uploadModes.profilePic === 'upload' && files.profilePic) {
+                submitData.append('profilePic', files.profilePic);
+            } else if (formData.profilePic) {
+                submitData.append('profilePicUrl', formData.profilePic);
+            }
 
+            if (uploadModes.coverImage === 'upload' && files.coverImage) {
+                submitData.append('coverImage', files.coverImage);
+            } else if (formData.coverImage) {
+                submitData.append('coverImageUrl', formData.coverImage);
+            }
 
             const response = await axios.put(
                 `${baseUrl}/api/users/profile`,
-                updateData,
+                submitData,
                 {
                     headers: { 
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
             );
@@ -219,30 +251,176 @@ const EditProfilePage = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Profile Picture Section */}
-                    <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-3xl p-8 flex flex-col items-center">
-                        <div className="relative group cursor-pointer">
-                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-500/30 group-hover:border-purple-500 transition-colors">
-                                <img
-                                    src={formData.profilePic || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
-                                />
+                    {/* Media Section */}
+                    <div className="grid grid-cols-1 gap-8">
+                        {/* Profile Picture Card */}
+                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 shadow-xl">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-purple-500/10 rounded-xl">
+                                        <Camera size={20} className="text-purple-400" />
+                                    </div>
+                                    <h2 className="text-lg font-bold tracking-tight">Profile Identity</h2>
+                                </div>
+                                <div className="flex bg-[#0F0529]/80 p-1 rounded-2xl border border-white/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setUploadModes(prev => ({ ...prev, profilePic: 'upload' }))}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.profilePic === 'upload' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                    >
+                                        Upload
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setUploadModes(prev => ({ ...prev, profilePic: 'link' }))}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.profilePic === 'link' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                    >
+                                        Link
+                                    </button>
+                                </div>
                             </div>
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                                <Camera size={24} className="text-white" />
+
+                            <div className="flex flex-col md:flex-row items-center gap-10">
+                                <div className="relative group shrink-0">
+                                    <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all duration-500 shadow-2xl">
+                                        {previews.profilePic ? (
+                                            <img src={previews.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-[#0F0529] flex items-center justify-center text-gray-700">
+                                                <User size={48} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {previews.profilePic && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setPreviews(prev => ({ ...prev, profilePic: '' }));
+                                                setFormData(prev => ({ ...prev, profilePic: '' }));
+                                                setFiles(prev => ({ ...prev, profilePic: null }));
+                                            }}
+                                            className="absolute -top-1 -right-1 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform z-10"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 w-full space-y-4">
+                                    {uploadModes.profilePic === 'upload' ? (
+                                        <div 
+                                            onClick={() => profilePicInputRef.current?.click()}
+                                            className="w-full border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-purple-500/5 bg-[#0F0529] rounded-3xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                                        >
+                                            <ImageIcon size={24} className="text-gray-600 mb-2 group-hover:text-purple-500 transition-colors" />
+                                            <span className="text-xs font-bold text-gray-500">Click to upload photo</span>
+                                            <input 
+                                                type="file" 
+                                                ref={profilePicInputRef}
+                                                onChange={(e) => handleFileSelect(e, 'profilePic')}
+                                                className="hidden" 
+                                                accept="image/*" 
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Direct Image URL</label>
+                                            <div className="relative">
+                                                <LinkIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
+                                                <input
+                                                    type="url"
+                                                    value={formData.profilePic}
+                                                    onChange={(e) => handleUrlChange(e.target.value, 'profilePic')}
+                                                    placeholder="https://example.com/photo.jpg"
+                                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-12 pr-4 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div className="mt-6 w-full max-w-md">
-                            <label className="text-sm font-medium text-gray-400 mb-2 block">Profile Picture URL</label>
-                            <input
-                                type="url"
-                                name="profilePic"
-                                value={formData.profilePic}
-                                onChange={handleChange}
-                                placeholder="https://example.com/image.jpg"
-                                className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
-                            />
+
+                        {/* Cover Image Card */}
+                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 shadow-xl">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-purple-500/10 rounded-xl">
+                                        <ImageIcon size={20} className="text-purple-400" />
+                                    </div>
+                                    <h2 className="text-lg font-bold tracking-tight">Cover Branding</h2>
+                                </div>
+                                <div className="flex bg-[#0F0529]/80 p-1 rounded-2xl border border-white/5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setUploadModes(prev => ({ ...prev, coverImage: 'upload' }))}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.coverImage === 'upload' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                    >
+                                        Upload
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setUploadModes(prev => ({ ...prev, coverImage: 'link' }))}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.coverImage === 'link' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                    >
+                                        Link
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="relative w-full h-40 rounded-3xl overflow-hidden bg-[#0F0529] border border-white/5 group">
+                                    {previews.coverImage ? (
+                                        <img src={previews.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-700">
+                                            <ImageIcon size={32} className="mb-2 opacity-50" />
+                                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">No Cover Set</span>
+                                        </div>
+                                    )}
+                                    {previews.coverImage && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setPreviews(prev => ({ ...prev, coverImage: '' }));
+                                                setFormData(prev => ({ ...prev, coverImage: '' }));
+                                                setFiles(prev => ({ ...prev, coverImage: null }));
+                                            }}
+                                            className="absolute top-4 right-4 p-2 bg-black/60 text-white rounded-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {uploadModes.coverImage === 'upload' ? (
+                                    <div 
+                                        onClick={() => coverImageInputRef.current?.click()}
+                                        className="w-full border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-purple-500/5 bg-[#0F0529] rounded-3xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                                    >
+                                        <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-500 transition-colors" />
+                                        <span className="text-xs font-bold text-gray-500">Upload cover image</span>
+                                        <input 
+                                            type="file" 
+                                            ref={coverImageInputRef}
+                                            onChange={(e) => handleFileSelect(e, 'coverImage')}
+                                            className="hidden" 
+                                            accept="image/*" 
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        <LinkIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
+                                        <input
+                                            type="url"
+                                            value={formData.coverImage}
+                                            onChange={(e) => handleUrlChange(e.target.value, 'coverImage')}
+                                            placeholder="https://example.com/banner.jpg"
+                                            className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-12 pr-4 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -287,81 +465,54 @@ const EditProfilePage = () => {
                         </div>
                     </div>
 
-                    {/* Preferences & Privacy */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-3xl p-8 space-y-6">
-                            <div className="flex items-center space-x-2 mb-2">
-                                <Palette size={20} className="text-purple-400" />
-                                <h2 className="text-lg font-semibold">Preferences</h2>
+                    {/* Privacy Settings */}
+                    <div className="max-w-xl mx-auto w-full">
+                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 space-y-6 shadow-xl">
+                            <div className="flex items-center space-x-3 mb-2">
+                                <div className="p-2 bg-purple-500/10 rounded-xl">
+                                    <Shield size={20} className="text-purple-400" />
+                                </div>
+                                <h2 className="text-lg font-bold tracking-tight">Privacy & Safety</h2>
                             </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-400 mb-2 block">Theme</label>
-                                <select
-                                    name="preferences.theme"
-                                    value={formData.preferences.theme}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
-                                >
-                                    <option value="dark">Dark</option>
-                                    <option value="light">Light</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-400 mb-2 block">Language</label>
-                                <select
-                                    name="preferences.language"
-                                    value={formData.preferences.language}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
-                                >
-                                    <option value="en">English</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="fr">French</option>
-                                    <option value="de">German</option>
-                                </select>
-                            </div>
-                        </div>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Profile Visibility</label>
+                                    <select
+                                        name="privacy.profileVisibility"
+                                        value={formData.privacy.profileVisibility}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
+                                    >
+                                        <option value="public">Public (Everyone can see)</option>
+                                        <option value="followers">Followers Only</option>
+                                        <option value="private">Private (Only you)</option>
+                                    </select>
+                                </div>
 
-                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-3xl p-8 space-y-6">
-                            <div className="flex items-center space-x-2 mb-2">
-                                <Shield size={20} className="text-purple-400" />
-                                <h2 className="text-lg font-semibold">Privacy</h2>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-400 mb-2 block">Profile Visibility</label>
-                                <select
-                                    name="privacy.profileVisibility"
-                                    value={formData.privacy.profileVisibility}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
-                                >
-                                    <option value="public">Public</option>
-                                    <option value="followers">Followers Only</option>
-                                    <option value="private">Private</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-400 mb-2 block">Message Privacy</label>
-                                <select
-                                    name="privacy.messagePrivacy"
-                                    value={formData.privacy.messagePrivacy}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition-colors"
-                                >
-                                    <option value="everyone">Everyone</option>
-                                    <option value="followers">Followers Only</option>
-                                    <option value="none">No One</option>
-                                </select>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-gray-400">Show Online Status</label>
-                                <input
-                                    type="checkbox"
-                                    name="privacy.showOnlineStatus"
-                                    checked={formData.privacy.showOnlineStatus}
-                                    onChange={handleChange}
-                                    className="w-5 h-5 rounded border-white/10 bg-[#0F0529] text-purple-500 focus:ring-purple-500"
-                                />
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1 block mb-3">Message Privacy</label>
+                                    <select
+                                        name="privacy.messagePrivacy"
+                                        value={formData.privacy.messagePrivacy}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm appearance-none cursor-pointer hover:border-purple-500/50"
+                                    >
+                                        <option value="everyone">Allow DMs from Everyone</option>
+                                        <option value="followers">Followers Only</option>
+                                        <option value="none">Disable DMs</option>
+                                    </select>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-[#0F0529] rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group cursor-pointer" onClick={() => handleChange({ target: { name: 'privacy.showOnlineStatus', type: 'checkbox', checked: !formData.privacy.showOnlineStatus }})}>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-gray-200">Show Online Status</span>
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">Let others see when you're active</span>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full transition-all relative ${formData.privacy.showOnlineStatus ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-lg ${formData.privacy.showOnlineStatus ? 'right-1' : 'left-1'}`} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

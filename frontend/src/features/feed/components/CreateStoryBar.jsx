@@ -160,7 +160,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
                         {/* Pop-over URL Input */}
                         {showUrlInput && (
-                            <div className="absolute right-0 bottom-full mb-4 w-64 sm:w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200 z-30">
+                            <div className="absolute right-0 top-full mt-4 w-64 sm:w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-30">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
                                     <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
@@ -184,7 +184,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                                         Apply Image
                                     </button>
                                 </div>
-                                <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[#1A1140] border-r border-b border-purple-500/30 rotate-45"></div>
+                                <div className="absolute -top-2 right-6 w-4 h-4 bg-[#1A1140] border-l border-t border-purple-500/30 rotate-45"></div>
                             </div>
                         )}
                     </div>

@@ -11,14 +11,24 @@ const StoryCard = ({ story }) => {
             onClick={() => navigate(`/stories/${username}`)}
             className="group bg-[#1E1B3A] border border-white/5 hover:border-purple-500/30 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer"
         >
-            {/* Image */}
-            <div className="relative overflow-hidden">
-                <img
-                    src={story.image}
-                    alt={story.title}
-                    className="w-full h-44 object-cover transform group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B3A] via-transparent to-transparent" />
+            {/* Media Content */}
+            <div className="relative overflow-hidden aspect-square md:aspect-auto">
+                {story.type === 'video' ? (
+                    <video
+                        src={`${story.image}#t=0.1`}
+                        className="w-full h-44 object-cover transform group-hover:scale-110 transition-transform duration-700 pointer-events-none"
+                        preload="metadata"
+                        muted
+                        playsInline
+                    />
+                ) : (
+                    <img
+                        src={story.image}
+                        alt={story.title}
+                        className="w-full h-44 object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B3A] via-transparent to-transparent opacity-60" />
 
                 {/* Time badge */}
                 <div className="absolute top-3 left-3 flex items-center space-x-1.5 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">

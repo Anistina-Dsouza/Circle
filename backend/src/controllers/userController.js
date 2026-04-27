@@ -120,24 +120,37 @@ exports.getFollowing = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const updates = req.body;
-
-    // Allowed fields to update
-    const allowedFields = {
-      displayName: updates.displayName,
-      bio: updates.bio,
-      profilePic: updates.profileImage || updates.profilePic,
-      coverImage: updates.coverImage,
-      preferences: updates.preferences,
-      privacy: updates.privacy
-    };
-
-    // Remove undefined values
     const finalUpdates = {};
-    Object.keys(allowedFields).forEach(key => {
-      if (allowedFields[key] !== undefined) {
-        finalUpdates[key] = allowedFields[key];
+
+    // Handle File Uploads (if any)
+    if (req.files) {
+      if (req.files.profilePic?.[0]) {
+        finalUpdates.profilePic = req.files.profilePic[0].path;
       }
-    });
+      if (req.files.coverImage?.[0]) {
+        finalUpdates.coverImage = req.files.coverImage[0].path;
+      }
+    }
+
+    // Allowed text fields
+    if (updates.displayName !== undefined) finalUpdates.displayName = updates.displayName;
+    if (updates.bio !== undefined) finalUpdates.bio = updates.bio;
+    
+    // Support URL fallbacks if no file was uploaded
+    if (updates.profilePicUrl && !finalUpdates.profilePic) finalUpdates.profilePic = updates.profilePicUrl;
+    if (updates.coverImageUrl && !finalUpdates.coverImage) finalUpdates.coverImage = updates.coverImageUrl;
+
+    // Handle nested fields (they might come as JSON strings in FormData)
+    if (updates.preferences) {
+      finalUpdates.preferences = typeof updates.preferences === 'string' 
+        ? JSON.parse(updates.preferences) 
+        : updates.preferences;
+    }
+    if (updates.privacy) {
+      finalUpdates.privacy = typeof updates.privacy === 'string' 
+        ? JSON.parse(updates.privacy) 
+        : updates.privacy;
+    }
 
     if (Object.keys(finalUpdates).length === 0) {
       return res.status(400).json({ error: 'No valid update fields provided' });
