@@ -17,12 +17,6 @@ exports.getDashboard = async (req, res) => {
       .sort({ startTime: 1 })
       .limit(3);
 
-    const safeHosted = hosted.map(m => {
-      const obj = m.toObject ? m.toObject() : { ...m };
-      obj.startLink = obj.meetingLink;
-      return obj;
-    });
-
     const userCirclesFull = await Circle.find({ 'members.user': userId }).select('_id creator members');
     const circleIds = userCirclesFull.map(c => c._id);
 
