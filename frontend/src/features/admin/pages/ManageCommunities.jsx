@@ -116,7 +116,7 @@ export default function ManageCommunities() {
                         onClick={() => setCurrentPage(page)}
                         className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
                             page === currentPage 
-                                ? "bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-white/20 shadow-[0_10px_25px_rgba(79,70,229,0.4)] scale-110 z-10"
+                                ? "bg-gradient-to-br from-purple-600 to-fuchsia-700 text-white border-white/20 shadow-[0_10px_25px_rgba(168,85,247,0.4)] scale-110 z-10"
                                 : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
                         }`}
                     >
@@ -128,7 +128,7 @@ export default function ManageCommunities() {
             <button 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-indigo-600 hover:border-indigo-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-purple-600 hover:border-purple-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
             >
                 <ChevronRight size={18} />
             </button>
@@ -153,10 +153,10 @@ export default function ManageCommunities() {
         <div className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
                     <Layers size={20} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">Management</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-400/60">Management</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Community Management</h1>
             <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Manage platform communities and moderation</p>
@@ -175,17 +175,17 @@ export default function ManageCommunities() {
             </div>
 
             <div className="relative flex-1 sm:flex-none group">
-                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none group-hover:text-indigo-400 transition-colors" size={14} />
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none group-hover:text-purple-400 transition-colors" size={14} />
                 <select
                   value={privacyFilter}
                   onChange={(e) => setPrivacyFilter(e.target.value)}
-                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-12 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-white/10 hover:text-white transition-all shadow-lg"
+                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-12 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 hover:text-white transition-all shadow-lg"
                 >
                   <option value="all" className="bg-[#1A0C3F]">Privacy: All</option>
                   <option value="public" className="bg-[#1A0C3F]">Privacy: Public</option>
                   <option value="private" className="bg-[#1A0C3F]">Privacy: Private</option>
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px] group-hover:text-indigo-400 transition-colors">▼</div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px] group-hover:text-purple-400 transition-colors">▼</div>
             </div>
           </div>
         </div>

@@ -363,10 +363,14 @@ function VelocityReport({ data }) {
                         {/* Matrix Viewport */}
                         <div className="absolute inset-0 border-l-2 border-b-2 border-white/10 rounded-bl-[20px] lg:rounded-bl-[40px]">
                             {/* Spatial Bubbles with Precision Arrow Tooltips */}
-                            {data?.circleEngagement.map((circle, i) => {
-                                // Better distribution logic to avoid clustering
-                                const normalizedMsg = circle.stats.messageCount / (maxMsg || 1);
-                                const normalizedMem = circle.stats.memberCount / (maxMem || 1);
+                            {data?.circleEngagement && (() => {
+                                const maxMsg = Math.max(...data.circleEngagement.map(c => c.stats.messageCount), 1);
+                                const maxMem = Math.max(...data.circleEngagement.map(c => c.stats.memberCount), 1);
+                                
+                                return data.circleEngagement.map((circle, i) => {
+                                    // Better distribution logic to avoid clustering
+                                    const normalizedMsg = circle.stats.messageCount / maxMsg;
+                                    const normalizedMem = circle.stats.memberCount / maxMem;
                                 
                                 // Apply a non-linear scale and jitter for better spread when values are low
                                 const bottom = Math.min(Math.max((Math.sqrt(normalizedMsg) * 75) + (i * 4) % 12 + 5, 8), 92);
@@ -437,7 +441,8 @@ function VelocityReport({ data }) {
                                         </div>
                                     </div>
                                 );
-                            })}
+                                });
+                            })()}
 
                             {/* High-Fidelity Tactical Matrix */}
                             <div className="absolute inset-0 grid grid-cols-10 grid-rows-10 opacity-[0.04] pointer-events-none">
