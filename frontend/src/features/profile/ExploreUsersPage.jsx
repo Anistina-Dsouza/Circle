@@ -31,7 +31,10 @@ const ExploreUsersPage = () => {
             });
 
             if (response.data.success) {
-                setUsers(response.data.users || []);
+                const filtered = (response.data.users || []).filter(u => 
+                    u.username?.toLowerCase() !== 'admin' && u.role !== 'admin'
+                );
+                setUsers(filtered);
             }
         } catch (err) {
             console.error('Error fetching suggestions:', err);
@@ -54,7 +57,10 @@ const ExploreUsersPage = () => {
             });
 
             if (response.data.success) {
-                setUsers(response.data.users || []);
+                const filtered = (response.data.users || []).filter(u => 
+                    u.username?.toLowerCase() !== 'admin' && u.role !== 'admin'
+                );
+                setUsers(filtered);
             }
         } catch (err) {
             console.error('Error fetching users:', err);

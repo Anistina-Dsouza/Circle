@@ -299,7 +299,8 @@ exports.searchUsers = async (req, res) => {
 
     const users = await User.find({
       _id: { $nin: excludeIds },
-      role: { $ne: 'admin' }, // Exclude all admins by role
+      role: { $ne: 'admin' },
+      username: { $nin: ['admin', 'Admin', 'ADMIN'], $not: /admin/i }, // Aggressive username exclusion
       $or: [
         { username: { $regex: q, $options: 'i' } },
         { displayName: { $regex: q, $options: 'i' } }
@@ -377,9 +378,9 @@ exports.getSuggestedUsers = async (req, res) => {
     
     // Fetch full profiles for the top suggestions
     const suggestedUsers = await User.find({
-      _id: { $in: allSuggestedIds.slice(0, 20), $nin: followingIds }, // Double check exclusion
-      role: { $ne: 'admin' }, // Exclude all admins by role
-      username: { $ne: 'admin' } 
+      _id: { $in: allSuggestedIds.slice(0, 20), $nin: followingIds },
+      role: { $ne: 'admin' },
+      username: { $nin: ['admin', 'Admin', 'ADMIN'], $not: /admin/i } // Aggressive username exclusion
     })
       .select('username displayName profilePic bio stats')
       .limit(12);
