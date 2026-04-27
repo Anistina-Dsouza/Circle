@@ -192,11 +192,21 @@ export const DiscoverGrid = () => {
                         className="group relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/5 bg-[#1A1140] hover:border-purple-500/50 transition-all shadow-2xl hover:shadow-purple-500/30 active:scale-95"
                     >
                         {/* Story Preview */}
-                        <img 
-                            src={story.media?.url} 
-                            alt="" 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
-                        />
+                        {story.media?.type === 'video' ? (
+                            <video 
+                                src={`${story.media.url}#t=0.1`} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
+                                preload="metadata"
+                                muted
+                                playsInline
+                            />
+                        ) : (
+                            <img 
+                                src={story.media?.url} 
+                                alt="" 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
+                            />
+                        )}
 
                         {/* Overlay Gradient */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent group-hover:via-black/40 transition-all" />

@@ -61,7 +61,12 @@ const CircleDetailsPage = () => {
                     headers: token ? { Authorization: `Bearer ${token}` } : {}
                 });
                 if (res.data.success) {
-                    setCircle(res.data.circle);
+                    const fetchedCircle = res.data.circle;
+                    if (!fetchedCircle.isMember) {
+                        navigate(`/circles/${slug}/join`, { replace: true });
+                        return;
+                    }
+                    setCircle(fetchedCircle);
                 }
             } catch (err) {
                 setError(err.response?.data?.error || 'Failed to load circle.');

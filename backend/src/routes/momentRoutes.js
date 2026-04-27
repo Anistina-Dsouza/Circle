@@ -13,6 +13,7 @@ router.get('/user/:username', optionalProtect, cacheMiddleware(30), momentContro
 router.use(protect);
 // Cache the personalized feed for 30 seconds (safe because we append userId in middleware)
 router.get('/feed', cacheMiddleware(30), momentController.getFeed);
+router.post('/members', momentController.getMembersMoments);
 router.get('/:momentId', cacheMiddleware(60), momentController.getMoment);
 router.post('/', upload.single('media'), momentController.createMoment);
 router.delete('/:momentId', momentController.deleteMoment);

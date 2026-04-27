@@ -8,6 +8,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -92,11 +93,17 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
         window.location.href = '/login';
     };
 
+    const handleSearch = (e) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/circles?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
     const NavItem = ({ icon: Icon, label, to, active, isMobile = false }) => (
         <Link
             to={to}
             onClick={() => isMobile && setIsOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-2xl cursor-pointer transition-all ${active 
+            className={`flex items-center space-x-3 px-4 py-3 rounded-full cursor-pointer transition-all ${active 
                 ? 'bg-[#7C3AED] text-white shadow-lg shadow-purple-500/20' 
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
@@ -153,6 +160,9 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
                             type="text"
                             placeholder="Search circles..."
                             className="bg-transparent border-none outline-none text-white ml-3 w-full placeholder-gray-500 text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
                         />
                     </div>
 

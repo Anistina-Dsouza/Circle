@@ -72,28 +72,18 @@ const CircleStoriesBar = ({ circleMemberIds = [], onPostSuccess }) => {
         const fetchCircleStories = async () => {
             try {
                 const token = localStorage.getItem('token');
-                // Fetch the global feed and filter to circle members only
-                const res = await axios.get(`${baseUrl}/api/moments/feed`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
+                const res = await axios.post(`${baseUrl}/api/moments/members`, 
+                    { userIds: circleMemberIds },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                
                 if (res.data.success) {
-                    const memberIdSet = new Set(circleMemberIds.map(String));
-                    const uniqueUsers = new Map();
-
-                    res.data.moments.forEach(moment => {
-                        const u = moment.user;
-                        if (u && memberIdSet.has(String(u._id)) && !uniqueUsers.has(u._id)) {
-                            uniqueUsers.set(u._id, {
-                                id: u._id,
-                                name: u.displayName || u.username,
-                                username: u.username,
-                                avatar: u.profilePic || DEFAULT_AVATAR,
-                            });
-                        }
-                    });
-
-                    setStories(Array.from(uniqueUsers.values()));
+                    setStories(res.data.moments.map(m => ({
+                        id: m.user?._id,
+                        name: m.user?.displayName || m.user?.username,
+                        username: m.user?.username,
+                        avatar: m.user?.profilePic || DEFAULT_AVATAR,
+                    })));
                 }
             } catch (err) {
                 console.error('Circle stories fetch failed:', err);
