@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
+import AdminLayout from "../layouts/AdminLayout";
 import CommunityTable from "../components/DetailedCommunityTables";
 import CommunityStats from "../components/CommunityStats";
 import ViewReportsModal from "../components/ViewReportsModal";
@@ -86,90 +86,82 @@ export default function ManageCommunities() {
     : "0";
 
   return (
-    <div className="flex bg-[#10002B] text-white min-h-screen">
-
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <main className="flex-1 ml-64 p-10">
-
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-10">
-          <div className="flex items-center gap-6">
-            <h1 className="text-4xl font-bold">Community Management</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Community Management</h1>
 
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 px-5 py-2 rounded-full text-sm">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium">
               {circles.length} Circles
             </span>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row gap-4 mb-8">
 
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-purple-300" size={18}/>
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-purple-400" size={18}/>
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name, host, or keyword..."
-              className="w-full bg-[#240046] pl-14 pr-6 py-4 rounded-full outline-none border border-purple-900/40 focus:ring-2 focus:ring-purple-500 transition"
+              className="w-full bg-[#240046]/40 pl-12 pr-6 py-3.5 rounded-full outline-none border border-purple-900/40 focus:ring-2 focus:ring-purple-500/50 transition placeholder:text-gray-500 text-sm"
             />
           </div>
 
-          {/* Select */}
-          {/* <select className="bg-[#240046] px-6 py-4 rounded-full border border-purple-900/40 outline-none w-64 focus:ring-2 focus:ring-purple-500">
-            <option>Privacy Type: All</option>
-            <option>Public</option>
-            <option>Private</option>
-          </select> */}
-
-            <div className="relative w-64">
-
+          {/* Privacy Filter */}
+          <div className="relative w-full lg:w-64">
             <select
-            value={privacyFilter}
-            onChange={(e) => setPrivacyFilter(e.target.value)}
-            className="
-                w-full
-                appearance-none
-                bg-[#240046]
-                px-6 pr-12 py-4
-                rounded-full
-                border border-purple-500/30
-                text-purple-200
-                text-sm font-medium
-                outline-none
-                transition-all duration-200
-                hover:border-purple-400
-                focus:border-purple-400
-                focus:ring-2 focus:ring-purple-500/30
-                shadow-md shadow-purple-900/20
-                cursor-pointer
-            "
+              value={privacyFilter}
+              onChange={(e) => setPrivacyFilter(e.target.value)}
+              className="
+                  w-full
+                  appearance-none
+                  bg-[#240046]/40
+                  px-6 pr-12 py-3.5
+                  rounded-full
+                  border border-purple-500/30
+                  text-purple-200
+                  text-sm font-medium
+                  outline-none
+                  transition-all duration-200
+                  hover:border-purple-400
+                  focus:border-purple-400
+                  focus:ring-2 focus:ring-purple-500/30
+                  cursor-pointer
+              "
             >
-            <option value="all" className="bg-[#1a0033] text-purple-200">
-                Privacy Type: All
-            </option>
-            <option value="public" className="bg-[#1a0033] text-purple-200">
-                Public
-            </option>
-            <option value="private" className="bg-[#1a0033] text-purple-200">
-                Private
-            </option>
+              <option value="all" className="bg-[#1a0033] text-purple-200">
+                  Privacy Type: All
+              </option>
+              <option value="public" className="bg-[#1a0033] text-purple-200">
+                  Public
+              </option>
+              <option value="private" className="bg-[#1a0033] text-purple-200">
+                  Private
+              </option>
             </select>
 
-            {/* Custom Arrow */}
             <div className="pointer-events-none absolute inset-y-0 right-5 flex items-center text-purple-400">
-            ▼
+              <span className="text-[10px]">▼</span>
             </div>
-
-            </div>
-
+          </div>
         </div>
 
-        <CommunityTable data={processedCircles} loading={loading} onToggleStatus={handleToggleStatus} onViewReports={(id) => setViewReportItemId(id)} />
+        <div className="mb-10 overflow-x-auto rounded-[28px] border border-white/5 bg-[#240046]/20">
+          <div className="min-w-[800px]">
+            <CommunityTable 
+              data={processedCircles} 
+              loading={loading} 
+              onToggleStatus={handleToggleStatus} 
+              onViewReports={(id) => setViewReportItemId(id)} 
+            />
+          </div>
+        </div>
 
         <CommunityStats 
             newCircles={newCirclesCount} 
@@ -184,8 +176,7 @@ export default function ManageCommunities() {
             itemType="Circle"
             onDismiss={handleDismiss}
         />
-
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
-}
+}

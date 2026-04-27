@@ -30,8 +30,8 @@ if (process.env.REDIS_URL) {
     set: async () => null,
     setEx: async () => null,
     del: async () => null,
-    on: () => {},
-    connect: async () => {}
+    on: () => { },
+    connect: async () => { }
   };
 }
 

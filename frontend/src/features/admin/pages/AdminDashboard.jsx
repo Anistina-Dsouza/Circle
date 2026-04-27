@@ -73,17 +73,18 @@ export default function AdminDashboard() {
     return (
         <AdminLayout>
 
-            <div className="grid grid-cols-4 gap-6 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
                 <KPICard value={stats.totalUsers.toLocaleString()} label="Users" />
                 <KPICard value={stats.totalCircles.toLocaleString()} label="Circles" />
                 <KPICard value={stats.activeUsers.toLocaleString()} label="Active" />
                 <KPICard value={stats.flaggedItems.toLocaleString()} label="Flagged" badge={stats.flaggedItems > 0 ? "Review" : "Good"} />
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8 mb-8 mt-10">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 mb-8 mt-10">
                 <LatestRegistrations users={latestUsers} />
                 <CirclesTable circles={latestCircles} />
             </div>
+
 
             <NetworkChart 
                 registrationTrends={trends.registrations} 

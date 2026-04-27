@@ -23,82 +23,86 @@ export default function CirclesTable({ circles }) {
     };
 
     return (
-        <div className="rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl">
-            {/* Header */}
-            <div className="flex justify-between items-center px-8 py-7 border-b border-white/5">
-                <div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">New Circles</h2>
-                    <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Community Growth</p>
-                </div>
-                <Link to="/admin/communities" className="flex items-center gap-2 text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                    <span>Manage</span>
-                    <Settings size={12} />
-                </Link>
+    <div className="rounded-[24px] sm:rounded-[32px] bg-[#1A0C3F]/50 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl">
+        {/* Header */}
+        <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center px-6 sm:px-8 py-5 sm:py-7 border-b border-white/5 gap-4">
+            <div>
+                <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">New Circles</h2>
+                <p className="text-[10px] text-white/40 mt-1 uppercase tracking-widest font-black">Community Growth</p>
             </div>
+            <Link to="/admin/communities" className="flex items-center gap-2 text-purple-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-4 py-2 rounded-full border border-white/5 whitespace-nowrap">
+                <span>Manage</span>
+                <Settings size={12} />
+            </Link>
+        </div>
 
-            {/* Column Headings */}
-            <div className="flex px-8 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-white/30 border-b border-white/5 bg-white/[0.02]">
-                <div className="w-[45%]">Circle</div>
-                <div className="w-[20%]">Category</div>
-                <div className="w-[20%]">Members</div>
-                <div className="w-[15%] text-right">Action</div>
-            </div>
+        {/* Column Headings */}
+        <div className="flex px-6 sm:px-8 py-4 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] text-white/30 border-b border-white/5 bg-white/[0.02]">
+            <div className="flex-1">Circle</div>
+            <div className="hidden sm:block w-[20%] text-center">Category</div>
+            <div className="w-[20%] text-center">Nodes</div>
+            <div className="w-12 text-right"></div>
+        </div>
 
-            {/* Rows */}
-            <div className="divide-y divide-white/5">
-                {circles && circles.length > 0 ? (
-                    circles.map((c, i) => (
-                        <div
-                            key={c._id || i}
-                            className="group flex items-center px-8 py-6 hover:bg-white/[0.03] transition-all relative"
-                        >
-                            <div className="absolute left-0 w-1 h-0 bg-indigo-500 group-hover:h-1/2 top-1/4 transition-all duration-300 rounded-r-full" />
+        {/* Rows */}
+        <div className="divide-y divide-white/5">
+            {circles && circles.length > 0 ? (
+                circles.map((c, i) => (
+                    <div
+                        key={c._id || i}
+                        className="group flex items-center px-6 sm:px-8 py-5 sm:py-6 hover:bg-white/[0.03] transition-all relative"
+                    >
+                        <div className="absolute left-0 w-1 h-0 bg-indigo-500 group-hover:h-1/2 top-1/4 transition-all duration-300 rounded-r-full" />
 
-                            {/* Circle */}
-                            <div className="w-[45%] flex gap-5 items-center overflow-hidden">
-                                {c.coverImage && c.coverImage !== 'default_circle.png' ? (
-                                    <img src={c.coverImage} className="w-11 h-11 rounded-2xl object-cover ring-2 ring-white/5 flex-shrink-0 group-hover:scale-105 transition-transform" alt={c.name} />
-                                ) : (
-                                    <div className="w-11 h-11 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-purple-400 flex-shrink-0 shadow-xl group-hover:bg-purple-500 group-hover:text-white transition-all">
-                                        {getDefaultIcon(c.category)}
-                                    </div>
-                                )}
-                                <span className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">{c.name}</span>
-                            </div>
-
-                            {/* Category */}
-                            <div className="w-[20%]">
-                                <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-white/5 text-white/60 border border-white/5 uppercase tracking-tighter truncate inline-block max-w-[90%] group-hover:border-white/20 transition-all">
-                                    {c.category}
-                                </span>
-                            </div>
-
-                            {/* Members */}
-                            <div className="w-[20%]">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-                                    <span className="text-xs font-black text-white/80">
-                                        {c.stats?.memberCount || c.members?.length || 0}
-                                    </span>
+                        {/* Circle */}
+                        <div className="flex-1 flex gap-3 sm:gap-5 items-center overflow-hidden">
+                            {c.coverImage && c.coverImage !== 'default_circle.png' ? (
+                                <img src={c.coverImage} className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/5 flex-shrink-0 group-hover:scale-105 transition-transform" alt={c.name} />
+                            ) : (
+                                <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-purple-400 flex-shrink-0 shadow-xl group-hover:bg-purple-500 group-hover:text-white transition-all">
+                                    {getDefaultIcon(c.category)}
                                 </div>
-                            </div>
-
-                            {/* Action */}
-                            <div className="w-[15%] flex justify-end">
-                                <Link to="/admin/communities">
-                                    <button className="p-3 rounded-xl bg-white/5 text-white/30 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-xl">
-                                        <Settings size={16} />
-                                    </button>
-                                </Link>
+                            )}
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate">{c.name}</span>
+                                <span className="text-[9px] text-white/20 uppercase font-black tracking-widest sm:hidden">{c.category}</span>
                             </div>
                         </div>
-                    ))
-                ) : (
-                    <div className="py-20 text-center text-sm text-white/20 italic">
-                        No circles have been detected in the system.
+
+                        {/* Category - Desktop only */}
+                        <div className="hidden sm:block w-[20%] text-center">
+                            <span className="text-[9px] font-black px-2 py-1 rounded-md bg-white/5 text-white/40 border border-white/5 uppercase tracking-tighter truncate inline-block max-w-[90%]">
+                                {c.category}
+                            </span>
+                        </div>
+
+                        {/* Members */}
+                        <div className="w-[20%] flex justify-center">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                                <span className="text-xs font-black text-white/80">
+                                    {c.stats?.memberCount || c.members?.length || 0}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Action */}
+                        <div className="w-12 flex justify-end">
+                            <Link to="/admin/communities">
+                                <button className="p-2.5 rounded-xl bg-white/5 text-white/30 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                                    <Settings size={14} />
+                                </button>
+                            </Link>
+                        </div>
                     </div>
-                )}
-            </div>
+                ))
+            ) : (
+                <div className="py-20 text-center text-sm text-white/20 italic font-medium uppercase tracking-[0.2em]">
+                    No circles discovered.
+                </div>
+            )}
         </div>
+    </div>
+
     );
 }
