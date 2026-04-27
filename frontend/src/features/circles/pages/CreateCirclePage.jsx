@@ -1,8 +1,18 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Plus, Globe, Lock, Shield, Image as ImageIcon, Camera, Link as LinkIcon, X } from 'lucide-react';
+import { ArrowLeft, Plus, Globe, Lock, Shield, Image as ImageIcon, Camera, Link as LinkIcon, X, LayoutGrid, Cpu, Palette, Gamepad2, Rocket, Briefcase } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
+import PremiumDropdown from '../../../components/ui/PremiumDropdown';
+
+const categoryOptions = [
+    { value: 'Technology', label: 'Technology', icon: Cpu },
+    { value: 'UI/UX Design', label: 'UI/UX Design', icon: LayoutGrid },
+    { value: 'Gaming', label: 'Gaming', icon: Gamepad2 },
+    { value: 'Digital Art', label: 'Digital Art', icon: Palette },
+    { value: 'Web3', label: 'Web3', icon: Rocket },
+    { value: 'Startups', label: 'Startups', icon: Briefcase }
+];
 
 const CreateCirclePage = () => {
     const navigate = useNavigate();
@@ -100,8 +110,7 @@ const CreateCirclePage = () => {
 
             const response = await axios.post(`${baseUrl}/api/circles`, submitData, {
                 headers: { 
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
+                    Authorization: `Bearer ${token}`
                 }
             });
 
@@ -248,24 +257,15 @@ const CreateCirclePage = () => {
 
                     {/* Settings */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
-                            <div>
-                                <label htmlFor="category" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
-                                <select
-                                    id="category"
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all text-lg appearance-none cursor-pointer"
-                                >
-                                    <option>Technology</option>
-                                    <option>UI/UX Design</option>
-                                    <option>Gaming</option>
-                                    <option>Digital Art</option>
-                                    <option>Web3</option>
-                                    <option>Startups</option>
-                                </select>
-                            </div>
+                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl flex flex-col">
+                            <label htmlFor="category" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
+                            <PremiumDropdown 
+                                value={formData.category}
+                                onChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                                options={categoryOptions}
+                                icon={LayoutGrid}
+                                placeholder="Select a category"
+                            />
                         </div>
 
                         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">

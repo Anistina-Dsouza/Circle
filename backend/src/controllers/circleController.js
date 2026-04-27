@@ -20,7 +20,7 @@ const uploadToCloudinary = (fileBuffer, folder) => {
 // =========== CREATE CIRCLE ===========
 exports.createCircle = async (req, res) => {
   try {
-    let { name, description, type, category, settings, profilePic, coverImage } = req.body;
+    let { name, description, type, category, settings, profilePic, coverImage } = req.body || {};
     
     // Parse settings if string (from FormData)
     if (typeof settings === 'string') {

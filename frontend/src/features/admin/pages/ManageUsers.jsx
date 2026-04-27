@@ -3,7 +3,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import axios from "axios";
 import { Loader2, ShieldAlert, UserCheck, UserX, Search, Filter, SortAsc, ChevronLeft, ChevronRight, Mail, Calendar, Info } from "lucide-react";
 import ViewReportsModal from "../components/ViewReportsModal";
-import PremiumDropdown from "../components/PremiumDropdown";
+import PremiumDropdown from "../../../components/ui/PremiumDropdown";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
