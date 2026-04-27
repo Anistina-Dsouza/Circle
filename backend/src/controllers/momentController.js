@@ -167,9 +167,17 @@ exports.getUserMoments = async (req, res) => {
       .populate('viewers', 'username displayName profilePic')
       .populate('reactions.user', 'username displayName profilePic');
 
+    const filteredMoments = moments.map(m => {
+      const mObj = m.toObject();
+      const ownerId = m.user?._id?.toString() || m.user?.toString();
+      mObj.viewers = (mObj.viewers || []).filter(v => (v._id || v).toString() !== ownerId);
+      mObj.viewCount = mObj.viewers.length;
+      return mObj;
+    });
+
     res.json({
       success: true,
-      moments
+      moments: filteredMoments
     });
 
   } catch (error) {
@@ -211,9 +219,15 @@ exports.getMoment = async (req, res) => {
     // Add view
     await moment.addView(req.userId);
 
+    // Filter out owner from viewers in response
+    const momentObj = moment.toObject();
+    const ownerId = moment.user?._id?.toString() || moment.user?.toString();
+    momentObj.viewers = (momentObj.viewers || []).filter(v => (v._id || v).toString() !== ownerId);
+    momentObj.viewCount = momentObj.viewers.length;
+
     res.json({
       success: true,
-      moment
+      moment: momentObj
     });
 
   } catch (error) {

@@ -126,7 +126,7 @@ momentSchema.methods.addView = function (userId) {
   if (!userId) return Promise.resolve(this);
   
   // Don't add own view
-  const ownerId = this.user && this.user._id ? this.user._id.toString() : this.user.toString();
+  const ownerId = (this.user && this.user._id) ? this.user._id.toString() : this.user.toString();
   if (userId.toString() === ownerId) return Promise.resolve(this);
 
   const userIdStr = userId.toString();
