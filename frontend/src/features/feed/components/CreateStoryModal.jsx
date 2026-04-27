@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Plus, Image as ImageIcon, Video, Eye, Info, Send, Lock, Globe, Camera, Link as LinkIcon, Type } from 'lucide-react';
+import { X, Plus, Image as ImageIcon, Video, Eye, Info, Send, Lock, Globe, Camera, Link as LinkIcon, Type, Volume2, VolumeX } from 'lucide-react';
 import axios from 'axios';
 
 const CreateStoryModal = ({ isOpen, onClose }) => {
@@ -13,6 +13,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const [uploadMode, setUploadMode] = useState('device'); // 'device' or 'link'
     const [mediaFile, setMediaFile] = useState(null);
     const [error, setError] = useState('');
+    const [isMuted, setIsMuted] = useState(false);
     
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
@@ -189,7 +190,15 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                         mediaType === 'image' ? (
                                             <img src={previewUrl} className="w-full h-full object-cover" />
                                         ) : (
-                                            <video src={previewUrl} className="w-full h-full object-cover" autoPlay loop playsInline />
+                                            <>
+                                                <video src={previewUrl} className="w-full h-full object-cover" autoPlay muted={isMuted} loop playsInline />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                                                    className="absolute top-4 right-4 z-40 p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-colors"
+                                                >
+                                                    {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                                </button>
+                                            </>
                                         )
                                     ) : (
                                         <div className="flex flex-col items-center text-center px-6">
