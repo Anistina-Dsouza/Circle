@@ -356,17 +356,24 @@ const CircleChatArea = ({ circle }) => {
     };
     
     // Mention Logic
-    const handleInputChange = (val) => {
+    const handleInputChange = (val, cursorIdx) => {
         setMessageInput(val);
-        const lastAtIdx = val.lastIndexOf('@');
+        
+        const textBeforeCursor = val.substring(0, cursorIdx);
+        const lastAtIdx = textBeforeCursor.lastIndexOf('@');
+        
         if (lastAtIdx !== -1) {
-            const afterAt = val.slice(lastAtIdx + 1);
-            if (!afterAt.includes(' ')) {
-                setShowMentions(true);
-                setMentionFilter(afterAt);
-                setMentionIndex(lastAtIdx);
-                setSelectedMentionIdx(0);
-                return;
+            // Check if @ is at start or preceded by space
+            const charBeforeAt = lastAtIdx === 0 ? ' ' : textBeforeCursor[lastAtIdx - 1];
+            if (charBeforeAt === ' ' || charBeforeAt === '\n') {
+                const afterAt = textBeforeCursor.slice(lastAtIdx + 1);
+                if (!afterAt.includes(' ')) {
+                    setShowMentions(true);
+                    setMentionFilter(afterAt);
+                    setMentionIndex(lastAtIdx);
+                    setSelectedMentionIdx(0);
+                    return;
+                }
             }
         }
         setShowMentions(false);
@@ -385,7 +392,7 @@ const CircleChatArea = ({ circle }) => {
         if (!u || u._id === currentUserId) return false;
         const search = mentionFilter.toLowerCase();
         return (u.displayName || u.username).toLowerCase().includes(search) || u.username.toLowerCase().includes(search);
-    }).slice(0, 5);
+    }).slice(0, 10);
 
     const handleInputKeyDown = (e) => {
         if (showMentions && filteredMembers.length > 0) {
@@ -594,7 +601,13 @@ const CircleChatArea = ({ circle }) => {
                     <input
                         type="text"
                         value={messageInput}
-                        onChange={e => handleInputChange(e.target.value)}
+                        onChange={e => handleInputChange(e.target.value, e.target.selectionStart)}
+                        onKeyUp={e => {
+                            if (e.key === '@' || e.key === 'Backspace' || (e.key.length === 1)) {
+                                handleInputChange(e.target.value, e.target.selectionStart);
+                            }
+                        }}
+                        onClick={e => handleInputChange(e.target.value, e.target.selectionStart)}
                         onKeyDown={handleInputKeyDown}
                         placeholder={isMuted ? "Muted..." : replyingTo ? "Type your reply..." : "Share something with the circle..."}
                         disabled={isMuted}
