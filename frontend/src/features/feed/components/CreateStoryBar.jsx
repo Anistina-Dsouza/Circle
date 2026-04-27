@@ -99,115 +99,119 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     };
 
     return (
-        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10">
-            <div className="flex items-center space-x-4">
-                {/* User Avatar */}
-                <div className="relative shrink-0">
+        <div className="relative mb-10 max-w-2xl mx-auto">
+            {/* Quick Post Bar (Matches Screenshot) */}
+            <div className="bg-[#1E1B3A]/60 backdrop-blur-xl border border-white/10 rounded-[2rem] p-2 pr-3 flex items-center shadow-2xl shadow-purple-900/20 group transition-all hover:border-purple-500/30">
+                {/* User Avatar with Plus Badge */}
+                <div 
+                    className="relative shrink-0 cursor-pointer active:scale-95 transition-transform"
+                    onClick={() => fileInputRef.current?.click()}
+                >
                     <img
                         src={profilePic || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"}
                         alt="Profile"
-                        className="w-12 h-12 rounded-full border-2 border-purple-500/30 object-cover"
+                        className="w-11 h-11 rounded-full border-2 border-purple-500/20 object-cover"
                     />
-                    <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1 border-2 border-[#1E1B3A]">
-                        <Plus size={10} className="text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1 border-2 border-[#1E1B3A] shadow-lg">
+                        <Plus size={10} className="text-white" strokeWidth={4} />
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col">
-                    {/* Caption Input */}
-                    <div className="flex-1 bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
-                        <input
-                            type="text"
-                            value={caption}
-                            onChange={(e) => setCaption(e.target.value)}
-                            placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
-                            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
-                        />
-                    </div>
+                {/* Vertical Divider (Matches Screenshot '|') */}
+                <div className="h-6 w-px bg-white/10 mx-4" />
+
+                {/* Main Input Area - More compact */}
+                <div className="flex-1 min-w-0">
+                    <input
+                        type="text"
+                        value={caption}
+                        onChange={(e) => setCaption(e.target.value)}
+                        placeholder="What's happening?"
+                        className="w-full bg-transparent border-none outline-none text-white placeholder-gray-500 text-sm font-medium px-2"
+                    />
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-3 shrink-0 ml-4 pr-1">
-                    <div className="relative flex items-center gap-2">
-                        <button 
-                            onClick={() => fileInputRef.current?.click()}
-                            className={`p-3 transition-all rounded-full ${mediaFile ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                            title="Upload Image"
-                        >
-                            <ImageIcon size={24} />
-                        </button>
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            onChange={handleFileSelect} 
-                            className="hidden" 
-                            accept="image/*,video/*"
-                        />
-                        <button 
-                            onClick={() => setShowUrlInput(!showUrlInput)}
-                            className={`p-3 transition-all rounded-full ${(!mediaFile && mediaUrl) || showUrlInput ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                            title="Add Image URL"
-                        >
-                            <LinkIcon size={24} />
-                        </button>
-
-                        {/* Pop-over URL Input */}
-                        {showUrlInput && (
-                            <div className="absolute right-0 bottom-full mb-4 w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200 z-30">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
-                                    <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                                <div className="space-y-3">
-                                    <input
-                                        type="url"
-                                        value={tempUrl}
-                                        onChange={(e) => setTempUrl(e.target.value)}
-                                        placeholder="https://example.com/image.jpg"
-                                        className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
-                                        autoFocus
-                                        onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
-                                    />
-                                    <button 
-                                        onClick={handleUrlSubmit}
-                                        className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors"
-                                    >
-                                        Apply Image
-                                    </button>
-                                </div>
-                                <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[#1A1140] border-r border-b border-purple-500/30 rotate-45"></div>
-                            </div>
-                        )}
-                    </div>
+                {/* Quick Actions */}
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`p-2.5 transition-all rounded-xl ${mediaFile ? 'bg-purple-500/20 text-purple-400' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                        title="Upload Media"
+                    >
+                        <ImageIcon size={20} />
+                    </button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileSelect} 
+                        className="hidden" 
+                        accept="image/*,video/*"
+                    />
                     
+                    <button 
+                        onClick={() => setShowUrlInput(!showUrlInput)}
+                        className={`p-2.5 transition-all rounded-xl ${(!mediaFile && mediaUrl) || showUrlInput ? 'bg-purple-500/20 text-purple-400' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                        title="Add Link"
+                    >
+                        <LinkIcon size={20} />
+                    </button>
+
+                    {/* Pop-over URL Input */}
+                    {showUrlInput && (
+                        <div className="absolute right-0 bottom-full mb-6 w-72 bg-[#1A1140] border border-purple-500/30 rounded-3xl p-5 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-4 duration-300 z-[100] backdrop-blur-2xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">Add Media Link</span>
+                                <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white transition-colors">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                <input
+                                    type="url"
+                                    value={tempUrl}
+                                    onChange={(e) => setTempUrl(e.target.value)}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500 transition-all placeholder:text-gray-600"
+                                    autoFocus
+                                    onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                                />
+                                <button 
+                                    onClick={handleUrlSubmit}
+                                    className="w-full bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-900/40"
+                                >
+                                    Apply Content
+                                </button>
+                            </div>
+                            <div className="absolute -bottom-2 right-8 w-4 h-4 bg-[#1A1140] border-r border-b border-purple-500/30 rotate-45"></div>
+                        </div>
+                    )}
+
+                    <div className="w-px h-6 bg-white/10 mx-2" />
+
+                    {/* Post Button */}
                     <button 
                         onClick={handlePostStory}
                         disabled={loading || status === 'success'}
                         className={`
-                            bg-gradient-to-r from-purple-400 to-purple-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-105 active:scale-95 flex items-center space-x-2
+                            bg-gradient-to-br from-purple-500 to-purple-700 text-white p-2.5 rounded-xl font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all flex items-center justify-center
                             ${(loading || status === 'success') ? 'opacity-70 scale-100' : ''}
                         `}
                     >
                         {loading ? (
-                            <Loader2 size={16} className="animate-spin" />
+                            <Loader2 size={20} className="animate-spin" />
                         ) : status === 'success' ? (
-                            <CheckCircle2 size={16} />
+                            <CheckCircle2 size={20} />
                         ) : (
-                            <>
-                                <span className="hidden sm:inline font-bold">POST</span>
-                                <Plus size={16} />
-                            </>
+                            <Plus size={20} strokeWidth={3} />
                         )}
                     </button>
                 </div>
             </div>
 
-            {/* Media Preview - Popping from the side/bottom */}
+            {/* Media Preview Overlay */}
             {mediaUrl && (
-                <div className="mt-4 flex items-center space-x-3 px-4 py-2 bg-purple-500/5 rounded-2xl border border-purple-500/10 animate-in slide-in-from-left-2 duration-300">
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-500/50 shadow-lg group">
+                <div className="absolute top-full left-0 right-0 mt-3 px-4 py-3 bg-[#1E1B3A]/80 backdrop-blur-xl rounded-[2rem] border border-purple-500/20 animate-in slide-in-from-top-2 duration-500 flex items-center gap-4 z-20">
+                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-purple-500/40 shadow-2xl group">
                         <img src={mediaUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Preview" />
                         <button 
                             onClick={() => setMediaUrl('')}
@@ -216,13 +220,13 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <X size={16} className="text-white" />
                         </button>
                     </div>
-                    <div className="flex flex-col flex-1 overflow-hidden">
-                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Image Attached</span>
-                        <span className="text-[9px] text-gray-400 truncate pr-4">{mediaFile ? mediaFile.name : mediaUrl}</span>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-0.5">Media Attached</p>
+                        <p className="text-[10px] text-gray-400 truncate font-medium">{mediaFile ? mediaFile.name : mediaUrl}</p>
                     </div>
                     <button 
                         onClick={() => { setMediaUrl(''); setMediaFile(null); }}
-                        className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors"
+                        className="p-2 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded-full text-gray-500 transition-all"
                     >
                         <X size={18} />
                     </button>

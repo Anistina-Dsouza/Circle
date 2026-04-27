@@ -101,30 +101,41 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             </button>
 
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl py-3 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-4 w-60 bg-[#1A1140]/95 border border-white/10 rounded-2xl shadow-2xl p-2 backdrop-blur-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-[110]">
+                <div className="px-4 py-3 mb-1 border-b border-white/5">
+                    <p className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">Account</p>
+                </div>
                 <Link
                   to={`/profile/${user?.username}`}
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-white/5 transition group"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 transition group text-gray-300 hover:text-white"
                   onClick={() => setProfileMenuOpen(false)}
                 >
-                  <User size={16} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">My Profile</span>
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:scale-110 transition-all">
+                    <User size={16} />
+                  </div>
+                  <span className="text-sm font-bold">My Profile</span>
                 </Link>
                 <Link
-                  to="/settings"
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-white/5 transition group"
+                  to="/profile/edit"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 transition group text-gray-300 hover:text-white"
                   onClick={() => setProfileMenuOpen(false)}
                 >
-                  <Settings size={16} className="text-purple-400 group-hover:rotate-45 transition-transform" />
-                  <span className="text-xs font-bold">Settings</span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:rotate-45 transition-all">
+                    <Settings size={16} />
+                  </div>
+                  <span className="text-sm font-bold">Settings</span>
                 </Link>
-                <div className="h-px bg-white/5 my-2 mx-5" />
+                
+                <div className="h-px bg-white/5 my-2 mx-2" />
+                
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-red-500/10 transition w-full text-left text-red-400 group"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition w-full text-left text-red-400 group"
                 >
-                  <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-                  <span className="text-xs font-bold">Logout</span>
+                  <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-all">
+                    <LogOut size={16} />
+                  </div>
+                  <span className="text-sm font-bold">Logout</span>
                 </button>
               </div>
             )}

@@ -25,15 +25,26 @@ const NotificationsPage = () => {
                     navigate(`/profile/${noti.sender.username}`);
                 }
                 break;
-            case 'reaction':
             case 'message':
+                // For direct messages, go to messages page
+                // We could potentially select the chat if we have the conversation ID
+                navigate('/messages', { state: { selectedChat: noti.relatedItem?.id } });
+                break;
             case 'mention':
-                if (noti.relatedItem?.type === 'circle' && noti.relatedItem?.id) {
-                    // Navigate to circle chat
-                    // Assuming you have circle slug in related item or can fetch it
-                    // For now, let's just go to the circles list or if id is slug
-                    navigate(`/circles`); 
+            case 'reaction':
+                if (noti.relatedItem?.type === 'circle') {
+                    // Navigate to circles list for now, or specific circle if ID is slug
+                    navigate(`/circles`);
+                } else if (noti.relatedItem?.type === 'message') {
+                    navigate('/messages');
                 }
+                break;
+            case 'circle_invite':
+            case 'circle_join':
+                navigate('/circles');
+                break;
+            case 'meeting_invite':
+                navigate('/meetings/upcoming');
                 break;
             default:
                 break;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Filter } from 'lucide-react';
+import { Search, Edit, Filter, MessageCircle, Users, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -154,9 +154,9 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                             <div className="absolute top-full left-0 mt-2 w-48 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl">
                                 <div className="p-2 space-y-1">
                                     {[
-                                        { id: 'all', label: 'All Conversations' },
-                                        { id: 'messages', label: 'With Messages' },
-                                        { id: 'online', label: 'Online Friends' }
+                                        { id: 'all', label: 'All Conversations', icon: <MessageCircle size={14} /> },
+                                        { id: 'messages', label: 'With Messages', icon: <Activity size={14} /> },
+                                        { id: 'online', label: 'Online Friends', icon: <Users size={14} /> }
                                     ].map(opt => (
                                         <button
                                             key={opt.id}
@@ -164,8 +164,9 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                                 setFilterType(opt.id);
                                                 setShowFilterMenu(false);
                                             }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${filterType === opt.id ? 'bg-violet-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-3 ${filterType === opt.id ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
                                         >
+                                            <span className={filterType === opt.id ? 'text-white' : 'text-violet-400'}>{opt.icon}</span>
                                             {opt.label}
                                         </button>
                                     ))}
