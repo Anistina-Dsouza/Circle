@@ -32,6 +32,10 @@ exports.createCircle = async (req, res) => {
       profilePicUrl,
       coverImageUrl
     } = req.body || {};
+    // Use URL links if provided and no file was uploaded
+    if (!profilePic && profilePicUrl) profilePic = profilePicUrl;
+    if (!coverImage && coverImageUrl) coverImage = coverImageUrl;
+
     // Parse settings if string (from FormData)
     if (typeof settings === 'string') {
       try {
@@ -243,7 +247,12 @@ exports.getCircleBySlug = async (req, res) => {
 exports.updateCircle = async (req, res) => {
   try {
     console.log("updateCircle - req.body - ", req.body);
-    const { description, coverImage, profilePic, settings } = req.body;
+    let { description, coverImage, profilePic, settings, profilePicUrl, coverImageUrl } = req.body || {};
+    
+    // Use link URLs if provided
+    if (!profilePic && profilePicUrl) profilePic = profilePicUrl;
+    if (!coverImage && coverImageUrl) coverImage = coverImageUrl;
+
     const circle = await Circle.findById(req.params.circleId);
 
     if (!circle || !circle.isActive) {

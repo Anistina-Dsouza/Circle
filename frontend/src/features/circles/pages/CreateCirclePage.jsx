@@ -127,11 +127,11 @@ const CreateCirclePage = () => {
         <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-400 ml-1">{label}</label>
-                <div className="flex bg-[#0F0529] p-1 rounded-xl border border-white/5">
+                <div className="flex bg-[#0F0529]/80 p-1.5 rounded-2xl border border-white/5 backdrop-blur-sm">
                     <button
                         type="button"
                         onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'upload' }))}
-                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'upload' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all duration-300 active:scale-95 uppercase ${uploadModes[field] === 'upload' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
                     >
                         <Camera size={14} />
                         <span>Upload</span>
@@ -139,7 +139,7 @@ const CreateCirclePage = () => {
                     <button
                         type="button"
                         onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'link' }))}
-                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadModes[field] === 'link' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all duration-300 active:scale-95 uppercase ${uploadModes[field] === 'link' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
                     >
                         <LinkIcon size={14} />
                         <span>Link</span>

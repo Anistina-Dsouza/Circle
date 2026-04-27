@@ -26,7 +26,7 @@ const MeetingsPage = () => {
             if (res.success && res.data) {
                 const mapUpcoming = (m) => {
                     const dateObj = new Date(m.startTime);
-                    const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
+                    const attendees = m.participants?.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3) || [];
                     const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
                     return {
                         id: m._id,
@@ -59,7 +59,7 @@ const MeetingsPage = () => {
 
                 const mapHosted = (m) => {
                     const dateObj = new Date(m.startTime);
-                    const attendees = m.participants?.map(p => p.user?.profile?.profileImage || 'https://i.pravatar.cc/150?u=1').slice(0, 3) || [];
+                    const attendees = m.participants?.map(p => p.user?.profilePic || 'https://i.pinimg.com/736x/24/de/64/24de6482109345ed57693bcd21b42927.jpg').slice(0, 3) || [];
                     const plusCount = m.participants?.length > 3 ? m.participants.length - 3 : 0;
                     return {
                         id: m._id,

@@ -41,6 +41,7 @@ exports.getDashboard = async (req, res) => {
     })
       .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage creator')
+      .populate('participants.user', 'username displayName profilePic')
       .sort({ startTime: 1 })
       .limit(5);
 
@@ -54,6 +55,7 @@ exports.getDashboard = async (req, res) => {
     })
       .populate('host', 'username displayName profilePic')
       .populate('circle', 'name slug coverImage creator')
+      .populate('participants.user', 'username displayName profilePic')
       .sort({ endTime: -1 })
       .limit(10);
 
