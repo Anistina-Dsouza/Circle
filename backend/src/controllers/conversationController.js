@@ -2,47 +2,58 @@ const ConversationService = require('../services/conversationService');
 const { getIo } = require('../sockets');
 
 exports.startConversation = async (req, res) => {
-  const { recipientId } = req.body
-  console.log("here -",recipientId)
-  console.log("here myId-",req.userId)
-  const myId = req.userId
-
-  // basic validation only
-  if (!recipientId) return res.status(400).json({ error: 'recipientId required' })
-  if (recipientId === myId.toString())
-    return res.status(400).json({ error: 'Cannot DM yourself' })
-
-  const conversation = await ConversationService.findOrCreate(myId, recipientId)
-
   try {
-    getIo().to(myId.toString()).to(recipientId.toString()).emit('newConversation', conversation);
+    const { recipientId } = req.body;
+    const myId = req.userId;
+
+    if (!recipientId) return res.status(400).json({ error: 'recipientId required' });
+    if (recipientId === myId.toString())
+      return res.status(400).json({ error: 'Cannot DM yourself' });
+
+    const conversation = await ConversationService.findOrCreate(myId, recipientId);
+
+    try {
+      getIo().to(myId.toString()).to(recipientId.toString()).emit('newConversation', conversation);
+    } catch (err) {
+      console.error('Socket error:', err);
+    }
+
+    res.status(200).json({ conversation });
   } catch (err) {
-    console.error('Socket error:', err);
+    res.status(err.statusCode || 400).json({ error: err.message });
   }
-
-  res.status(200).json({ conversation })
-
-}   
+};
 
 exports.getMyConversations = async (req, res) => {
-  const conversations = await ConversationService.getMyList(req.userId)
-  res.status(200).json({ conversations })
-}
-
+  try {
+    const conversations = await ConversationService.getMyList(req.userId);
+    res.status(200).json({ conversations });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
 
 exports.getConversation = async (req, res) => {
-  const conversation = await ConversationService.getById(
-    req.params.conversationId,
-    req.userId
-  )
-  res.status(200).json({ conversation })
-}
-
+  try {
+    const conversation = await ConversationService.getById(
+      req.params.conversationId,
+      req.userId
+    );
+    res.status(200).json({ conversation });
+  } catch (err) {
+    const status = err.message.includes('not found') ? 404 : 400;
+    res.status(status).json({ error: err.message });
+  }
+};
 
 exports.deleteConversation = async (req, res) => {
-  await ConversationService.deleteForUser(
-    req.params.conversationId,
-    req.userId
-  )
-  res.status(200).json({ success: true })
-}
+  try {
+    await ConversationService.deleteForUser(
+      req.params.conversationId,
+      req.userId
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};

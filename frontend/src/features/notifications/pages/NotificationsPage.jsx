@@ -26,10 +26,17 @@ const NotificationsPage = () => {
                 }
                 break;
             case 'message':
-            case 'mention':
             case 'flash_reply':
                 if (noti.relatedItem?.id) {
-                    // Navigate to conversation
+                    navigate(`/messages`, { state: { selectedChat: noti.relatedItem.id } });
+                } else {
+                    navigate(`/messages`);
+                }
+                break;
+            case 'mention':
+                if (noti.relatedItem?.type === 'circle' && noti.relatedItem?.id) {
+                    navigate(`/circles/${noti.relatedItem.id}`);
+                } else if (noti.relatedItem?.id) {
                     navigate(`/messages`, { state: { selectedChat: noti.relatedItem.id } });
                 } else {
                     navigate(`/messages`);
@@ -43,7 +50,7 @@ const NotificationsPage = () => {
             case 'circle_invite':
             case 'circle_join':
             case 'circle_message':
-                if (noti.relatedItem?.type === 'circle' && noti.relatedItem?.id) {
+                if (noti.relatedItem?.id) {
                     navigate(`/circles/${noti.relatedItem.id}`);
                 } else {
                     navigate(`/circles`);

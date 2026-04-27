@@ -369,10 +369,12 @@ const StoryViewerPage = () => {
                     )}
 
                     {currentStory.caption && (
-                        <div className="absolute bottom-10 left-8 right-1/4 pointer-events-none z-10">
-                            <p className="text-white text-base font-bold leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-3">
-                                {currentStory.caption}
-                            </p>
+                        <div className="absolute bottom-12 left-0 right-0 px-8 z-20 pointer-events-none">
+                            <div className="bg-black/20 backdrop-blur-sm p-4 rounded-3xl border border-white/5 pointer-events-auto">
+                                <p className="text-white text-sm md:text-base font-medium leading-relaxed drop-shadow-lg max-h-32 overflow-y-auto custom-scrollbar">
+                                    {currentStory.caption}
+                                </p>
+                            </div>
                         </div>
                     )}
 

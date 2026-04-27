@@ -115,13 +115,17 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
                 <div className="flex-1 flex flex-col">
                     {/* Caption Input */}
-                    <div className="flex-1 bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
-                        <input
-                            type="text"
+                    <div className="flex-1 bg-[#2D2A4A]/50 rounded-2xl px-6 py-2 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
+                        <textarea
+                            rows="1"
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
                             placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
-                            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+                            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm resize-none py-1 custom-scrollbar"
+                            onInput={(e) => {
+                                e.target.style.height = 'auto';
+                                e.target.style.height = e.target.scrollHeight + 'px';
+                            }}
                         />
                     </div>
                 </div>

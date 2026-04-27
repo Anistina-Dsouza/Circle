@@ -155,7 +155,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                 <div className="p-2 space-y-1">
                                     {[
                                         { id: 'all', label: 'All Conversations' },
-                                        { id: 'messages', label: 'With Messages' },
+                                        { id: 'messages', label: 'Unread' },
                                         { id: 'online', label: 'Online Friends' }
                                     ].map(opt => (
                                         <button
@@ -164,7 +164,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                                 setFilterType(opt.id);
                                                 setShowFilterMenu(false);
                                             }}
-                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterType === opt.id ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+                                            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${filterType === opt.id ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
                                         >
                                             {opt.label}
                                         </button>

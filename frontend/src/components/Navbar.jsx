@@ -113,7 +113,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                   <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                     <User size={16} />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-wider">My Profile</span>
+                  <span className="text-sm font-medium text-white/80 group-hover:text-white">My Profile</span>
                 </Link>
                 <Link
                   to="/settings"
@@ -123,7 +123,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                   <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:rotate-45 transition-transform">
                     <Settings size={16} />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-wider">Settings</span>
+                  <span className="text-sm font-medium text-white/80 group-hover:text-white">Settings</span>
                 </Link>
                 <div className="h-px bg-white/5 my-2 mx-5" />
                 <button
@@ -133,7 +133,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                   <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 group-hover:-translate-x-1 transition-transform">
                     <LogOut size={16} />
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-wider">Logout</span>
+                  <span className="text-sm font-medium">Logout</span>
                 </button>
               </div>
             )}
