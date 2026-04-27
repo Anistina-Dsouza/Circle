@@ -139,6 +139,4 @@ export default function LatestRegistrations({ users }) {
     </div>
   );
 }
-
-  );
-}
+
