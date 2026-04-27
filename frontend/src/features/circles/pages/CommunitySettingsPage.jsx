@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
     Settings, ArrowLeft, Shield, Sparkles, 
     Lock, Save, AlertTriangle, Image as ImageIcon,
-    Check, Loader2, Camera, UploadCloud
+    Check, Loader2, Camera, UploadCloud, X, Link as LinkIcon
 } from 'lucide-react';
 
 import FeedNavbar from '../../feed/components/FeedNavbar';
@@ -21,13 +21,32 @@ const CommunitySettingsPage = () => {
     const [saveSuccess, setSaveSuccess] = useState(false);
     const baseUrl = import.meta.env.VITE_API_URL;
 
+    // Media refs & states
+    const profilePicInputRef = useRef(null);
+    const coverImageInputRef = useRef(null);
+    
+    const [uploadModes, setUploadModes] = useState({
+        profilePic: 'link',
+        coverImage: 'link'
+    });
+
+    const [files, setFiles] = useState({
+        profilePic: null,
+        coverImage: null
+    });
+
+    const [previews, setPreviews] = useState({
+        profilePic: '',
+        coverImage: ''
+    });
+
     // Form state
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         type: 'public',
         coverImage: '',
-        profileImage: '', // Simulated field
+        profilePic: '',
         settings: {
             allowMemberPosts: true,
             allowMemberInvites: true
@@ -50,11 +69,15 @@ const CommunitySettingsPage = () => {
                         description: c.description || '',
                         type: c.type || 'public',
                         coverImage: c.coverImage || '',
-                        profileImage: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop', // Default mock
+                        profilePic: c.profilePic || '',
                         settings: {
                             allowMemberPosts: c.settings?.allowMemberPosts ?? true,
                             allowMemberInvites: c.settings?.allowMemberInvites ?? true
                         }
+                    });
+                    setPreviews({
+                        profilePic: c.profilePic || '',
+                        coverImage: c.coverImage || ''
                     });
                 }
             } catch (err) {
@@ -66,31 +89,50 @@ const CommunitySettingsPage = () => {
         fetchCircle();
     }, [slug, baseUrl]);
 
-    const handleUpdateBanner = () => {
-        const url = prompt("Enter the URL for the community banner (cover image):", formData.coverImage);
-        if (url !== null) {
-            setFormData({ ...formData, coverImage: url });
+    const handleFileSelect = (e, field) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFiles(prev => ({ ...prev, [field]: file }));
+            const url = URL.createObjectURL(file);
+            setPreviews(prev => ({ ...prev, [field]: url }));
+            setFormData(prev => ({ ...prev, [field]: url }));
         }
     };
 
-    const handleUpdateIcon = () => {
-        const url = prompt("Enter the URL for the community icon:", formData.profileImage);
-        if (url !== null) {
-            setFormData({ ...formData, profileImage: url });
-        }
+    const handleUrlChange = (url, field) => {
+        setFormData(prev => ({ ...prev, [field]: url }));
+        setPreviews(prev => ({ ...prev, [field]: url }));
+        setFiles(prev => ({ ...prev, [field]: null }));
     };
 
     const handleSave = async () => {
         setSaving(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put(`${baseUrl}/api/circles/${circle._id}`, {
-                description: formData.description,
-                coverImage: formData.coverImage,
-                profilePic: formData.profileImage, // formData.profileImage is currently used for the icon URL
-                settings: formData.settings
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
+            
+            const submitData = new FormData();
+            submitData.append('description', formData.description);
+            submitData.append('settings', JSON.stringify(formData.settings));
+
+            // Profile Pic
+            if (uploadModes.profilePic === 'upload' && files.profilePic) {
+                submitData.append('profilePic', files.profilePic);
+            } else {
+                submitData.append('profilePic', formData.profilePic);
+            }
+
+            // Cover Image
+            if (uploadModes.coverImage === 'upload' && files.coverImage) {
+                submitData.append('coverImage', files.coverImage);
+            } else {
+                submitData.append('coverImage', formData.coverImage);
+            }
+
+            const res = await axios.put(`${baseUrl}/api/circles/${circle._id}`, submitData, {
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
             if (res.data.success) {
@@ -118,6 +160,84 @@ const CommunitySettingsPage = () => {
             alert(err.response?.data?.error || 'Failed to delete circle');
         }
     };
+
+    const ImageSection = ({ label, field, inputRef }) => (
+        <div className="bg-[#1A1140]/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-gray-400 ml-1 uppercase tracking-widest">{label}</label>
+                <div className="flex bg-[#0F0529] p-1 rounded-xl border border-white/5">
+                    <button 
+                        type="button"
+                        onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'upload' }))}
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${uploadModes[field] === 'upload' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        <Camera size={12} />
+                        <span>Upload</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setUploadModes(prev => ({ ...prev, [field]: 'link' }))}
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${uploadModes[field] === 'link' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40' : 'text-gray-500 hover:text-gray-300'}`}
+                    >
+                        <LinkIcon size={12} />
+                        <span>Link</span>
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className={`relative ${field === 'profilePic' ? 'w-24 h-24' : 'w-full h-32'} bg-[#0F0529] rounded-2xl border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 group`}>
+                    {previews[field] ? (
+                        <>
+                            <img src={previews[field]} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button 
+                                    type="button"
+                                    onClick={() => {
+                                        setPreviews(prev => ({ ...prev, [field]: '' }));
+                                        setFormData(prev => ({ ...prev, [field]: '' }));
+                                        setFiles(prev => ({ ...prev, [field]: null }));
+                                    }}
+                                    className="p-2 bg-red-500/80 rounded-full text-white hover:bg-red-500 transition-all"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <ImageIcon size={field === 'profilePic' ? 24 : 32} className="text-gray-700" />
+                    )}
+                </div>
+
+                <div className="flex-1 w-full">
+                    {uploadModes[field] === 'upload' ? (
+                        <div 
+                            onClick={() => inputRef.current?.click()}
+                            className="w-full h-24 border-2 border-dashed border-white/5 hover:border-purple-500/50 bg-[#0F0529] rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all group"
+                        >
+                            <UploadCloud size={20} className="text-gray-600 mb-2 group-hover:text-purple-400 transition-colors" />
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Click to Upload</p>
+                            <input 
+                                type="file" 
+                                ref={inputRef} 
+                                onChange={(e) => handleFileSelect(e, field)} 
+                                className="hidden" 
+                                accept="image/*"
+                            />
+                        </div>
+                    ) : (
+                        <input
+                            type="text"
+                            placeholder={`Paste ${label} URL...`}
+                            value={formData[field]}
+                            onChange={(e) => handleUrlChange(e.target.value, field)}
+                            className="w-full bg-[#0F0529] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-purple-500 transition-all font-medium text-sm"
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 
     if (loading) {
         return (
@@ -159,64 +279,9 @@ const CommunitySettingsPage = () => {
                     description="Customize the visual appearance of your circle."
                     icon={ImageIcon}
                 >
-                    <div className="space-y-8">
-                        {/* Banner Upload */}
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 mb-3 ml-1 tracking-widest">Circle Banner</label>
-                            <div className="relative group/banner aspect-[3/1] rounded-3xl overflow-hidden border border-white/10 bg-[#1A1140]/40">
-                                <img 
-                                    src={formData.coverImage || 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'} 
-                                    alt="Banner" 
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                    <button 
-                                        onClick={handleUpdateBanner}
-                                        className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all active:scale-90"
-                                    >
-                                        <Camera size={20} />
-                                    </button>
-                                    <button 
-                                        onClick={handleUpdateBanner}
-                                        className="p-3 bg-purple-600/80 backdrop-blur-md rounded-full text-white hover:bg-purple-600 transition-all active:scale-90 shadow-xl shadow-purple-900/40"
-                                    >
-                                        <UploadCloud size={20} />
-                                    </button>
-                                </div>
-                                <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/5">
-                                    <p className="text-[9px] font-bold text-gray-300">Optimal: 1500 × 500 px</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Profile Pic Upload */}
-                        <div className="flex items-center gap-8">
-                            <div className="relative group/avatar">
-                                <div className="w-24 h-24 rounded-[32px] overflow-hidden border-2 border-purple-500/30 bg-[#1A1140]/60 p-1 group-hover/avatar:border-purple-500 transition-all">
-                                    <img 
-                                        src={formData.profileImage} 
-                                        alt="Profile" 
-                                        className="w-full h-full object-cover rounded-[28px]"
-                                    />
-                                </div>
-                                <button 
-                                    onClick={handleUpdateIcon}
-                                    className="absolute -bottom-2 -right-2 p-2.5 bg-purple-600 rounded-2xl text-white shadow-lg shadow-purple-900/40 border border-[#0F0529] hover:scale-110 transition-transform active:scale-95"
-                                >
-                                    <Camera size={14} />
-                                </button>
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-bold text-white mb-1">Community Icon</h4>
-                                <p className="text-xs text-gray-500 leading-relaxed mb-3">This icon appears in the sidebar and chat list. Recommended: Square high-res image.</p>
-                                <button 
-                                    onClick={() => setFormData({...formData, profileImage: ''})}
-                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-gray-400 hover:text-white hover:border-white/20 transition-all"
-                                >
-                                    Remove Icon
-                                </button>
-                            </div>
-                        </div>
+                    <div className="space-y-6">
+                        <ImageSection label="Circle Banner" field="coverImage" inputRef={coverImageInputRef} />
+                        <ImageSection label="Community Icon" field="profilePic" inputRef={profilePicInputRef} />
                     </div>
                 </SettingsSection>
 
@@ -228,7 +293,7 @@ const CommunitySettingsPage = () => {
                 >
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-400 mb-2 ml-1 tracking-widest">Circle Name</label>
+                            <label className="block text-[10px] font-bold text-gray-400 mb-2 ml-1 tracking-widest uppercase">Circle Name</label>
                             <input 
                                 type="text" 
                                 value={formData.name}
@@ -238,7 +303,7 @@ const CommunitySettingsPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-400 mb-2 ml-1 tracking-widest">Community Description</label>
+                            <label className="block text-[10px] font-bold text-gray-400 mb-2 ml-1 tracking-widest uppercase">Community Description</label>
                             <textarea 
                                 rows="3"
                                 value={formData.description}
@@ -297,7 +362,7 @@ const CommunitySettingsPage = () => {
                 <div className="bg-red-500/5 border border-red-500/10 rounded-[32px] p-8 mt-12 mb-6">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="p-3 bg-red-500/10 rounded-2xl text-red-400">
-                            <AlertTriangle size={22} strokeWidth={2} />
+                             <AlertTriangle size={22} strokeWidth={2} />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-red-400 tracking-tight">Danger Zone</h2>
@@ -343,7 +408,7 @@ const CommunitySettingsPage = () => {
                             className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-purple-400 to-purple-600 rounded-2xl text-white font-bold text-xs tracking-wide hover:shadow-lg hover:shadow-purple-500/30 transition-all hover:scale-[1.05] active:scale-95 disabled:opacity-50 disabled:scale-100 shadow-xl shadow-purple-900/40"
                         >
                             {saving ? (
-                                <Loader2Icon className="animate-spin" size={16} />
+                                <Loader2 className="animate-spin" size={16} />
                             ) : (
                                 <Save size={16} />
                             )}
@@ -388,21 +453,5 @@ const CommunitySettingsPage = () => {
     );
 };
 
-// Helper for the loader
-const Loader2Icon = ({ className, size }) => (
-    <svg 
-        className={className} 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-    >
-        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-);
-
 export default CommunitySettingsPage;
+

@@ -16,18 +16,35 @@ const ExploreUsersPage = () => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const { following: currentUserFollowing, followUser, unfollowUser } = useFollowData(currentUser.username);
 
-    const fetchUsers = useCallback(async (query = '') => {
-        // If query is empty, we search for a common letter to get some "suggested" users
-        // since the backend requires 2 characters for search.
-        const searchQueryToUse = query.length < 2 ? (query.length === 0 ? 'a' : query) : query;
+    const fetchSuggestedUsers = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${baseUrl}/api/users/suggested`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-        if (searchQueryToUse.length < 2) return;
+            if (response.data.success) {
+                setUsers(response.data.users || []);
+            }
+        } catch (err) {
+            console.error('Error fetching suggestions:', err);
+            // If suggestions fail, fall back to a generic search so the page isn't empty
+            fetchUsers('a');
+        } finally {
+            setLoading(false);
+        }
+    }, [baseUrl]);
+
+    const fetchUsers = useCallback(async (query = '') => {
+        if (query.length < 2) return;
 
         setLoading(true);
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/search?q=${searchQueryToUse}`, {
+            const response = await axios.get(`${baseUrl}/api/users/search?q=${query}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -44,8 +61,8 @@ const ExploreUsersPage = () => {
 
     // Initial load: Fetch suggested users
     useEffect(() => {
-        fetchUsers('');
-    }, [fetchUsers]);
+        fetchSuggestedUsers();
+    }, [fetchSuggestedUsers]);
 
     // Debounced search
     useEffect(() => {
@@ -125,10 +142,10 @@ const ExploreUsersPage = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="flex items-center space-x-2 mb-8">
-                            <Users size={20} className="text-gray-500" />
-                            <h2 className="text-xl font-bold text-white uppercase tracking-wider">
-                                {searchQuery.length >= 2 ? `Results for "${searchQuery}"` : 'Suggested for you'}
+                        <div className="flex items-center space-x-2 mb-10">
+                            <Users size={20} className="text-purple-400" />
+                            <h2 className="text-xl font-bold text-white tracking-tight">
+                                {searchQuery.length >= 2 ? `Results for "${searchQuery}"` : 'Suggested For You'}
                             </h2>
                         </div>
 

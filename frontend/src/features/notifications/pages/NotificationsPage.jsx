@@ -202,18 +202,18 @@ const NotificationsPage = () => {
                 </div>
 
                 {/* Tabs / Filter Area */}
-                <div className="flex items-center gap-1 bg-[#12082A] p-1.5 rounded-2xl border border-white/5 mb-6 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1 bg-white/2 backdrop-blur-xl p-1.5 rounded-2xl border border-white/5 mb-8 overflow-x-auto no-scrollbar">
                     {['all', 'unread', 'mention', 'like', 'followers', 'announcements'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
                                 activeTab === tab 
-                                ? 'bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg' 
-                                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                                ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]' 
+                                : 'text-white/60 hover:text-white border-transparent hover:bg-white/5'
                             }`}
                         >
-                            {tab.replace('_', ' ')}
+                            {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1).replace('_', ' ')}
                         </button>
                     ))}
                 </div>

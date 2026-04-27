@@ -17,10 +17,10 @@ const FilterBar = ({ selectedCategory, onSelectCategory }) => {
                 <button
                     key={category}
                     onClick={() => onSelectCategory(category)}
-                    className={`px-6 py-3 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap active:scale-95 ${
+                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap active:scale-95 border ${
                         selectedCategory === category
-                        ? 'bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
-                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5 border border-transparent'
+                        ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                        : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
                     }`}
                 >
                     {category}

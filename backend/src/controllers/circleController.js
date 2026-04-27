@@ -265,10 +265,33 @@ exports.updateCircle = async (req, res) => {
     //   circle.name = name;
     // }
     
+    // Handle File Uploads
+    if (req.files) {
+      if (req.files.profilePic) {
+        const result = await uploadToCloudinary(req.files.profilePic[0].buffer, 'profiles');
+        circle.profilePic = result.secure_url;
+      }
+      if (req.files.coverImage) {
+        const result = await uploadToCloudinary(req.files.coverImage[0].buffer, 'covers');
+        circle.coverImage = result.secure_url;
+      }
+    }
+
     if (description !== undefined) circle.description = description;
-    if (coverImage) circle.coverImage = coverImage;
-    if (profilePic) circle.profilePic = profilePic;
-    if (settings) circle.settings = { ...circle.settings, ...settings };
+    if (coverImage && (!req.files || !req.files.coverImage)) circle.coverImage = coverImage;
+    if (profilePic && (!req.files || !req.files.profilePic)) circle.profilePic = profilePic;
+    
+    if (settings) {
+      let parsedSettings = settings;
+      if (typeof settings === 'string') {
+        try {
+          parsedSettings = JSON.parse(settings);
+        } catch (e) {
+          parsedSettings = circle.settings;
+        }
+      }
+      circle.settings = { ...circle.settings, ...parsedSettings };
+    }
     
     await circle.save();
     

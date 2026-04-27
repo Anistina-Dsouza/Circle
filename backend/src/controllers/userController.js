@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Follow = require('../models/Follow');
 const Notification = require('../models/Notification');
+const Circle = require('../models/Circle');
 
 // GET /api/users/:username
 exports.getUserProfile = async (req, res) => {
@@ -292,3 +293,59 @@ exports.searchUsers = async (req, res) => {
   }
 };
 
+// GET /api/users/suggested
+exports.getSuggestedUsers = async (req, res) => {
+  try {
+    const currentUserId = req.userId;
+
+    // 1. Get IDs of users already followed
+    const following = await Follow.find({ follower: currentUserId }).select('following');
+    const followingIds = following.map(f => f.following.toString());
+    followingIds.push(currentUserId.toString()); // Exclude self
+
+    // 2. Find mutual friends (users followed by people I follow)
+    const mutuals = await Follow.find({ 
+      follower: { $in: following.map(f => f.following) } 
+    })
+    .limit(50)
+    .select('following');
+    
+    const mutualIds = mutuals
+      .map(f => f.following.toString())
+      .filter(id => !followingIds.includes(id));
+
+    // 3. Find people in same circles
+    const myCircles = await Circle.find({ 'members.user': currentUserId }).select('members.user');
+    const circleMemberIds = myCircles
+      .flatMap(c => c.members.map(m => m.user.toString()))
+      .filter(id => !followingIds.includes(id));
+
+    // 4. Fallback: Popular users
+    const popularUsers = await User.find({ 
+      _id: { $nin: followingIds } 
+    })
+    .sort({ 'stats.followerCount': -1 })
+    .limit(20)
+    .select('_id');
+
+    const popularIds = popularUsers.map(u => u._id.toString());
+
+    // Combine all and shuffle/limit
+    const allSuggestedIds = [...new Set([...mutualIds, ...circleMemberIds, ...popularIds])];
+    
+    // Fetch full profiles for the top suggestions
+    const suggestedUsers = await User.find({
+      _id: { $in: allSuggestedIds.slice(0, 15) }
+    })
+    .select('username displayName profilePic bio stats')
+    .limit(12);
+
+    res.json({
+      success: true,
+      users: suggestedUsers
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

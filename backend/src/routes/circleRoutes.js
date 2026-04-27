@@ -21,7 +21,10 @@ router.post('/', upload.fields([
     { name: 'coverImage', maxCount: 1 }
 ]), circleController.createCircle);
 router.get('/my-circles/list', circleController.getMyCircles);
-router.put('/:circleId', circleController.updateCircle);
+router.put('/:circleId', upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+]), circleController.updateCircle);
 router.delete('/:circleId', circleController.deleteCircle);
 
 // Membership

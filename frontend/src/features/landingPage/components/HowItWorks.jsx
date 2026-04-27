@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, UserPlus, MessageCircle, ArrowRight } from 'lucide-react';
+import { Search, UserPlus, MessageCircle, ArrowDown } from 'lucide-react';
 
 const STEPS = [
   {
@@ -64,7 +64,7 @@ export default function HowItWorks() {
               </p>
 
               {i < STEPS.length - 1 && (
-                <ArrowRight className="md:hidden mt-8 text-violet-500/40 animate-bounce" />
+                <ArrowDown className="md:hidden mt-8 text-violet-500/40 animate-bounce" />
               )}
             </div>
           ))}
