@@ -137,6 +137,7 @@ const StoryViewerPage = () => {
         const currentTouch = e.targetTouches[0].clientY;
         const diff = currentTouch - touchStart;
         if (diff > 0) {
+            if (e.cancelable) e.preventDefault();
             setTranslateY(diff);
         }
     };
@@ -325,7 +326,11 @@ const StoryViewerPage = () => {
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     onClick={handleContainerClick}
-                    style={{ transform: `translateY(${translateY}px)`, transition: translateY === 0 ? 'transform 0.3s' : 'none' }}
+                    style={{ 
+                        transform: `translateY(${translateY}px)`, 
+                        transition: translateY === 0 ? 'transform 0.3s' : 'none',
+                        touchAction: 'none'
+                    }}
                 >
                     {currentStory.media?.type === 'video' ? (
                         <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
