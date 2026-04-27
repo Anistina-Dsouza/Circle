@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
 import StoryInfo from '../components/StoryInfo';
 import StoryViewersModal from '../components/StoryViewersModal';
@@ -31,7 +31,7 @@ const StoryViewerPage = () => {
     const [translateY, setTranslateY] = useState(0);
 
     const progressTimer = useRef(null);
-    const baseUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     
     const currentUser = (() => {
         try { return JSON.parse(localStorage.getItem('user') || '{}'); }
