@@ -288,6 +288,7 @@ exports.searchUsers = async (req, res) => {
     }
 
     const users = await User.find({
+      username: { $ne: 'admin' }, // Exclude admin
       $or: [
         { username: { $regex: q, $options: 'i' } },
         { displayName: { $regex: q, $options: 'i' } }
@@ -365,10 +366,11 @@ exports.getSuggestedUsers = async (req, res) => {
     
     // Fetch full profiles for the top suggestions
     const suggestedUsers = await User.find({
-      _id: { $in: allSuggestedIds.slice(0, 20) }
+      _id: { $in: allSuggestedIds.slice(0, 20) },
+      username: { $ne: 'admin' } // Exclude admin
     })
-    .select('username displayName profilePic bio stats')
-    .limit(12);
+      .select('username displayName profilePic bio stats')
+      .limit(12);
 
     res.json({
       success: true,

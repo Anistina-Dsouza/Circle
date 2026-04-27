@@ -127,7 +127,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="flex flex-col md:flex-row min-h-0">
+                    <div className="flex flex-col-reverse md:flex-row min-h-0">
                         {/* Left: Live Preview */}
                         <div className="w-full md:w-[40%] p-8 bg-[#0F0529]/50 flex flex-col items-center justify-center border-r border-white/5">
                             <span className="text-[10px] font-bold tracking-[0.2em] text-gray-500 mb-8 uppercase">Live Preview</span>
