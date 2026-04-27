@@ -182,12 +182,13 @@ export default function ManageUsers() {
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
+                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-12 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 hover:text-white transition-all shadow-lg"
                 >
-                  <option value="all">Status: All</option>
-                  <option value="active">Status: Active</option>
-                  <option value="suspended">Status: Suspended</option>
+                  <option value="all" className="bg-[#1A0C3F]">Status: All</option>
+                  <option value="active" className="bg-[#1A0C3F]">Status: Active</option>
+                  <option value="suspended" className="bg-[#1A0C3F]">Status: Suspended</option>
                 </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px] group-hover:text-purple-400 transition-colors">▼</div>
               </div>
               
               <div className="relative flex-1 sm:flex-none">
@@ -195,12 +196,13 @@ export default function ManageUsers() {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
+                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-12 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 hover:text-white transition-all shadow-lg"
                 >
-                  <option value="default">Sort: Default</option>
-                  <option value="alphabetical">Sort: A-Z</option>
-                  <option value="flagged">Sort: Reported</option>
+                  <option value="default" className="bg-[#1A0C3F]">Sort: Default</option>
+                  <option value="alphabetical" className="bg-[#1A0C3F]">Sort: A-Z</option>
+                  <option value="flagged" className="bg-[#1A0C3F]">Sort: Reported</option>
                 </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px] group-hover:text-purple-400 transition-colors">▼</div>
               </div>
             </div>
           </div>

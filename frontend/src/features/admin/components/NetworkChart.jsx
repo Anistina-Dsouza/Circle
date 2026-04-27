@@ -165,12 +165,12 @@ export default function NetworkChart({ registrationTrends = [], hourlyTrends = [
                         transform: 'translate(-50%, -140%)'
                     }}
                     >
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-[8px] text-green-400 uppercase tracking-tighter">
+                        <div className="flex items-center gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-[7px] sm:text-[8px] text-green-400 uppercase tracking-tighter">
                             <div className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />
                             <span>System Active</span>
                         </div>
-                        <span className="uppercase tracking-widest text-xs sm:text-[13px] text-white tabular-nums">{activeData.value} Active Nodes</span>
-                        <div className="text-[8px] sm:text-[9px] text-purple-400/60 uppercase tracking-[0.2em] border-t border-white/5 pt-1.5 w-full text-center font-black mt-1.5">
+                        <span className="uppercase tracking-widest text-[10px] sm:text-[13px] text-white tabular-nums">{activeData.value} Active Nodes</span>
+                        <div className="text-[7px] sm:text-[9px] text-purple-400/60 uppercase tracking-[0.2em] border-t border-white/5 pt-1.5 w-full text-center font-black mt-1.5">
                             Temporal Pulse: {active}
                         </div>
                         <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0F0529]/95 border-r border-b border-purple-500/30 rotate-45" />
@@ -188,12 +188,12 @@ export default function NetworkChart({ registrationTrends = [], hourlyTrends = [
                     >
                     <div className="relative w-full h-full flex items-end justify-center group/bar">
                         {/* Premium Tactical Tag for Bar chart */}
-                        <div className={`absolute bg-[#0F0529]/95 backdrop-blur-2xl text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black pointer-events-none z-30 mb-10 bottom-full transition-all duration-500 flex flex-col items-center gap-1 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-purple-500/40 whitespace-nowrap ${active === item.day ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
-                            <div className="flex items-center gap-2">
+                        <div className={`absolute bg-[#0F0529]/95 backdrop-blur-2xl text-white px-2.5 sm:px-4 py-1.5 sm:py-3 rounded-xl sm:rounded-2xl text-[8px] sm:text-[10px] font-black pointer-events-none z-30 mb-8 sm:mb-10 bottom-full transition-all duration-500 flex flex-col items-center gap-1 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-purple-500/40 whitespace-nowrap ${active === item.day ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
                                 <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-                                <span className="uppercase tracking-wider text-[10px] sm:text-[12px]">{item.value} Nodes</span>
+                                <span className="uppercase tracking-wider text-[9px] sm:text-[12px]">{item.value} Nodes</span>
                             </div>
-                            <span className="text-[7px] sm:text-[8px] text-purple-400/50 uppercase tracking-[0.3em] border-t border-white/5 pt-1 w-full text-center font-black">
+                            <span className="text-[6px] sm:text-[8px] text-purple-400/50 uppercase tracking-[0.3em] border-t border-white/5 pt-1 w-full text-center font-black">
                                 {item.day}
                             </span>
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0F0529]/95 border-r border-b border-purple-500/40 rotate-45" />

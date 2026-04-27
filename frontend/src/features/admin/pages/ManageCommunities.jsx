@@ -174,18 +174,18 @@ export default function ManageCommunities() {
               />
             </div>
 
-            <div className="relative flex-1 sm:flex-none">
-                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={14} />
+            <div className="relative flex-1 sm:flex-none group">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none group-hover:text-indigo-400 transition-colors" size={14} />
                 <select
                   value={privacyFilter}
                   onChange={(e) => setPrivacyFilter(e.target.value)}
-                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
+                  className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-12 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer hover:bg-white/10 hover:text-white transition-all shadow-lg"
                 >
-                  <option value="all">Privacy: All</option>
-                  <option value="public">Privacy: Public</option>
-                  <option value="private">Privacy: Private</option>
+                  <option value="all" className="bg-[#1A0C3F]">Privacy: All</option>
+                  <option value="public" className="bg-[#1A0C3F]">Privacy: Public</option>
+                  <option value="private" className="bg-[#1A0C3F]">Privacy: Private</option>
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px]">▼</div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 text-[8px] group-hover:text-indigo-400 transition-colors">▼</div>
             </div>
           </div>
         </div>

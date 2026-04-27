@@ -101,21 +101,22 @@ export default function AdminReports() {
                         </p>
                     </div>
 
-                    <div className="flex p-1 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-[24px] sm:rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
+                    <div className="flex p-1 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex flex-col items-center gap-1 min-w-[80px] sm:min-w-[100px] px-4 sm:px-6 py-3 sm:py-4 rounded-[18px] sm:rounded-[24px] transition-all duration-700 group shrink-0 ${activeTab === tab.id
+                                className={`flex flex-col items-center gap-1 min-w-[70px] xs:min-w-[80px] sm:min-w-[100px] px-3 xs:px-4 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-[24px] transition-all duration-700 group shrink-0 ${activeTab === tab.id
                                     ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10"
                                     : "text-white/20 hover:text-white/60 hover:bg-white/[0.03]"
                                     }`}
                             >
                                 <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'scale-100 group-hover:scale-110'}`}>
-                                    {tab.icon}
+                                    {tab.icon && <tab.icon.type {...tab.icon.props} size={window.innerWidth < 640 ? 16 : 18} />}
+                                    {!tab.icon.type && tab.icon}
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-widest mt-1">{tab.label}</span>
-                                <span className={`text-[7px] font-black uppercase tracking-tighter opacity-40 group-hover:opacity-100 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'} hidden xs:block`}>
+                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest mt-1">{tab.label}</span>
+                                <span className={`text-[6px] sm:text-[7px] font-black uppercase tracking-tighter opacity-40 group-hover:opacity-100 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'} hidden xs:block`}>
                                     {tab.desc}
                                 </span>
                             </button>
@@ -306,7 +307,7 @@ function VelocityReport({ data }) {
             </div>
 
             {/* Immersive Engagement Depth - High Precision Spatial Mapping */}
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[56px] p-6 sm:p-12 lg:p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[500px] lg:min-h-[700px]">
+            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[56px] p-5 sm:p-12 lg:p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[450px] sm:min-h-[600px] lg:min-h-[700px]">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-fuchsia-600/5 pointer-events-none" />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 sm:mb-20 relative z-10 gap-6">
@@ -332,8 +333,8 @@ function VelocityReport({ data }) {
                     </div>
                 </div>
 
-                <div className="flex-1 relative mb-16 lg:mb-10 lg:ml-10 overflow-x-auto lg:overflow-visible no-scrollbar -mx-6 sm:mx-0">
-                    <div className="min-w-[600px] lg:min-w-0 h-[400px] lg:h-full relative">
+                <div className="flex-1 relative mb-12 sm:mb-16 lg:mb-10 lg:ml-10 overflow-x-auto lg:overflow-visible no-scrollbar -mx-5 sm:mx-0">
+                    <div className="min-w-[500px] sm:min-w-[600px] lg:min-w-0 h-[300px] sm:h-[400px] lg:h-full relative">
                         {/* Dynamic Axis Labels */}
                         <div className="absolute -left-12 bottom-0 top-0 hidden lg:flex flex-col justify-between py-10 items-end pr-8">
                             <div className="flex flex-col items-end gap-1.5 group/axis">
@@ -641,7 +642,7 @@ function DistributionReport({ data }) {
                 </div>
             </div>
 
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[40px] p-10 relative overflow-hidden">
+            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 relative overflow-hidden">
                 <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-fuchsia-500/5 rounded-full blur-[60px] pointer-events-none" />
                 <div className="flex items-center gap-3 mb-10">
                     <div className="p-2.5 bg-fuchsia-500/10 rounded-xl text-fuchsia-400">
@@ -652,19 +653,19 @@ function DistributionReport({ data }) {
 
                 <div className="space-y-5">
                     {data?.topCircles.map((circle, i) => (
-                        <div key={i} className="flex items-center gap-5 p-4 rounded-[24px] bg-white/[0.01] border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative">
-                            <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black border-2 border-[#0F0529] shadow-lg transition-transform group-hover:scale-110 ${i === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-[#1A0C3F]' :
+                        <div key={i} className="flex items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-[20px] sm:rounded-[24px] bg-white/[0.01] border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative">
+                            <div className={`shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-[11px] font-black border-2 border-[#0F0529] shadow-lg transition-transform group-hover:scale-110 ${i === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-[#1A0C3F]' :
                                 i === 1 ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-[#1A0C3F]' :
                                     i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
                                         'bg-[#1A1140] text-purple-400'
                                 }`}>
-                                {i === 0 ? <Trophy size={14} /> : i + 1}
+                                {i === 0 ? <Trophy size={12} /> : i + 1}
                             </div>
 
                             <div className="relative shrink-0">
-                                <div className="relative w-14 h-14 rounded-[20px] overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors">
+                                <div className="relative w-10 h-10 sm:w-14 sm:h-14 rounded-[14px] sm:rounded-[20px] overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors">
                                     <img src={circle.profilePic} alt={circle.name} className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" />
-                                    <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-green-500 border-2 border-[#0F0529] shadow-[0_0_5px_#22c55e]" />
+                                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-green-500 border-2 border-[#0F0529] shadow-[0_0_5px_#22c55e]" />
                                 </div>
                             </div>
 
@@ -682,10 +683,10 @@ function DistributionReport({ data }) {
 
                             <div className="text-right shrink-0">
                                 <div className="flex items-center justify-end gap-1 text-white">
-                                    <Users size={10} className="text-purple-500" />
-                                    <span className="text-lg font-black tabular-nums leading-none tracking-tighter">{circle.stats.memberCount}</span>
+                                    <Users size={window.innerWidth < 640 ? 8 : 10} className="text-purple-500" />
+                                    <span className="text-sm sm:text-lg font-black tabular-nums leading-none tracking-tighter">{circle.stats.memberCount}</span>
                                 </div>
-                                <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest mt-1">Growth</p>
+                                <p className="text-[6px] sm:text-[7px] text-gray-600 font-black uppercase tracking-widest mt-1">Growth</p>
                             </div>
                         </div>
                     ))}

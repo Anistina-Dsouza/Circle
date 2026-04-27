@@ -11,6 +11,10 @@ export default function Announcements() {
   const [message, setMessage] = useState("");
 
   const baseUrl = import.meta.env.VITE_API_URL || '';
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(3);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -29,6 +33,49 @@ export default function Announcements() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Pagination Logic
+  const totalPages = Math.ceil(announcements.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAnnouncements = announcements.slice(indexOfFirstItem, indexOfLastItem);
+
+  const Pagination = ({ className = "" }) => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className={`flex justify-center items-center gap-3 ${className}`}>
+        <button 
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl disabled:opacity-10"
+        >
+            <ChevronLeft size={18} />
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+                key={p}
+                onClick={() => setCurrentPage(p)}
+                className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
+                    p === currentPage
+                        ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                        : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
+                }`}
+            >
+                {p}
+            </button>
+        ))}
+
+        <button 
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl disabled:opacity-10"
+        >
+            <ChevronRight size={18} />
+        </button>
+      </div>
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -158,28 +205,7 @@ export default function Announcements() {
           </div>
 
           {/* Top Pagination */}
-          {!loading && announcements.length > 0 && (
-            <div className="flex justify-center items-center gap-3 mb-10">
-              <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
-                <ChevronLeft size={18} />
-              </button>
-              {[1, 2, 3].map((p) => (
-                <button
-                  key={p}
-                  className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
-                    p === 1
-                      ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                      : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-              <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          )}
+          {!loading && <Pagination className="mb-10" />}
 
           <div className="space-y-8">
             {loading ? (
@@ -187,11 +213,11 @@ export default function Announcements() {
                 <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
                 <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Loading...</span>
               </div>
-            ) : announcements.length === 0 ? (
+            ) : currentAnnouncements.length === 0 ? (
               <div className="text-center p-20 text-white/20 border border-white/5 rounded-[32px] bg-white/[0.02] font-black uppercase tracking-[0.3em] italic text-sm">
                 No announcements found.
               </div>
-            ) : announcements.map((a) => (
+            ) : currentAnnouncements.map((a) => (
               <div
                 key={a._id}
                 className="bg-[#1A0C3F]/50 backdrop-blur-xl p-8 sm:p-10 rounded-[32px] border border-white/10 hover:border-purple-500/20 transition-all duration-500 relative group"
@@ -227,29 +253,7 @@ export default function Announcements() {
             ))}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center items-center gap-3 mt-16">
-            <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
-              <ChevronLeft size={18} />
-            </button>
-
-            {[1, 2, 3].map((p) => (
-              <button
-                key={p}
-                className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
-                  p === 1
-                    ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                    : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-
-            <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
-              <ChevronRight size={18} />
-            </button>
-          </div>
+          <Pagination className="mt-16" />
 
         </div>
 
