@@ -31,11 +31,16 @@ exports.createMoment = async (req, res) => {
         url: result.secure_url,
         type: result.resource_type === 'video' ? 'video' : 'image'
       };
+    } else if (media && media.type === 'text') {
+      mediaData = {
+        type: 'text',
+        text: media.text || caption
+      };
     } else if (media && media.url) {
       // Direct URL provided
       mediaData = media;
     } else {
-      return res.status(400).json({ error: 'Media (file or url) is required' });
+      return res.status(400).json({ error: 'Media (file, url, or text) is required' });
     }
 
     const moment = await Moment.create({
