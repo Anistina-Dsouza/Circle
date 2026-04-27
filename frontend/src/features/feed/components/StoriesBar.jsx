@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import CreateStoryModal from './CreateStoryModal';
 
-const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
+const StoryCircle = ({ name, avatar, isAdd = false, username, onClick, isSeen = false }) => {
     const content = (
         <div 
             onClick={onClick}
@@ -13,8 +13,12 @@ const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
         >
             <div className={`
                 w-20 h-20 rounded-full p-[3px] 
-                ${isAdd ? 'border-2 border-dashed border-gray-500 hover:border-white' : 'bg-gradient-to-tr from-yellow-400 to-purple-600 group-hover:from-yellow-300 group-hover:to-pink-500'}
-                transition-all duration-300 transform group-hover:scale-110 shadow-lg shadow-purple-500/20
+                ${isAdd 
+                    ? 'border-2 border-dashed border-gray-500 hover:border-white' 
+                    : isSeen 
+                        ? 'border-2 border-white/10' 
+                        : 'bg-gradient-to-tr from-yellow-400 to-purple-600 group-hover:from-yellow-300 group-hover:to-pink-500 shadow-lg shadow-purple-500/20'}
+                transition-all duration-300 transform group-hover:scale-110 
             `}>
                 <div className="w-full h-full bg-[#0F0529] rounded-full p-[2px] overflow-hidden flex items-center justify-center">
                     {isAdd ? (
@@ -23,12 +27,12 @@ const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
                         <img
                             src={avatar || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"}
                             alt={name}
-                            className="w-full h-full rounded-full object-cover"
+                            className={`w-full h-full rounded-full object-cover transition-all duration-300 ${isSeen ? 'opacity-40 grayscale-[0.5]' : 'opacity-100'}`}
                         />
                     )}
                 </div>
             </div>
-            <span className="text-xs font-medium text-gray-300 group-hover:text-white transition-colors truncate max-w-[70px]">
+            <span className={`text-xs font-medium transition-colors truncate max-w-[70px] ${isSeen ? 'text-gray-600' : 'text-gray-300 group-hover:text-white'}`}>
                 {isAdd ? 'Add Story' : name}
             </span>
         </div>
@@ -120,14 +124,21 @@ const StoriesBar = ({ onPostSuccess }) => {
                     onClick={() => setIsModalOpen(true)}
                 />
                 
-                {followingStories.map(story => (
-                    <StoryCircle
-                        key={story._id}
-                        name={story.user?.displayName || story.user?.username}
-                        avatar={story.user?.profilePic}
-                        username={story.user?.username}
-                    />
-                ))}
+                {followingStories.map(story => {
+                    const isSeen = story.viewers?.some(v => {
+                        const viewerId = v._id || v;
+                        return viewerId.toString() === user?._id?.toString() || viewerId.toString() === user?.id?.toString();
+                    });
+                    return (
+                        <StoryCircle
+                            key={story._id}
+                            name={story.user?.displayName || story.user?.username}
+                            avatar={story.user?.profilePic}
+                            username={story.user?.username}
+                            isSeen={isSeen}
+                        />
+                    );
+                })}
 
                 {followingStories.length === 0 && (
                     <div className="flex items-center space-x-4 ml-2">

@@ -881,7 +881,7 @@ exports.getPendingRequests = async (req, res) => {
     const circle = await Circle.findById(circleId)
       .populate({
         path: 'pendingRequests.user',
-        select: 'username profile.displayName profile.profileImage stats.followerCount createdAt'
+        select: 'username displayName profilePic stats.followerCount createdAt'
       })
       .populate('pendingRequests.reviewedBy', 'username');
 
@@ -936,7 +936,7 @@ exports.getAllRequests = async (req, res) => {
     const circle = await Circle.findById(circleId)
       .populate({
         path: 'pendingRequests.user',
-        select: 'username profile.displayName profile.profileImage'
+        select: 'username displayName profilePic'
       })
       .populate('pendingRequests.reviewedBy', 'username');
 
@@ -1051,7 +1051,7 @@ exports.approveJoinRequest = async (req, res) => {
     await circle.save();
 
     // Get user info for response
-    const userInfo = await User.findById(userId).select('username profile.displayName');
+    const userInfo = await User.findById(userId).select('username displayName profilePic');
 
     res.json({
       success: true,
@@ -1114,7 +1114,7 @@ exports.rejectJoinRequest = async (req, res) => {
     await circle.save();
 
     // Get user info for response
-    const userInfo = await User.findById(request.user).select('username profile.displayName');
+    const userInfo = await User.findById(request.user).select('username displayName profilePic');
 
     res.json({
       success: true,

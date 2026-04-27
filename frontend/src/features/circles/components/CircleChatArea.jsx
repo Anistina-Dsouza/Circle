@@ -22,6 +22,27 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete, isModerator }) 
     const canDelete = isMe || isModerator;
     const [showActionsMobile, setShowActionsMobile] = useState(false);
 
+    const renderMessageText = (text) => {
+        if (!text) return null;
+        const parts = text.split(/(@\w+)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('@')) {
+                const username = part.slice(1);
+                return (
+                    <Link 
+                        key={i} 
+                        to={`/profile/${username}`}
+                        className="text-violet-300 font-bold hover:text-white transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </Link>
+                );
+            }
+            return part;
+        });
+    };
+
     return (
         <div className={`flex gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-300 ${isMe ? 'flex-row-reverse' : ''}`}>
             {/* Avatar */}
@@ -65,7 +86,7 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete, isModerator }) 
                         className={`text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/40 cursor-pointer md:cursor-auto ${msg.isDeleted ? 'text-gray-500' : 'text-gray-200'}`}
                         onClick={() => setShowActionsMobile(!showActionsMobile)}
                     >
-                        {msg.isDeleted ? 'This message was deleted because it offends this circle' : msg.text}
+                        {msg.isDeleted ? 'This message was deleted because it offends this circle' : renderMessageText(msg.text)}
                     </p>
 
                     {/* Hover Actions Bar */}
@@ -139,6 +160,12 @@ const CircleChatArea = ({ circle }) => {
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [hasNewMessages, setHasNewMessages] = useState(false);
     const emojiPickerRef = useRef(null);
+    
+    // Mention States
+    const [showMentions, setShowMentions] = useState(false);
+    const [mentionFilter, setMentionFilter] = useState('');
+    const [mentionIndex, setMentionIndex] = useState(-1);
+    const [selectedMentionIdx, setSelectedMentionIdx] = useState(0);
 
     const emojiCategories = [
         { id: 'smileys', icon: <Smile size={16} />, emojis: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😮‍💨', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😶‍🌫️', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '😵‍💫', '🤐', '🥴', '🤢', '🤮', '🤧', '🤨', '🧐'] },
@@ -160,7 +187,6 @@ const CircleChatArea = ({ circle }) => {
         if (!circle || !currentUserId) return;
         const member = circle.members?.find(m => (m.user?._id || m.user) === currentUserId);
         
-        // Mute check
         if (member?.isMuted) {
             const until = member.mutedUntil ? new Date(member.mutedUntil) : null;
             if (!until || until > new Date()) {
@@ -172,7 +198,6 @@ const CircleChatArea = ({ circle }) => {
             setMutedUntil(null);
         }
 
-        // Moderator check
         const isMod = (circle.creator?._id || circle.creator) === currentUserId || 
                      ['admin', 'moderator'].includes(member?.role);
         setIsModerator(isMod);
@@ -187,52 +212,14 @@ const CircleChatArea = ({ circle }) => {
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e?.currentTarget || scrollRef.current || {};
         if (scrollHeight === undefined) return;
-        
         const distance = scrollHeight - scrollTop - clientHeight;
-        
-        // Also check if container bottom is offscreen
-        const container = scrollRef.current?.parentElement;
-        let isBottomOffscreen = false;
-        if (container) {
-            const rect = container.getBoundingClientRect();
-            isBottomOffscreen = rect.bottom > window.innerHeight + 10;
-        }
-        
-        if (distance > 20 || isBottomOffscreen) {
-            setShowScrollButton(true);
-        } else {
+        if (distance > 20) setShowScrollButton(true);
+        else {
             setShowScrollButton(false);
             setHasNewMessages(false);
         }
     };
 
-    // Add a window scroll listener to catch page scrolls
-    useEffect(() => {
-        const handleWinScroll = () => {
-            if (scrollRef.current) {
-                const container = scrollRef.current.parentElement;
-                const rect = container.getBoundingClientRect();
-                const isBottomOffscreen = rect.bottom > window.innerHeight + 10;
-                
-                const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-                const distance = scrollHeight - scrollTop - clientHeight;
-                
-                if (isBottomOffscreen || distance > 20) {
-                    setShowScrollButton(true);
-                } else {
-                    setShowScrollButton(false);
-                }
-            }
-        };
-        window.addEventListener('scroll', handleWinScroll);
-        // Run once on mount to set initial state
-        handleWinScroll();
-        return () => window.removeEventListener('scroll', handleWinScroll);
-    }, []);
-
-
-
-    // Also listen to window scroll as a fallback
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
@@ -242,10 +229,6 @@ const CircleChatArea = ({ circle }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-
-
-
 
     useEffect(() => {
         scrollToBottom();
@@ -262,7 +245,6 @@ const CircleChatArea = ({ circle }) => {
                 });
 
                 if (res.data.messages) {
-                    // console.log("messages - ", res.data.messages);
                     const formatted = res.data.messages.map(msg => formatBackendMessage(msg, currentUserId));
                     setMessages(formatted);
                 }
@@ -290,8 +272,6 @@ const CircleChatArea = ({ circle }) => {
             const senderId = newMsg.sender?._id || newMsg.sender;
             if (senderId !== currentUserId) {
                 setMessages(prev => [...prev, formatBackendMessage(newMsg, currentUserId)]);
-                
-                // If user is currently scrolled up, show the red notification dot
                 const element = scrollRef.current;
                 if (element && element.scrollHeight - element.scrollTop - element.clientHeight > 150) {
                     setHasNewMessages(true);
@@ -328,8 +308,6 @@ const CircleChatArea = ({ circle }) => {
     const formatBackendMessage = (msg, myUserId) => {
         const senderId = msg.sender?._id || msg.sender;
         const isMe = senderId === myUserId;
-        
-        // Find if I liked this
         const heartReaction = msg.reactions?.find(r => r.emoji === '❤️');
         const likedByMe = heartReaction?.users?.some(u => (u._id || u) === myUserId);
 
@@ -377,6 +355,58 @@ const CircleChatArea = ({ circle }) => {
         }
     };
     
+    // Mention Logic
+    const handleInputChange = (val) => {
+        setMessageInput(val);
+        const lastAtIdx = val.lastIndexOf('@');
+        if (lastAtIdx !== -1) {
+            const afterAt = val.slice(lastAtIdx + 1);
+            if (!afterAt.includes(' ')) {
+                setShowMentions(true);
+                setMentionFilter(afterAt);
+                setMentionIndex(lastAtIdx);
+                setSelectedMentionIdx(0);
+                return;
+            }
+        }
+        setShowMentions(false);
+    };
+
+    const handleMentionSelect = (userToMention) => {
+        if (!userToMention) return;
+        const before = messageInput.slice(0, mentionIndex);
+        const after = messageInput.slice(mentionIndex + mentionFilter.length + 1);
+        setMessageInput(`${before}@${userToMention.username} ${after}`);
+        setShowMentions(false);
+    };
+
+    const filteredMembers = members.filter(m => {
+        const u = m.user;
+        if (!u || u._id === currentUserId) return false;
+        const search = mentionFilter.toLowerCase();
+        return (u.displayName || u.username).toLowerCase().includes(search) || u.username.toLowerCase().includes(search);
+    }).slice(0, 5);
+
+    const handleInputKeyDown = (e) => {
+        if (showMentions && filteredMembers.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedMentionIdx(prev => (prev + 1) % filteredMembers.length);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedMentionIdx(prev => (prev - 1 + filteredMembers.length) % filteredMembers.length);
+            } else if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                handleMentionSelect(filteredMembers[selectedMentionIdx].user);
+            } else if (e.key === 'Escape') {
+                setShowMentions(false);
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSend(e);
+        }
+    };
+
     const handleDeleteMessage = async (messageId) => {
         if (!window.confirm('Delete this message?')) return;
         try {
@@ -425,17 +455,14 @@ const CircleChatArea = ({ circle }) => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Update tempId with real one
             setMessages(prev => prev.map(m => m.id === tempId ? formatBackendMessage(res.data.message, currentUserId) : m));
         } catch (err) {
             console.error("Failed to send message", err);
-            // Remove the optimistic message on failure
             setMessages(prev => prev.filter(m => m.id !== tempId));
             alert(err.response?.data?.error || "Failed to send message");
         }
     };
 
-    // Group messages by date
     const groupedMessages = messages.reduce((acc, msg) => {
         if (!acc[msg.date]) acc[msg.date] = [];
         acc[msg.date].push(msg);
@@ -449,7 +476,7 @@ const CircleChatArea = ({ circle }) => {
                 background: 'linear-gradient(160deg, #12082A 0%, #1A0D40 100%)'
             }}
         >
-            {/* Chat header area */}
+            {/* Header */}
             <div className="px-6 py-3 border-b border-white/5 bg-white/2 backdrop-blur-md flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -474,14 +501,14 @@ const CircleChatArea = ({ circle }) => {
                 </div>
             </div>
 
-            {/* Messages Area */}
+            {/* Messages */}
             <div 
                 ref={scrollRef}
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto px-6 py-4 space-y-2 no-scrollbar relative"
             >
                 {Object.keys(groupedMessages).length === 0 ? (
-                    <div className="flex justify-center mt-10 text-gray-500">
+                    <div className="flex justify-center mt-10 text-gray-500 italic">
                         No messages yet. Start the conversation!
                     </div>
                 ) : (
@@ -504,128 +531,112 @@ const CircleChatArea = ({ circle }) => {
                 <div ref={endRef} className="h-4" />
             </div>
 
-            {/* Scroll to latest button */}
+            {/* Scroll Button */}
             {showScrollButton && (
-                <div className="fixed bottom-28 left-0 right-0 pointer-events-none z-[100] flex justify-center px-4 sm:px-6">
-                    <div className="w-full max-w-[1400px] relative">
-                        {/* 
-                            On lg screens, the right panel is 288px (w-72) + 40px gap. 
-                            We add 24px for the chat area's internal padding so it sits nicely inside.
-                            On smaller screens, we just use right-6.
-                        */}
-                        <button
-                            onClick={scrollToBottom}
-                            className="absolute right-6 lg:right-[calc(288px+40px+24px)] bottom-0 p-4 rounded-full bg-violet-600 text-white shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:bg-violet-500 hover:scale-110 active:scale-95 transition-all pointer-events-auto flex items-center justify-center group"
-                            title="Go to latest messages"
-                        >
-                            <ChevronDown size={24} className="group-hover:translate-y-0.5 transition-transform" />
-                            {hasNewMessages && (
-                                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#12082A] animate-pulse" />
-                            )}
-                        </button>
-                    </div>
-                </div>
+                <button
+                    onClick={scrollToBottom}
+                    className="absolute bottom-28 right-6 p-4 rounded-full bg-violet-600 text-white shadow-2xl hover:bg-violet-500 transition-all z-50 flex items-center justify-center group"
+                >
+                    <ChevronDown size={24} className="group-hover:translate-y-0.5 transition-transform" />
+                    {hasNewMessages && (
+                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-[#12082A] animate-pulse" />
+                    )}
+                </button>
             )}
 
-            {/* Input bar area */}
-            <div className="p-6 bg-gradient-to-t from-[#12082A] to-transparent">
+            {/* Input Bar */}
+            <div className="p-6 bg-gradient-to-t from-[#12082A] to-transparent relative">
                 
-                {/* Reply Preview Bar */}
+                {/* Mentions */}
+                {showMentions && filteredMembers.length > 0 && (
+                    <div className="absolute bottom-[calc(100%-8px)] left-6 mb-2 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl z-[100] w-64 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="p-1 bg-white/5 border-b border-white/5">
+                            <span className="text-[10px] font-black text-violet-400 px-3 py-1 uppercase tracking-widest">Mention someone</span>
+                        </div>
+                        <div className="p-2 max-h-56 overflow-y-auto no-scrollbar">
+                            {filteredMembers.map((m, idx) => (
+                                <button
+                                    key={m.user?._id}
+                                    onClick={() => handleMentionSelect(m.user)}
+                                    onMouseEnter={() => setSelectedMentionIdx(idx)}
+                                    className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${idx === selectedMentionIdx ? 'bg-violet-600/40 border border-violet-500/30' : 'hover:bg-white/5 border border-transparent'}`}
+                                >
+                                    <div className="relative">
+                                        <img 
+                                            src={m.user?.profilePic || `https://ui-avatars.com/api/?name=${m.user?.username}&background=random`} 
+                                            className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10"
+                                            alt=""
+                                        />
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#1A1140]" />
+                                    </div>
+                                    <div className="flex-1 text-left overflow-hidden">
+                                        <p className="text-xs font-bold text-gray-200 truncate">{m.user?.displayName || m.user?.username}</p>
+                                        <p className="text-[10px] text-gray-500 truncate">@{m.user?.username}</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Reply */}
                 {replyingTo && (
                     <div className="mb-2 bg-[#1A1140]/80 backdrop-blur-md border-l-4 border-violet-500 rounded-r-2xl p-3 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
                         <div className="flex-1">
                             <p className="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-1">Replying to {replyingTo.name}</p>
                             <p className="text-xs text-gray-400 line-clamp-1 italic">"{replyingTo.text}"</p>
                         </div>
-                        <button 
-                            onClick={() => setReplyingTo(null)}
-                            className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-full transition-all active:scale-90"
-                        >
-                            <X size={16} />
-                        </button>
+                        <button onClick={() => setReplyingTo(null)} className="p-1.5 text-gray-500 hover:text-white rounded-full"><X size={16} /></button>
                     </div>
                 )}
 
                 <div className="flex items-center gap-3 bg-[#0F0529]/80 border border-[#2A1550] rounded-2xl px-4 py-2 hover:border-violet-500/30 transition-all group/input focus-within:ring-2 focus-within:ring-violet-500/20 shadow-inner backdrop-blur-md">
-                    
-
-
                     <input
                         type="text"
                         value={messageInput}
-                        onChange={e => setMessageInput(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend(e); } }}
-                        placeholder={
-                            isMuted 
-                                ? `Muted until ${mutedUntil ? mutedUntil.toLocaleTimeString() : 'indefinite'}` 
-                                : replyingTo ? "Type your reply..." : "Share something with the circle..."
-                        }
+                        onChange={e => handleInputChange(e.target.value)}
+                        onKeyDown={handleInputKeyDown}
+                        placeholder={isMuted ? "Muted..." : replyingTo ? "Type your reply..." : "Share something with the circle..."}
                         disabled={isMuted}
-                        className={`flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2 ${isMuted ? 'cursor-not-allowed opacity-50' : ''}`}
+                        className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none py-2"
                     />
 
                     <div className="flex items-center gap-1 shrink-0 relative" ref={emojiPickerRef}>
                          <button 
                             type="button" 
-                            disabled={isMuted}
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            className={`p-2 transition-colors rounded-xl ${isMuted ? 'opacity-30 cursor-not-allowed' : showEmojiPicker ? 'text-violet-400 bg-violet-400/10' : 'text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10'}`}
+                            className={`p-2 transition-colors rounded-xl ${showEmojiPicker ? 'text-violet-400 bg-violet-400/10' : 'text-gray-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10'}`}
                         >
                             <Smile size={20} />
                         </button>
 
                         {showEmojiPicker && (
                             <div className="absolute bottom-full right-0 mb-4 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl z-[100] w-72 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
-                                {/* WhatsApp style category tabs */}
                                 <div className="flex bg-black/20 p-1">
                                     {emojiCategories.map(cat => (
-                                        <button
-                                            key={cat.id}
-                                            type="button"
-                                            onClick={() => setActiveEmojiCategory(cat.id)}
-                                            className={`flex-1 flex items-center justify-center py-2 rounded-lg transition-all ${activeEmojiCategory === cat.id ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-500 hover:bg-white/5'}`}
-                                        >
-                                            {cat.icon}
-                                        </button>
+                                        <button key={cat.id} type="button" onClick={() => setActiveEmojiCategory(cat.id)} className={`flex-1 flex items-center justify-center py-2 rounded-lg ${activeEmojiCategory === cat.id ? 'bg-violet-600 text-white' : 'text-gray-500'}`}>{cat.icon}</button>
                                     ))}
                                 </div>
-                                
-                                {/* Emoji Grid */}
-                                <div className="p-4 max-h-56 overflow-y-auto custom-scrollbar grid grid-cols-6 gap-3 bg-[#12082A]">
+                                <div className="p-4 max-h-56 overflow-y-auto grid grid-cols-6 gap-3 bg-[#12082A]">
                                     {emojiCategories.find(cat => cat.id === activeEmojiCategory).emojis.map((emoji, idx) => (
-                                        <button
-                                            key={`${emoji}-${idx}`}
-                                            type="button"
-                                            onClick={() => {
-                                                setMessageInput(prev => prev + emoji);
-                                            }}
-                                            className="text-2xl hover:scale-125 transition-transform active:scale-90 flex items-center justify-center"
-                                        >
-                                            {emoji}
-                                        </button>
+                                        <button key={idx} type="button" onClick={() => setMessageInput(prev => prev + emoji)} className="text-2xl hover:scale-125 transition-transform flex items-center justify-center">{emoji}</button>
                                     ))}
                                 </div>
-
                                 <div className="px-4 py-2 border-t border-white/5 bg-black/10 flex justify-between items-center text-[9px] font-bold text-gray-500 uppercase tracking-widest">
                                     <span>{activeEmojiCategory}</span>
-                                    <button 
-                                        onClick={() => setShowEmojiPicker(false)}
-                                        className="text-violet-400 hover:text-violet-300"
-                                    >
-                                        Done
-                                    </button>
+                                    <button onClick={() => setShowEmojiPicker(false)} className="text-violet-400">Done</button>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                        <button
-                            disabled={!messageInput.trim() || isMuted}
-                            onClick={handleSend}
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-900/40 disabled:opacity-30 disabled:grayscale hover:scale-105 active:scale-95 transition-all"
-                        >
-                            <Send size={18} />
-                        </button>
+                    <button
+                        disabled={!messageInput.trim() || isMuted}
+                        onClick={handleSend}
+                        className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg disabled:opacity-30 transition-all"
+                    >
+                        <Send size={18} />
+                    </button>
                 </div>
             </div>
         </div>

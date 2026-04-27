@@ -23,13 +23,13 @@ const JoinRequestItem = ({ request, onApprove, onReject }) => {
                 {/* Info */}
                 <div className="flex-1 min-w-0 text-center sm:text-left">
                     <h4 className="text-xl font-black text-white group-hover:text-purple-400 transition-colors truncate tracking-tight">
-                        {request.name}
+                        {request.name || request.username || 'User'}
                     </h4>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2 italic">
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2 italic leading-relaxed">
                         "{request.message || "Hi! I'd love to join this community and connect with like-minded creators."}"
                     </p>
-                    <div className="flex items-center justify-center sm:justify-start gap-3 mt-3">
-                        <span className="text-[10px] text-gray-600 font-bold tracking-widest bg-white/5 px-2 py-0.5 rounded-md">
+                    <div className="flex items-center justify-center sm:justify-start gap-3 mt-4">
+                        <span className="text-[10px] text-gray-600 font-bold tracking-widest bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 uppercase">
                             Requested {request.time}
                         </span>
                     </div>
