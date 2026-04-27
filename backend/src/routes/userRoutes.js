@@ -8,13 +8,15 @@ const {
   updateProfile,
   followUser,
   unfollowUser,
-  searchUsers
+  searchUsers,
+  getSuggestedUsers
 } = require('../controllers/userController');
 const cacheMiddleware = require('../middleware/cacheMiddleware');
 
 // Public routes
 // Cache search results for 1 minute
 router.get('/search', cacheMiddleware(60), searchUsers);
+router.get('/suggested', protect, getSuggestedUsers); 
 // Cache profiles for 1 minute
 router.get('/:username', protect, cacheMiddleware(60), getUserProfile); // protect optional, but we want userId for isFollowing
 router.get('/:username/followers', getFollowers);
