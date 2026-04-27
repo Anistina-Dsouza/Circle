@@ -36,7 +36,10 @@ const StoryCircle = ({ name, avatar, isAdd = false, username, onClick }) => {
 
     if (isAdd || onClick) return content;
     return (
-        <Link to={`/stories/${username}`}>
+        <Link 
+            to={`/stories/${username}`} 
+            state={{ userList: username.includes('discover_') ? [] : (window._stories_list || []) }}
+        >
             {content}
         </Link>
     );
@@ -63,7 +66,9 @@ const StoriesBar = ({ onPostSuccess }) => {
                 });
 
                 if (response.data.success) {
-                    setFollowingStories(response.data.followingMoments || []);
+                    const follows = response.data.followingMoments || [];
+                    setFollowingStories(follows);
+                    window._stories_list = follows.map(s => s.user?.username).filter(Boolean);
                 }
             } catch (error) {
                 console.error('Error fetching stories:', error);
@@ -141,7 +146,9 @@ export const DiscoverGrid = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.data.success) {
-                    setDiscoverStories(response.data.discoverMoments || []);
+                    const discover = response.data.discoverMoments || [];
+                    setDiscoverStories(discover);
+                    window._discover_list = discover.map(s => s.user?.username).filter(Boolean);
                 }
             } catch (err) {
                 console.error(err);
@@ -181,6 +188,7 @@ export const DiscoverGrid = () => {
                     <Link 
                         key={story._id} 
                         to={`/stories/${story.user?.username}`}
+                        state={{ userList: window._discover_list || [] }}
                         className="group relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/5 bg-[#1A1140] hover:border-purple-500/50 transition-all shadow-2xl hover:shadow-purple-500/30 active:scale-95"
                     >
                         {/* Story Preview */}

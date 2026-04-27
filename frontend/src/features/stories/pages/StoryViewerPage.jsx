@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
@@ -13,6 +13,7 @@ const PROGRESS_INTERVAL = 50;
 const StoryViewerPage = () => {
     const { username } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     
     const [stories, setStories] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,6 +24,7 @@ const StoryViewerPage = () => {
     const [error, setError] = useState(null);
     const [burstEmoji, setBurstEmoji] = useState(null);
     const [successMsg, setSuccessMsg] = useState('');
+    const [userList, setUserList] = useState([]);
 
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
@@ -41,19 +43,33 @@ const StoryViewerPage = () => {
             setCurrentIndex(prev => prev + 1);
             setProgress(0);
         } else {
-            navigate('/feed');
+            // Check if there's a next user
+            const currentUIndex = userList.indexOf(username);
+            if (currentUIndex !== -1 && currentUIndex < userList.length - 1) {
+                const nextUser = userList[currentUIndex + 1];
+                navigate(`/stories/${nextUser}`, { state: { userList }, replace: true });
+            } else {
+                navigate('/feed');
+            }
         }
-    }, [currentIndex, stories.length, navigate]);
+    }, [currentIndex, stories.length, navigate, username, userList]);
 
     const handlePrev = useCallback(() => {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
             setProgress(0);
         } else {
-            setCurrentIndex(0);
-            setProgress(0);
+            // Check if there's a previous user
+            const currentUIndex = userList.indexOf(username);
+            if (currentUIndex !== -1 && currentUIndex > 0) {
+                const prevUser = userList[currentUIndex - 1];
+                navigate(`/stories/${prevUser}`, { state: { userList }, replace: true });
+            } else {
+                setCurrentIndex(0);
+                setProgress(0);
+            }
         }
-    }, [currentIndex]);
+    }, [currentIndex, username, userList, navigate]);
 
     const handleReact = useCallback(async (emoji) => {
         const momentId = stories[currentIndex]?._id;
@@ -126,9 +142,41 @@ const StoryViewerPage = () => {
     /* ── Effects ─────────────────────────────────────────── */
 
     useEffect(() => {
+        const fetchUserList = async () => {
+            if (location.state?.userList && location.state.userList.length > 0) {
+                setUserList(location.state.userList);
+                return;
+            }
+            if (window._stories_list && window._stories_list.length > 0) {
+                setUserList(window._stories_list);
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${baseUrl}/api/moments/feed`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.data.success) {
+                    const follows = response.data.followingMoments || [];
+                    const list = follows.map(s => s.user?.username).filter(Boolean);
+                    setUserList(list);
+                    window._stories_list = list;
+                }
+            } catch (err) {
+                console.error('Error fetching user list:', err);
+            }
+        };
+
+        fetchUserList();
+    }, [location.state, username, baseUrl]);
+
+    useEffect(() => {
         const fetchUserStories = async () => {
             setLoading(true);
             setError(null);
+            setProgress(0);
+            setCurrentIndex(0);
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get(`${baseUrl}/api/moments/user/${username}`, {
