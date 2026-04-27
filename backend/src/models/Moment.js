@@ -12,13 +12,17 @@ const momentSchema = new mongoose.Schema({
   media: {
     url: {
       type: String,
-      required: true
+      required: function() { return this.media && this.media.type !== 'text'; }
     },
     type: {
       type: String,
-      enum: ['image', 'video'],
+      enum: ['image', 'video', 'text'],
       required: true
     },
+    text: {
+      type: String,
+      maxlength: 200
+    }, // Added text field
     duration: Number // For videos in seconds
   },
   caption: {
