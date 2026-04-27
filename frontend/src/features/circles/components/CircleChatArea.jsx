@@ -166,6 +166,7 @@ const CircleChatArea = ({ circle }) => {
     const [mentionFilter, setMentionFilter] = useState('');
     const [mentionIndex, setMentionIndex] = useState(-1);
     const [selectedMentionIdx, setSelectedMentionIdx] = useState(0);
+    const mentionListRef = useRef(null);
 
     const emojiCategories = [
         { id: 'smileys', icon: <Smile size={16} />, emojis: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😮‍💨', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😶‍🌫️', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '😵‍💫', '🤐', '🥴', '🤢', '🤮', '🤧', '🤨', '🧐'] },
@@ -387,6 +388,19 @@ const CircleChatArea = ({ circle }) => {
         setShowMentions(false);
     };
 
+    // Auto-scroll mention list
+    useEffect(() => {
+        if (showMentions && mentionListRef.current) {
+            const activeItem = mentionListRef.current.children[selectedMentionIdx];
+            if (activeItem) {
+                activeItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }
+        }
+    }, [selectedMentionIdx, showMentions]);
+
     const filteredMembers = members.filter(m => {
         const u = m.user;
         if (!u || u._id === currentUserId) return false;
@@ -560,7 +574,10 @@ const CircleChatArea = ({ circle }) => {
                         <div className="p-1 bg-white/5 border-b border-white/5">
                             <span className="text-[10px] font-black text-violet-400 px-3 py-1 uppercase tracking-widest">Mention someone</span>
                         </div>
-                        <div className="p-2 max-h-56 overflow-y-auto no-scrollbar">
+                        <div 
+                            ref={mentionListRef}
+                            className="p-2 max-h-56 overflow-y-auto no-scrollbar"
+                        >
                             {filteredMembers.map((m, idx) => (
                                 <button
                                     key={m.user?._id}
