@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "node-cache": "^5.1.2",
     "qrcode.react": "^4.2.0"
   }
 }

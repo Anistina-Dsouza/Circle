@@ -85,28 +85,28 @@ export default function AdminReports() {
             {/* Header Section */}
             <div className="mb-14 relative">
                 <div className="absolute -top-24 -left-24 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-3">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 lg:gap-10">
+                    <div className="relative z-10 text-center lg:text-left">
+                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
                             <div className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-[0.2em]">
                                 Intelligence Suite v6.0
                             </div>
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
                         </div>
-                        <h1 className="text-4xl font-black text-white tracking-tight mb-3 leading-none uppercase">
+                        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-3 leading-none uppercase">
                             Platform <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Intelligence</span>
                         </h1>
-                        <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] max-w-lg">
+                        <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] max-w-lg mx-auto lg:mx-0">
                             Neural auditing of community nodes and conversational engagement vectors.
                         </p>
                     </div>
 
-                    <div className="flex p-1.5 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar">
+                    <div className="flex p-1 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-[24px] sm:rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex flex-col items-center gap-1 min-w-[100px] px-6 py-4 rounded-[24px] transition-all duration-700 group ${activeTab === tab.id
+                                className={`flex flex-col items-center gap-1 min-w-[80px] sm:min-w-[100px] px-4 sm:px-6 py-3 sm:py-4 rounded-[18px] sm:rounded-[24px] transition-all duration-700 group shrink-0 ${activeTab === tab.id
                                     ? "bg-gradient-to-br from-purple-600/90 to-fuchsia-800/90 text-white shadow-2xl shadow-purple-900/40 border border-white/10"
                                     : "text-white/20 hover:text-white/60 hover:bg-white/[0.03]"
                                     }`}
@@ -115,7 +115,7 @@ export default function AdminReports() {
                                     {tab.icon}
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-widest mt-1">{tab.label}</span>
-                                <span className={`text-[7px] font-black uppercase tracking-tighter opacity-40 group-hover:opacity-100 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'}`}>
+                                <span className={`text-[7px] font-black uppercase tracking-tighter opacity-40 group-hover:opacity-100 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'} hidden xs:block`}>
                                     {tab.desc}
                                 </span>
                             </button>
@@ -262,11 +262,11 @@ function VelocityReport({ data }) {
             </div>
 
             {/* Peak Signal Heatmap */}
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[48px] p-12 flex flex-col relative overflow-hidden group shadow-2xl">
+            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[48px] p-6 sm:p-12 flex flex-col relative overflow-hidden group shadow-2xl">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-purple-600/5 rounded-full blur-[80px] pointer-events-none" />
-                <div className="flex justify-between items-center mb-12">
+                <div className="flex justify-between items-center mb-10 sm:mb-12">
                     <div>
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tight">Peak Signal Hours</h3>
+                        <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Peak Signal Hours</h3>
                         <div className="flex items-center gap-2 mt-1">
                             <Sparkles size={12} className="text-purple-400" />
                             <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Neural Traffic Intensity Map</p>
@@ -274,172 +274,170 @@ function VelocityReport({ data }) {
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col gap-3">
-                    {days.map((day, dIdx) => (
-                        <div key={day} className="flex items-center gap-6 group/row">
-                            <span className="text-[10px] font-black text-white/30 uppercase w-10 transition-colors group-hover/row:text-purple-400">{day}</span>
-                            <div className="flex-1 flex gap-2">
-                                {hours.map(hour => {
-                                    const val = getIntensity(dIdx + 1, hour);
-                                    const opacity = (val / maxIntensity) * 0.9 + 0.1;
-                                    return (
-                                        <div
-                                            key={hour}
-                                            className="flex-1 h-8 rounded-[4px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20"
-                                            style={{ backgroundColor: `rgba(168, 85, 247, ${opacity})` }}
-                                        >
-                                            <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-50">
-                                                <div className="bg-[#1A0C3F] border border-purple-500/40 text-[9px] font-black px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap text-white">
-                                                    <span className="text-purple-400">{val}</span> SIGNALS @ {hour}:00
+                <div className="overflow-x-auto no-scrollbar -mx-6 sm:mx-0 px-6 sm:px-0">
+                    <div className="min-w-[600px] flex flex-col gap-3">
+                        {days.map((day, dIdx) => (
+                            <div key={day} className="flex items-center gap-6 group/row">
+                                <span className="text-[10px] font-black text-white/30 uppercase w-10 transition-colors group-hover/row:text-purple-400">{day}</span>
+                                <div className="flex-1 flex gap-2">
+                                    {hours.map(hour => {
+                                        const val = getIntensity(dIdx + 1, hour);
+                                        const opacity = (val / maxIntensity) * 0.9 + 0.1;
+                                        return (
+                                            <div
+                                                key={hour}
+                                                className="flex-1 h-8 rounded-[4px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20"
+                                                style={{ backgroundColor: `rgba(168, 85, 247, ${opacity})` }}
+                                            >
+                                                <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-50">
+                                                    <div className="bg-[#1A0C3F] border border-purple-500/40 text-[9px] font-black px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap text-white">
+                                                        <span className="text-purple-400">{val}</span> SIGNALS @ {hour}:00
+                                                    </div>
+                                                    <div className="w-2 h-2 bg-[#1A0C3F] rotate-45 mx-auto -mt-1 border-r border-b border-purple-500/40" />
                                                 </div>
-                                                <div className="w-2 h-2 bg-[#1A0C3F] rotate-45 mx-auto -mt-1 border-r border-b border-purple-500/40" />
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {/* Immersive Engagement Depth - High Precision Spatial Mapping */}
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[56px] p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[700px]">
+            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[56px] p-6 sm:p-12 lg:p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[500px] lg:min-h-[700px]">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-fuchsia-600/5 pointer-events-none" />
 
-                {/* Neural Pulse Scanline Effect */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent absolute top-0 animate-scanline" />
-                </div>
-
-                <div className="flex justify-between items-end mb-20 relative z-10">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 sm:mb-20 relative z-10 gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                                <Target size={24} className="animate-pulse" />
+                            <div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                                <Target size={20} className="animate-pulse sm:w-6 sm:h-6" />
                             </div>
-                            <h3 className="text-4xl font-black text-white uppercase tracking-tighter">Engagement Depth</h3>
+                            <h3 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter">Engagement Depth</h3>
                         </div>
-                        <p className="text-[12px] text-gray-500 font-black uppercase tracking-[0.3em] ml-1">Spatial Node Interaction Matrix v2.2</p>
+                        <p className="text-[10px] sm:text-[12px] text-gray-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Spatial Node Interaction Matrix v2.2</p>
                     </div>
-                    <div className="flex items-center gap-14 px-10 py-5 bg-[#1A0C3F]/40 backdrop-blur-2xl border border-white/5 rounded-[32px] shadow-2xl">
+                    <div className="flex items-center gap-6 sm:gap-14 px-6 sm:px-10 py-4 sm:py-5 bg-[#1A0C3F]/40 backdrop-blur-2xl border border-white/5 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full sm:w-auto justify-center sm:justify-start">
                         <div className="text-center">
-                            <span className="text-3xl font-black text-white tabular-nums drop-shadow-lg">20</span>
-                            <p className="text-[8px] text-purple-400 font-black uppercase tracking-[0.3em] mt-1.5">Audit Population</p>
+                            <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">20</span>
+                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Audit Population</p>
                         </div>
-                        <div className="w-px h-12 bg-white/10" />
+                        <div className="w-px h-10 sm:h-12 bg-white/10" />
                         <div className="text-center">
-                            <span className="text-3xl font-black text-white tabular-nums drop-shadow-lg">{data?.platformVolume.toLocaleString()}</span>
-                            <p className="text-[8px] text-purple-400 font-black uppercase tracking-[0.3em] mt-1.5">Gross Signal Flux</p>
+                            <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">{data?.platformVolume.toLocaleString()}</span>
+                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Gross Signal Flux</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 relative ml-10 mb-10">
-                    {/* Dynamic Axis Labels */}
-                    <div className="absolute -left-16 bottom-0 top-0 flex flex-col justify-between py-10 items-end pr-8">
-                        <div className="flex flex-col items-end gap-1.5 group/axis">
-                            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">High Velocity</span>
-                            <span className="text-[7px] text-white/20 uppercase font-black">Signal Peak</span>
+                <div className="flex-1 relative mb-16 lg:mb-10 lg:ml-10 overflow-x-auto lg:overflow-visible no-scrollbar -mx-6 sm:mx-0">
+                    <div className="min-w-[600px] lg:min-w-0 h-[400px] lg:h-full relative">
+                        {/* Dynamic Axis Labels */}
+                        <div className="absolute -left-12 bottom-0 top-0 hidden lg:flex flex-col justify-between py-10 items-end pr-8">
+                            <div className="flex flex-col items-end gap-1.5 group/axis">
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">High Velocity</span>
+                                <span className="text-[7px] text-white/20 uppercase font-black">Signal Peak</span>
+                            </div>
+                            <div className="w-1.5 h-32 bg-gradient-to-b from-purple-500/40 via-purple-500/10 to-transparent rounded-full shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
+                            <div className="flex flex-col items-end gap-1.5">
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Low Velocity</span>
+                                <span className="text-[7px] text-white/10 uppercase font-black">Latency Base</span>
+                            </div>
                         </div>
-                        <div className="w-1.5 h-32 bg-gradient-to-b from-purple-500/40 via-purple-500/10 to-transparent rounded-full shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
-                        <div className="flex flex-col items-end gap-1.5">
-                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Low Velocity</span>
-                            <span className="text-[7px] text-white/10 uppercase font-black">Latency Base</span>
+
+                        <div className="absolute left-0 right-0 -bottom-16 hidden lg:flex justify-between px-10">
+                            <div className="flex flex-col gap-1.5">
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Micro Footprint</span>
+                                <span className="text-[7px] text-white/10 uppercase font-black">Sparse Nodes</span>
+                            </div>
+                            <div className="h-1.5 w-64 bg-gradient-to-r from-transparent via-purple-500/10 to-purple-500/40 rounded-full mt-5 shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
+                            <div className="flex flex-col items-end gap-1.5 group/axis">
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Global Scale</span>
+                                <span className="text-[7px] text-white/20 uppercase font-black">Mass Population</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="absolute left-0 right-0 -bottom-16 flex justify-between px-10">
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Micro Footprint</span>
-                            <span className="text-[7px] text-white/10 uppercase font-black">Sparse Nodes</span>
-                        </div>
-                        <div className="h-1.5 w-64 bg-gradient-to-r from-transparent via-purple-500/10 to-purple-500/40 rounded-full mt-5 shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
-                        <div className="flex flex-col items-end gap-1.5 group/axis">
-                            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Global Scale</span>
-                            <span className="text-[7px] text-white/20 uppercase font-black">Mass Population</span>
-                        </div>
-                    </div>
+                        {/* Matrix Viewport */}
+                        <div className="absolute inset-0 border-l-2 border-b-2 border-white/10 rounded-bl-[20px] lg:rounded-bl-[40px]">
+                            {/* Spatial Bubbles with Precision Arrow Tooltips */}
+                            {data?.circleEngagement.map((circle, i) => {
+                                const maxMsg = Math.max(...data.circleEngagement.map(c => c.stats.messageCount), 1);
+                                const maxMem = Math.max(...data.circleEngagement.map(c => c.stats.memberCount), 1);
+                                const bottom = (circle.stats.messageCount / maxMsg) * 80 + 10;
+                                const left = (circle.stats.memberCount / maxMem) * 80 + 10;
+                                const size = Math.max((circle.stats.messageCount / maxMsg) * 70 + 25, 30);
+                                const efficiency = (circle.stats.messageCount / (circle.stats.memberCount || 1)).toFixed(1);
 
-                    {/* Matrix Viewport */}
-                    <div className="absolute inset-0 border-l-2 border-b-2 border-white/10 rounded-bl-[40px]">
-                        {/* Spatial Bubbles with Precision Arrow Tooltips */}
-                        {data?.circleEngagement.map((circle, i) => {
-                            const maxMsg = Math.max(...data.circleEngagement.map(c => c.stats.messageCount), 1);
-                            const maxMem = Math.max(...data.circleEngagement.map(c => c.stats.memberCount), 1);
-                            const bottom = (circle.stats.messageCount / maxMsg) * 80 + 10;
-                            const left = (circle.stats.memberCount / maxMem) * 80 + 10;
-                            const size = Math.max((circle.stats.messageCount / maxMsg) * 70 + 25, 30);
-                            const efficiency = (circle.stats.messageCount / (circle.stats.memberCount || 1)).toFixed(1);
+                                const showBelow = bottom > 70;
+                                const showLeft = left > 75;
 
-                            const showBelow = bottom > 70;
-                            const showLeft = left > 75;
+                                return (
+                                    <div
+                                        key={i}
+                                        className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center"
+                                        style={{
+                                            bottom: `${bottom}%`,
+                                            left: `${left}%`,
+                                            width: `${size}px`,
+                                            height: `${size}px`,
+                                            background: `radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(124, 58, 237, 0.2))`,
+                                            border: `2.5px solid rgba(192, 132, 252, 0.5)`,
+                                            boxShadow: `0 0 50px rgba(168, 85, 247, 0.2), inset 0 0 25px rgba(255,255,255,0.1)`,
+                                            animation: `pulse-slow ${5 + i % 4}s infinite alternate ease-in-out`
+                                        }}
+                                    >
+                                        <span className="text-[9px] font-black text-white/60 group-hover/bubble:text-white transition-colors">{i + 1}</span>
 
-                            return (
-                                <div
-                                    key={i}
-                                    className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center"
-                                    style={{
-                                        bottom: `${bottom}%`,
-                                        left: `${left}%`,
-                                        width: `${size}px`,
-                                        height: `${size}px`,
-                                        background: `radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(124, 58, 237, 0.2))`,
-                                        border: `2.5px solid rgba(192, 132, 252, 0.5)`,
-                                        boxShadow: `0 0 50px rgba(168, 85, 247, 0.2), inset 0 0 25px rgba(255,255,255,0.1)`,
-                                        animation: `pulse-slow ${5 + i % 4}s infinite alternate ease-in-out`
-                                    }}
-                                >
-                                    <span className="text-[9px] font-black text-white/60 group-hover/bubble:text-white transition-colors">{i + 1}</span>
+                                        {/* High-Precision Beacon Tooltip */}
+                                        <div className={`absolute ${showBelow ? 'top-full mt-4 sm:mt-8' : 'bottom-full mb-4 sm:mb-8'} ${showLeft ? 'right-0' : 'left-1/2 -translate-x-1/2'} opacity-0 group-hover/bubble:opacity-100 transition-all duration-500 pointer-events-none w-64 sm:w-80 z-[150]`}>
+                                            <div className={`relative bg-[#0A051E]/98 backdrop-blur-3xl border-2 border-purple-500/40 p-4 sm:p-8 rounded-[24px] sm:rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,1)] transform ${showBelow ? 'translate-y-4 group-hover/bubble:translate-y-0' : '-translate-y-4 group-hover/bubble:translate-y-0'}`}>
 
-                                    {/* High-Precision Beacon Tooltip */}
-                                    <div className={`absolute ${showBelow ? 'top-full mt-8' : 'bottom-full mb-8'} ${showLeft ? 'right-0' : 'left-1/2 -translate-x-1/2'} opacity-0 group-hover/bubble:opacity-100 transition-all duration-500 pointer-events-none w-80 z-[150]`}>
-                                        <div className={`relative bg-[#0A051E]/98 backdrop-blur-3xl border-2 border-purple-500/40 p-8 rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,1)] transform ${showBelow ? 'translate-y-4 group-hover/bubble:translate-y-0' : '-translate-y-4 group-hover/bubble:translate-y-0'}`}>
+                                                {/* Refined Arrow - Precision Beacon */}
+                                                <div className={`absolute ${showBelow ? '-top-3' : '-bottom-3'} left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 bg-[#0A051E] border-2 border-purple-500/40 ${showBelow ? 'border-r-0 border-b-0' : 'border-l-0 border-t-0'} shadow-[0_0_30px_rgba(168,85,247,0.3)]`} />
 
-                                            {/* Refined Arrow - Precision Beacon */}
-                                            <div className={`absolute ${showBelow ? '-top-3' : '-bottom-3'} left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 bg-[#0A051E] border-2 border-purple-500/40 ${showBelow ? 'border-r-0 border-b-0' : 'border-l-0 border-t-0'} shadow-[0_0_30px_rgba(168,85,247,0.3)]`} />
-
-                                            <div className="flex items-center justify-between mb-8 relative z-10">
-                                                <div>
-                                                    <h5 className="text-xl font-black text-white uppercase tracking-tighter leading-none mb-2">{circle.name}</h5>
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                                                        <span className="text-[11px] text-purple-400 font-black uppercase tracking-[0.2em]">{circle.category}</span>
+                                                <div className="flex items-center justify-between mb-4 sm:mb-8 relative z-10">
+                                                    <div>
+                                                        <h5 className="text-lg sm:text-xl font-black text-white uppercase tracking-tighter leading-none mb-2 truncate max-w-[150px]">{circle.name}</h5>
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                                                            <span className="text-[10px] sm:text-[11px] text-purple-400 font-black uppercase tracking-[0.2em]">{circle.category}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="shrink-0 w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 rounded-[18px] sm:rounded-[24px] flex items-center justify-center border-2 border-purple-500/30 shadow-lg">
+                                                        <span className="text-base sm:text-lg font-black text-purple-400">#{i + 1}</span>
                                                     </div>
                                                 </div>
-                                                <div className="shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 rounded-[24px] flex items-center justify-center border-2 border-purple-500/30 shadow-lg">
-                                                    <span className="text-lg font-black text-purple-400">#{i + 1}</span>
-                                                </div>
-                                            </div>
 
-                                            <div className="grid grid-cols-2 gap-5 mb-8 relative z-10">
-                                                <div className="p-5 rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                    <span className="text-[10px] text-gray-500 font-black uppercase block mb-2 tracking-widest">Signals DB</span>
-                                                    <span className="text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.messageCount.toLocaleString()}</span>
+                                                <div className="grid grid-cols-2 gap-3 sm:gap-5 mb-4 sm:mb-8 relative z-10">
+                                                    <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
+                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Signals</span>
+                                                        <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.messageCount.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
+                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Nodes</span>
+                                                        <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.memberCount.toLocaleString()}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="p-5 rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                    <span className="text-[10px] text-gray-500 font-black uppercase block mb-2 tracking-widest">Nodes DB</span>
-                                                    <span className="text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.memberCount.toLocaleString()}</span>
-                                                </div>
-                                            </div>
 
-                                            <div className="p-6 rounded-[32px] bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border-2 border-purple-500/40 flex items-center justify-between shadow-[0_10px_30px_rgba(168,85,247,0.1)] relative z-10 overflow-hidden">
-                                                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/5 to-transparent animate-pulse" />
-                                                <div className="flex items-center gap-4 relative z-10">
-                                                    <Zap size={22} className="text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                                                    <span className="text-[12px] font-black text-white uppercase tracking-widest">Efficiency Index</span>
+                                                <div className="p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border-2 border-purple-500/40 flex items-center justify-between shadow-[0_10px_30px_rgba(168,85,247,0.1)] relative z-10 overflow-hidden">
+                                                    <div className="flex items-center gap-2 sm:gap-4 relative z-10">
+                                                        <Zap size={18} className="text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)] sm:w-5 sm:h-5" />
+                                                        <span className="text-[10px] sm:text-[12px] font-black text-white uppercase tracking-widest">Efficiency</span>
+                                                    </div>
+                                                    <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 relative z-10 drop-shadow-xl">{efficiency}x</span>
                                                 </div>
-                                                <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 relative z-10 drop-shadow-xl">{efficiency}x</span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
 
-                        {/* High-Fidelity Tactical Matrix */}
-                        <div className="absolute inset-0 grid grid-cols-10 grid-rows-10 opacity-[0.04] pointer-events-none">
-                            {Array.from({ length: 100 }).map((_, i) => (<div key={i} className="border border-white/80" />))}
+                            {/* High-Fidelity Tactical Matrix */}
+                            <div className="absolute inset-0 grid grid-cols-10 grid-rows-10 opacity-[0.04] pointer-events-none">
+                                {Array.from({ length: 100 }).map((_, i) => (<div key={i} className="border border-white/80" />))}
+                            </div>
                         </div>
                     </div>
                 </div>

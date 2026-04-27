@@ -15,48 +15,59 @@ export default function KPICard({ value, label, badge }) {
   };
 
   const colors = {
-    Users: "bg-purple-800/60 text-purple-300",
-    Circles: "bg-indigo-800/60 text-indigo-300",
-    Active: "bg-green-800/60 text-green-300",
-    Flagged: "bg-red-800/60 text-red-300",
+    Users: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+    Circles: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    Active: "bg-green-500/10 text-green-400 border-green-500/20",
+    Flagged: "bg-red-500/10 text-red-400 border-red-500/20",
   };
 
   return (
     <div
       className="
       relative overflow-hidden
-      p-6 rounded-[28px]
-      bg-[radial-gradient(circle_at_top,#2a004a,#13001f)]
-      border border-white/5
-
-      transition-all duration-300 ease-out
-      hover:-translate-y-[2px]
+      p-5 sm:p-7 rounded-[24px] sm:rounded-[32px]
+      bg-[#1A0C3F]/50 backdrop-blur-xl
+      border border-white/10
+      shadow-2xl
+      transition-all duration-500 ease-out
+      hover:-translate-y-1
       hover:border-purple-500/30
-      hover:bg-[radial-gradient(circle_at_top,#320060,#160026)]
+      group
       "
     >
+      {/* Background Glow */}
+      <div className="absolute -right-8 -top-8 w-24 h-24 bg-purple-500/5 blur-[40px] group-hover:bg-purple-500/10 transition-all duration-700" />
 
       {/* Badge */}
-      <div className="absolute right-4 top-4 text-xs bg-purple-900/60 px-3 py-1 rounded-full">
-        {badge}
-      </div>
+      {badge && (
+        <div className="absolute right-5 top-5 text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-white/40 px-3 py-1 rounded-full group-hover:border-purple-500/20 group-hover:text-purple-300 transition-all">
+            {badge}
+        </div>
+      )}
 
       {/* Icon */}
       <div
         className={`
-        w-11 h-11 rounded-full flex items-center justify-center mb-4
+        w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center mb-5 sm:mb-6
+        border transition-transform duration-500 group-hover:scale-110
         ${colors[label]}
         `}
       >
-        {icons[label]}
+        {icons[label] || <Layers size={18} />}
       </div>
 
-      {/* Value */}
-      <h2 className="text-3xl font-semibold tracking-tight">{value}</h2>
+      <div className="space-y-1">
+        {/* Value */}
+        <h2 className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+            {value}
+        </h2>
 
-      {/* Label */}
-      <p className="text-gray-400 text-sm mt-1">{label}</p>
+        {/* Label */}
+        <p className="text-[10px] sm:text-xs font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/50 transition-colors">
+            {label}
+        </p>
+      </div>
 
     </div>
   );
-}
+}
