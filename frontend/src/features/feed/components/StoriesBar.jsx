@@ -102,7 +102,7 @@ const StoriesBar = ({ onPostSuccess }) => {
                 <span className="text-xs font-bold text-gray-500">Stories from people you follow</span>
             </div>
             
-            <div className="flex items-center space-x-6 overflow-x-auto py-2 scrollbar-hide no-scrollbar">
+            <div className="flex items-center space-x-6 overflow-x-auto py-4 px-4 -mx-4 scrollbar-hide no-scrollbar">
                 <StoryCircle 
                     isAdd 
                     name="Add Story" 

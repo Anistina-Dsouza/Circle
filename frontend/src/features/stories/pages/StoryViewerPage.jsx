@@ -25,6 +25,8 @@ const StoryViewerPage = () => {
     const [burstEmoji, setBurstEmoji] = useState(null);
     const [successMsg, setSuccessMsg] = useState('');
     const [userList, setUserList] = useState([]);
+    const [touchStart, setTouchStart] = useState(null);
+    const [translateY, setTranslateY] = useState(0);
 
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
@@ -125,6 +127,29 @@ const StoryViewerPage = () => {
             }
         }
     }, [currentIndex, stories, baseUrl, navigate]);
+
+    const handleTouchStart = (e) => {
+        setTouchStart(e.targetTouches[0].clientY);
+        setIsPaused(true);
+    };
+
+    const handleTouchMove = (e) => {
+        const currentTouch = e.targetTouches[0].clientY;
+        const diff = currentTouch - touchStart;
+        if (diff > 0) {
+            setTranslateY(diff);
+        }
+    };
+
+    const handleTouchEnd = (e) => {
+        setIsPaused(false);
+        if (translateY > 150) {
+            navigate('/feed');
+        } else {
+            setTranslateY(0);
+        }
+        setTouchStart(null);
+    };
 
     const handleContainerClick = (e) => {
         if (e.target.closest('button')) return;
@@ -296,9 +321,11 @@ const StoryViewerPage = () => {
                     className="flex-1 min-h-0 bg-[#1E1B3A] rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative cursor-pointer group border border-white/5"
                     onMouseDown={() => !showViewers && setIsPaused(true)}
                     onMouseUp={() => !showViewers && setIsPaused(false)}
-                    onTouchStart={() => !showViewers && setIsPaused(true)}
-                    onTouchEnd={() => !showViewers && setIsPaused(false)}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                     onClick={handleContainerClick}
+                    style={{ transform: `translateY(${translateY}px)`, transition: translateY === 0 ? 'transform 0.3s' : 'none' }}
                 >
                     {currentStory.media?.type === 'video' ? (
                         <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
