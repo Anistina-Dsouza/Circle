@@ -147,7 +147,7 @@ const CreateCirclePage = () => {
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex flex-col gap-6 items-start">
                 <div className={`relative ${field === 'profilePic' ? 'w-24 h-24' : 'w-full h-40'} bg-[#0F0529] rounded-2xl border border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 group`}>
                     {previews[field] ? (
                         <>
@@ -262,7 +262,7 @@ const CreateCirclePage = () => {
 
                     {/* Settings */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl flex flex-col">
+                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl flex flex-col relative z-20">
                             <label htmlFor="category" className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Category</label>
                             <PremiumDropdown
                                 value={formData.category}
@@ -273,7 +273,7 @@ const CreateCirclePage = () => {
                             />
                         </div>
 
-                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl">
+                        <div className="bg-[#1A1140]/60 backdrop-blur-md border border-white/5 rounded-3xl p-8 space-y-6 shadow-2xl relative z-10">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-400 mb-2 ml-1">Visibility</label>
                                 <div className="space-y-3 mt-4">
