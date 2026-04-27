@@ -7,7 +7,7 @@ const StoryCard = ({ story }) => {
     const navigate = useNavigate();
 
     return (
-        <div 
+        <div
             onClick={() => navigate(`/stories/${username}`)}
             className="group relative bg-[#1E1B3A] border border-white/5 hover:border-purple-500/30 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 cursor-pointer aspect-[9/16]"
         >
@@ -21,6 +21,23 @@ const StoryCard = ({ story }) => {
                         muted
                         playsInline
                     />
+                ) : story.type === 'text' ? (
+                    <div
+                        className="w-full h-full flex items-center justify-center p-6 text-center overflow-hidden relative"
+                        style={{
+                            backgroundImage: `url('https://i.pinimg.com/736x/d5/48/96/d54896e952622eee393eb237abb734d1.jpg')`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        }}
+                    >
+                        <div className="absolute inset-0 bg-black/40" />
+                        <p
+                            className="text-white text-lg md:text-xl break-words group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100 drop-shadow-xl relative z-10"
+                            style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}
+                        >
+                            {story.text || story.title}
+                        </p>
+                    </div>
                 ) : (
                     <img
                         src={story.image}
@@ -53,7 +70,7 @@ const StoryCard = ({ story }) => {
                             {story.description}
                         </p>
                     )}
-                    
+
                     {/* Visual Indicator */}
                     <div className="mt-4 w-8 h-1 bg-purple-500 rounded-full group-hover:w-full transition-all duration-700" />
                 </div>

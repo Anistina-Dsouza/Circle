@@ -332,13 +332,32 @@ const StoryViewerPage = () => {
                         touchAction: 'none'
                     }}
                 >
-                    {currentStory.media?.type === 'video' ? (
+                    {currentStory.media?.type === 'text' ? (
+                        <div 
+                            className="w-full h-full flex items-center justify-center p-8 text-center overflow-y-auto custom-scrollbar relative"
+                            style={{
+                                backgroundImage: `url('https://i.pinimg.com/736x/d5/48/96/d54896e952622eee393eb237abb734d1.jpg')`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
+                        >
+                            <div className="absolute inset-0 bg-black/40" />
+                            <p 
+                                className="text-white text-2xl whitespace-pre-wrap leading-relaxed drop-shadow-2xl break-words w-full relative z-10"
+                                style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}
+                            >
+                                {currentStory.media.text || currentStory.caption}
+                            </p>
+                        </div>
+                    ) : currentStory.media?.type === 'video' ? (
                         <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
                     ) : (
                         <img src={currentStory.media?.url} className="w-full h-full object-cover" alt="story" />
                     )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
+                    {currentStory.media?.type !== 'text' && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
+                    )}
 
                     {/* Burst Animation Overlay */}
                     {burstEmoji && (
@@ -350,25 +369,25 @@ const StoryViewerPage = () => {
                     )}
 
                     {isOwnStory && (
-                        <div className="absolute bottom-40 left-0 right-0 flex justify-center pointer-events-none z-30">
+                        <div className="absolute bottom-28 left-0 right-0 flex justify-center pointer-events-none z-30">
                             <div
                                 onClick={(e) => { e.stopPropagation(); setShowViewers(true); setIsPaused(true); }}
-                                className="bg-[#4C3E7C]/90 backdrop-blur-xl px-6 py-2.5 rounded-full flex items-center space-x-2 border border-white/20 shadow-2xl pointer-events-auto hover:bg-[#5f4e99] transition-all hover:scale-105 active:scale-95"
+                                className="bg-[#4C3E7C]/90 backdrop-blur-xl px-4 py-1.5 rounded-full flex items-center space-x-1.5 border border-white/20 shadow-2xl pointer-events-auto hover:bg-[#5f4e99] transition-all hover:scale-105 active:scale-95"
                             >
-                                <Eye size={16} className="text-purple-300" />
-                                <span className="text-xs font-black text-white tracking-widest uppercase">
+                                <Eye size={14} className="text-purple-300" />
+                                <span className="text-[10px] font-black text-white tracking-widest uppercase">
                                     {(currentStory.viewers || []).filter(v => {
                                         const vId = (v._id || v).toString();
                                         const ownerId = (currentStory.user?._id || currentStory.user).toString();
                                         return vId !== ownerId;
                                     }).length} Viewers
                                 </span>
-                                <ChevronUp size={16} className="text-purple-300 ml-1" />
+                                <ChevronUp size={14} className="text-purple-300 ml-0.5" />
                             </div>
                         </div>
                     )}
 
-                    {currentStory.caption && (
+                    {currentStory.caption && currentStory.media?.type !== 'text' && (
                         <div className="absolute bottom-6 left-0 right-0 px-6 z-20 pointer-events-none">
                             <div className="bg-black/60 backdrop-blur-md p-4 rounded-3xl border border-white/10 pointer-events-auto shadow-2xl">
                                 <p className="text-white text-sm md:text-base font-medium leading-relaxed drop-shadow-xl max-h-32 overflow-y-auto custom-scrollbar">

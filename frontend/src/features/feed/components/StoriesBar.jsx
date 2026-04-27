@@ -7,16 +7,16 @@ import CreateStoryModal from './CreateStoryModal';
 
 const StoryCircle = ({ name, avatar, isAdd = false, username, onClick, isSeen = false }) => {
     const content = (
-        <div 
+        <div
             onClick={onClick}
             className="flex flex-col items-center space-y-2 cursor-pointer group"
         >
             <div className={`
                 w-20 h-20 rounded-full p-[3px] 
-                ${isAdd 
-                    ? 'border-2 border-dashed border-gray-500 hover:border-white' 
-                    : isSeen 
-                        ? 'border-2 border-white/10' 
+                ${isAdd
+                    ? 'border-2 border-dashed border-gray-500 hover:border-white'
+                    : isSeen
+                        ? 'border-2 border-white/10'
                         : 'bg-gradient-to-tr from-yellow-400 to-purple-600 group-hover:from-yellow-300 group-hover:to-pink-500 shadow-lg shadow-purple-500/20'}
                 transition-all duration-300 transform group-hover:scale-110 
             `}>
@@ -40,8 +40,8 @@ const StoryCircle = ({ name, avatar, isAdd = false, username, onClick, isSeen = 
 
     if (isAdd || onClick) return content;
     return (
-        <Link 
-            to={`/stories/${username}`} 
+        <Link
+            to={`/stories/${username}`}
             state={{ userList: username.includes('discover_') ? [] : (window._stories_list || []) }}
         >
             {content}
@@ -71,7 +71,7 @@ const StoriesBar = ({ onPostSuccess }) => {
 
                 if (response.data.success) {
                     let follows = response.data.followingMoments || [];
-                    
+
                     // Sort such that the logged-in user's story is always first
                     if (user && user.username) {
                         follows = [...follows].sort((a, b) => {
@@ -80,7 +80,7 @@ const StoriesBar = ({ onPostSuccess }) => {
                             return 0;
                         });
                     }
-                    
+
                     setFollowingStories(follows);
                     window._stories_list = follows.map(s => s.user?.username).filter(Boolean);
                 }
@@ -115,15 +115,15 @@ const StoriesBar = ({ onPostSuccess }) => {
                 <span className="text-[10px] font-black text-purple-500 tracking-widest bg-purple-500/10 px-2 py-0.5 rounded">Friends</span>
                 <span className="text-xs font-bold text-gray-500">Stories from people you follow</span>
             </div>
-            
+
             <div className="flex items-center space-x-6 overflow-x-auto py-4 px-4 -mx-4 scrollbar-hide no-scrollbar">
-                <StoryCircle 
-                    isAdd 
-                    name="Add Story" 
-                    avatar={user?.profilePic} 
+                <StoryCircle
+                    isAdd
+                    name="Add Story"
+                    avatar={user?.profilePic}
                     onClick={() => setIsModalOpen(true)}
                 />
-                
+
                 {followingStories.map(story => {
                     const isSeen = story.viewers?.some(v => {
                         const viewerId = v._id || v;
@@ -206,25 +206,42 @@ export const DiscoverGrid = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
                 {discoverStories.map(story => (
-                    <Link 
-                        key={story._id} 
+                    <Link
+                        key={story._id}
                         to={`/stories/${story.user?.username}`}
                         state={{ userList: window._discover_list || [] }}
                         className="group relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/5 bg-[#1A1140] hover:border-purple-500/50 transition-all shadow-2xl hover:shadow-purple-500/30 active:scale-95"
                     >
                         {/* Story Preview */}
                         {story.media?.type === 'video' ? (
-                            <video 
-                                src={`${story.media.url}#t=0.1`} 
+                            <video
+                                src={`${story.media.url}#t=0.1`}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
                                 preload="metadata"
                                 muted
                                 playsInline
                             />
+                        ) : story.media?.type === 'text' ? (
+                            <div
+                                className="w-full h-full flex items-center justify-center p-6 text-center overflow-hidden relative"
+                                style={{
+                                    backgroundImage: `url('https://i.pinimg.com/736x/d5/48/96/d54896e952622eee393eb237abb734d1.jpg')`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center'
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-black/40" />
+                                <p
+                                    className="text-white text-sm md:text-base break-words group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100 drop-shadow-xl relative z-10"
+                                    style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}
+                                >
+                                    {story.media.text || story.caption}
+                                </p>
+                            </div>
                         ) : (
-                            <img 
-                                src={story.media?.url} 
-                                alt="" 
+                            <img
+                                src={story.media?.url}
+                                alt=""
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
                             />
                         )}
@@ -235,9 +252,9 @@ export const DiscoverGrid = () => {
                         {/* User Info */}
                         <div className="absolute bottom-6 left-6 right-6">
                             <div className="flex items-center gap-2 mb-1">
-                                <img 
-                                    src={story.user?.profilePic} 
-                                    className="w-6 h-6 rounded-full border border-white/20 object-cover" 
+                                <img
+                                    src={story.user?.profilePic}
+                                    className="w-6 h-6 rounded-full border border-white/20 object-cover"
                                     alt=""
                                 />
                                 <span className="text-xs font-black text-white truncate">{story.user?.displayName || story.user?.username}</span>
