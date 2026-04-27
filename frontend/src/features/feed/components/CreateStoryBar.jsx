@@ -117,11 +117,11 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                     </div>
                 </div>
 
-                {/* Vertical Divider (Matches Screenshot '|') */}
-                <div className="h-6 w-px bg-white/10 mx-4" />
+                {/* Vertical Divider - Less margin */}
+                <div className="h-6 w-px bg-white/10 mx-2" />
 
-                {/* Main Input Area - More space */}
-                <div className="flex-[2] min-w-[150px]">
+                {/* Main Input Area - Maximum space */}
+                <div className="flex-1 min-w-[220px]">
                     <input
                         type="text"
                         value={caption}

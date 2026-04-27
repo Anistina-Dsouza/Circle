@@ -34,10 +34,10 @@ const NotificationsPage = () => {
             case 'reaction':
                 if (noti.relatedItem?.type === 'moment') {
                     if (noti.sender?.username) {
-                        navigate(`/stories/${noti.sender.username}`);
+                        const momentId = noti.relatedItem.id || noti.relatedItem._id;
+                        navigate(`/stories/${noti.sender.username}?momentId=${momentId}`);
                     }
                 } else if (noti.relatedItem?.type === 'circle') {
-                    // Navigate to specific circle if possible
                     navigate(`/circles`);
                 } else if (noti.relatedItem?.type === 'message') {
                     navigate('/messages');

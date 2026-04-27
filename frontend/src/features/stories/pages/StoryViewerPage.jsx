@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
@@ -14,6 +14,8 @@ const StoryViewerPage = () => {
     const { username } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const targetMomentId = searchParams.get('momentId');
     
     const [stories, setStories] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -210,8 +212,17 @@ const StoryViewerPage = () => {
                 });
 
                 if (response.data.success) {
-                    if (response.data.moments && response.data.moments.length > 0) {
-                        setStories(response.data.moments);
+                    const fetchedMoments = response.data.moments || [];
+                    if (fetchedMoments.length > 0) {
+                        setStories(fetchedMoments);
+                        
+                        // Handle deep-linking to specific moment
+                        if (targetMomentId) {
+                            const index = fetchedMoments.findIndex(m => m._id === targetMomentId);
+                            if (index !== -1) {
+                                setCurrentIndex(index);
+                            }
+                        }
                     } else {
                         setError('No active stories found.');
                     }
