@@ -401,11 +401,31 @@ const CircleChatArea = ({ circle }) => {
         }
     }, [selectedMentionIdx, showMentions]);
 
-    const filteredMembers = members.filter(m => {
+    // Ensure admin/creator is included in the list for others to tag
+    const allPotentialMembers = (() => {
+        const list = [...members];
+        const creator = circle.creator;
+        if (creator) {
+            const creatorId = creator._id || creator;
+            const isCreatorInMembers = list.some(m => (m.user?._id || m.user) === creatorId);
+            if (!isCreatorInMembers) {
+                list.unshift({ user: creator, role: 'admin' });
+            }
+        }
+        return list;
+    })();
+
+    const filteredMembers = allPotentialMembers.filter(m => {
         const u = m.user;
-        if (!u || u._id === currentUserId) return false;
+        if (!u) return false;
+        const uid = u._id || u;
+        if (uid.toString() === currentUserId.toString()) return false;
+        
         const search = mentionFilter.toLowerCase();
-        return (u.displayName || u.username).toLowerCase().includes(search) || u.username.toLowerCase().includes(search);
+        const displayName = (u.displayName || u.username || '').toLowerCase();
+        const username = (u.username || '').toLowerCase();
+        
+        return displayName.includes(search) || username.includes(search);
     }).slice(0, 10);
 
     const handleInputKeyDown = (e) => {
@@ -576,7 +596,7 @@ const CircleChatArea = ({ circle }) => {
                         </div>
                         <div 
                             ref={mentionListRef}
-                            className="p-2 max-h-56 overflow-y-auto no-scrollbar"
+                            className="p-2 max-h-56 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-violet-500/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-violet-500/40"
                         >
                             {filteredMembers.map((m, idx) => (
                                 <button
@@ -594,7 +614,12 @@ const CircleChatArea = ({ circle }) => {
                                         <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#1A1140]" />
                                     </div>
                                     <div className="flex-1 text-left overflow-hidden">
-                                        <p className="text-xs font-bold text-gray-200 truncate">{m.user?.displayName || m.user?.username}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs font-bold text-gray-200 truncate">{m.user?.displayName || m.user?.username}</p>
+                                            {(m.role === 'admin' || (circle.creator?._id || circle.creator) === (m.user?._id || m.user)) && (
+                                                <span className="text-[8px] bg-violet-500/20 text-violet-400 border border-violet-500/30 px-1 rounded font-black uppercase tracking-tighter">Host</span>
+                                            )}
+                                        </div>
                                         <p className="text-[10px] text-gray-500 truncate">@{m.user?.username}</p>
                                     </div>
                                 </button>
