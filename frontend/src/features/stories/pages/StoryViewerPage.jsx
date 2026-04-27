@@ -359,8 +359,9 @@ const StoryViewerPage = () => {
                                 <span className="text-xs font-bold text-white tracking-wide">
                                     {(currentStory.viewers || []).filter(v => {
                                         const vId = (v._id || v).toString();
+                                        const curId = (currentUser?._id).toString();
                                         const ownerId = (currentStory.user?._id || currentStory.user).toString();
-                                        return vId !== ownerId;
+                                        return vId !== ownerId && vId !== curId;
                                     }).length} Viewers
                                 </span>
                                 <ChevronUp size={16} className="text-purple-300 ml-1" />

@@ -32,8 +32,12 @@ const NotificationsPage = () => {
                 break;
             case 'mention':
             case 'reaction':
-                if (noti.relatedItem?.type === 'circle') {
-                    // Navigate to circles list for now, or specific circle if ID is slug
+                if (noti.relatedItem?.type === 'moment') {
+                    if (noti.sender?.username) {
+                        navigate(`/stories/${noti.sender.username}`);
+                    }
+                } else if (noti.relatedItem?.type === 'circle') {
+                    // Navigate to specific circle if possible
                     navigate(`/circles`);
                 } else if (noti.relatedItem?.type === 'message') {
                     navigate('/messages');

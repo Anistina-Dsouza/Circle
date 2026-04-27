@@ -65,8 +65,8 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
         }
 
         // Apply Filters
-        if (filterType === 'messages') {
-            filtered = filtered.filter(chat => chat.lastMessage && chat.lastMessage.content?.text);
+        if (filterType === 'unread') {
+            filtered = filtered.filter(chat => chat.unreadCount > 0);
         } else if (filterType === 'online') {
             filtered = filtered.filter(chat => {
                 const otherParticipant = chat.participants?.find(p => {
@@ -155,7 +155,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                 <div className="p-2 space-y-1">
                                     {[
                                         { id: 'all', label: 'All Conversations', icon: <MessageCircle size={14} /> },
-                                        { id: 'messages', label: 'With Messages', icon: <Activity size={14} /> },
+                                        { id: 'unread', label: 'Unread Messages', icon: <Activity size={14} /> },
                                         { id: 'online', label: 'Online Friends', icon: <Users size={14} /> }
                                     ].map(opt => (
                                         <button

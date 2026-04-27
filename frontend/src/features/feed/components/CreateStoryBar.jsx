@@ -120,8 +120,8 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                 {/* Vertical Divider (Matches Screenshot '|') */}
                 <div className="h-6 w-px bg-white/10 mx-4" />
 
-                {/* Main Input Area - More compact */}
-                <div className="flex-1 min-w-0">
+                {/* Main Input Area - More space */}
+                <div className="flex-[2] min-w-[150px]">
                     <input
                         type="text"
                         value={caption}
