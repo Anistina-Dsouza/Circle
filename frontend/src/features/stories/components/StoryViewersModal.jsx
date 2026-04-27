@@ -8,19 +8,10 @@ const StoryViewersModal = ({ viewers = [], reactions = [], isOpen, onClose }) =>
 
     if (!isOpen) return null;
 
-    const currentUserId = (() => {
-        if (typeof window === 'undefined') return null;
-        try { return JSON.parse(localStorage.getItem('user') || '{}')._id; }
-        catch { return null; }
-    })();
-
-    const filteredViewers = viewers.filter(viewer => {
-        const vId = (viewer._id || viewer.id || viewer || '').toString();
-        const isSelf = vId === currentUserId?.toString();
-        const matchesSearch = (viewer.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              (viewer.displayName || '').toLowerCase().includes(searchQuery.toLowerCase());
-        return !isSelf && matchesSearch;
-    });
+    const filteredViewers = viewers.filter(viewer => 
+        (viewer.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (viewer.displayName || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -38,7 +29,7 @@ const StoryViewersModal = ({ viewers = [], reactions = [], isOpen, onClose }) =>
                         <div>
                             <h3 className="text-lg font-bold text-white leading-none mb-1">Story Viewers</h3>
                             <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
-                                {filteredViewers.length} Total Views
+                                {viewers.length} Total Views
                             </span>
                         </div>
                     </div>

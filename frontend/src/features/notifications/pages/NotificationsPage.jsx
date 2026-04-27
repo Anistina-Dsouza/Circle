@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Megaphone } from 'lucide-react';
+import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -10,7 +10,7 @@ const NotificationsPage = () => {
     const [notifications, setNotifications] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
-    const backendUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
     const handleNotifClick = (noti) => {
         // Mark as read
@@ -32,14 +32,8 @@ const NotificationsPage = () => {
                 break;
             case 'mention':
             case 'reaction':
-                if (noti.relatedItem?.type === 'moment') {
-                    if (noti.sender?.username) {
-                        const momentId = noti.relatedItem?.id || noti.relatedItem?._id;
-                        if (momentId) {
-                            navigate(`/stories/${noti.sender.username}?momentId=${momentId}`);
-                        }
-                    }
-                } else if (noti.relatedItem?.type === 'circle') {
+                if (noti.relatedItem?.type === 'circle') {
+                    // Navigate to circles list for now, or specific circle if ID is slug
                     navigate(`/circles`);
                 } else if (noti.relatedItem?.type === 'message') {
                     navigate('/messages');
@@ -111,7 +105,7 @@ const NotificationsPage = () => {
     };
 
     const clearAll = async () => {
-        if (typeof window !== 'undefined' && window.confirm('Clear all notifications?')) {
+        if (window.confirm('Clear all notifications?')) {
             try {
                 const token = localStorage.getItem('token');
                 await axios.delete(`${backendUrl}/api/notifications/clear-all`, {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
 import StoryInfo from '../components/StoryInfo';
 import StoryViewersModal from '../components/StoryViewersModal';
@@ -14,8 +14,6 @@ const StoryViewerPage = () => {
     const { username } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const [searchParams] = useSearchParams();
-    const targetMomentId = searchParams.get('momentId');
     
     const [stories, setStories] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,10 +29,9 @@ const StoryViewerPage = () => {
     const [translateY, setTranslateY] = useState(0);
 
     const progressTimer = useRef(null);
-    const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const baseUrl = import.meta.env.VITE_API_URL;
     
     const currentUser = (() => {
-        if (typeof window === 'undefined') return {};
         try { return JSON.parse(localStorage.getItem('user') || '{}'); }
         catch { return {}; }
     })();
@@ -105,7 +102,7 @@ const StoryViewerPage = () => {
         const momentId = stories[currentIndex]?._id;
         if (!momentId) return;
 
-                if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete this story?')) {
+        if (window.confirm('Are you sure you want to delete this story?')) {
             try {
                 const token = localStorage.getItem('token');
                 await axios.delete(`${baseUrl}/api/moments/${momentId}`, {
@@ -176,13 +173,13 @@ const StoryViewerPage = () => {
                 setUserList(location.state.userList);
                 return;
             }
-            if (typeof window !== 'undefined' && window._stories_list && window._stories_list.length > 0) {
+            if (window._stories_list && window._stories_list.length > 0) {
                 setUserList(window._stories_list);
                 return;
             }
             
             try {
-                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                const token = localStorage.getItem('token');
                 const response = await axios.get(`${baseUrl}/api/moments/feed`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -190,7 +187,7 @@ const StoryViewerPage = () => {
                     const follows = response.data.followingMoments || [];
                     const list = follows.map(s => s.user?.username).filter(Boolean);
                     setUserList(list);
-                    if (typeof window !== 'undefined') window._stories_list = list;
+                    window._stories_list = list;
                 }
             } catch (err) {
                 console.error('Error fetching user list:', err);
@@ -207,23 +204,14 @@ const StoryViewerPage = () => {
             setProgress(0);
             setCurrentIndex(0);
             try {
-                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                const token = localStorage.getItem('token');
                 const response = await axios.get(`${baseUrl}/api/moments/user/${username}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
                 if (response.data.success) {
-                    const fetchedMoments = response.data.moments || [];
-                    if (fetchedMoments.length > 0) {
-                        setStories(fetchedMoments);
-                        
-                        // Handle deep-linking to specific moment
-                        if (targetMomentId) {
-                            const index = fetchedMoments.findIndex(m => m._id === targetMomentId);
-                            if (index !== -1) {
-                                setCurrentIndex(index);
-                            }
-                        }
+                    if (response.data.moments && response.data.moments.length > 0) {
+                        setStories(response.data.moments);
                     } else {
                         setError('No active stories found.');
                     }
@@ -237,7 +225,7 @@ const StoryViewerPage = () => {
         };
 
         if (username) fetchUserStories();
-    }, [username, baseUrl, targetMomentId]);
+    }, [username, baseUrl]);
 
     useEffect(() => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
@@ -262,7 +250,7 @@ const StoryViewerPage = () => {
         if (!loading && stories.length > 0 && stories[currentIndex]) {
             const momentId = stories[currentIndex]._id;
             if (momentId) {
-                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                const token = localStorage.getItem('token');
                 axios.get(`${baseUrl}/api/moments/${momentId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }).catch(() => {});
@@ -370,10 +358,9 @@ const StoryViewerPage = () => {
                                 <Eye size={16} className="text-purple-300" />
                                 <span className="text-xs font-bold text-white tracking-wide">
                                     {(currentStory.viewers || []).filter(v => {
-                                        const vId = (v._id || v || '').toString();
-                                        const curId = currentUser?._id?.toString();
-                                        const ownerId = (currentStory.user?._id || currentStory.user || '').toString();
-                                        return vId !== ownerId && (curId ? vId !== curId : true);
+                                        const vId = (v._id || v).toString();
+                                        const ownerId = (currentStory.user?._id || currentStory.user).toString();
+                                        return vId !== ownerId;
                                     }).length} Viewers
                                 </span>
                                 <ChevronUp size={16} className="text-purple-300 ml-1" />

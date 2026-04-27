@@ -1,13 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { Link as LinkIcon, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
+import { Link as LinkIcon, Send, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 
 const CreateStoryBar = ({ onPostSuccess }) => {
-    const user = (() => {
-        if (typeof window === 'undefined') return {};
-        try { return JSON.parse(localStorage.getItem('user') || '{}'); }
-        catch { return {}; }
-    })();
+    const user = JSON.parse(localStorage.getItem('user'));
     const [caption, setCaption] = useState('');
     const [loading, setLoading] = useState(false);
     const [mediaUrl, setMediaUrl] = useState('');
@@ -121,11 +117,11 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                     </div>
                 </div>
 
-                {/* Vertical Divider - Less margin */}
-                <div className="h-6 w-px bg-white/10 mx-2" />
+                {/* Vertical Divider (Matches Screenshot '|') */}
+                <div className="h-6 w-px bg-white/10 mx-4" />
 
-                {/* Main Input Area - Maximum space */}
-                <div className="flex-1 min-w-[220px]">
+                {/* Main Input Area - More compact */}
+                <div className="flex-1 min-w-0">
                     <input
                         type="text"
                         value={caption}
