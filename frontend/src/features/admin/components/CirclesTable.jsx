@@ -29,21 +29,21 @@ export default function CirclesTable({ circles }) {
             <div className="space-y-1">
                 <div className="flex items-center gap-2 mb-1">
                     <Layers size={14} className="text-indigo-400" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400/60">Cluster Pulse</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400/60">Communities</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter">Emerging Nodes</h2>
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter">Recent Communities</h2>
             </div>
             <Link to="/admin/communities" className="flex items-center gap-3 text-white/40 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-6 py-2.5 rounded-2xl border border-white/5 whitespace-nowrap group">
-                <span>Manage Hub</span>
+                <span>View All</span>
                 <Settings size={14} className="group-hover:rotate-90 transition-transform duration-500" />
             </Link>
         </div>
 
         {/* Column Headings */}
         <div className="flex px-6 sm:px-10 py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b border-white/5 bg-white/[0.01]">
-            <div className="flex-1">Cluster Signature</div>
-            <div className="hidden lg:block w-[20%] text-center">Classification</div>
-            <div className="w-[20%] text-center">Node Count</div>
+            <div className="flex-1">Community</div>
+            <div className="hidden lg:block w-[20%] text-center">Category</div>
+            <div className="w-[20%] text-center">Members</div>
             <div className="w-12 text-right"></div>
         </div>
 
@@ -104,7 +104,7 @@ export default function CirclesTable({ circles }) {
                 ))
             ) : (
                 <div className="py-32 text-center text-xs text-white/10 italic font-black uppercase tracking-[0.4em]">
-                    Zero Clusters Detected
+                    No communities found
                 </div>
             )}
         </div>

@@ -14,7 +14,7 @@ export default function CommunityStats({ newCircles = 0, engagement = '0', repor
         />
   
         <StatCard
-          title="Engagement Depth"
+          title="Avg Engagement"
           value={engagement}
           subtitle="Avg Members/Circle"
           icon={<Users size={20} />}
@@ -24,7 +24,7 @@ export default function CommunityStats({ newCircles = 0, engagement = '0', repor
         />
   
         <StatCard
-          title="Risk Telemetry"
+          title="Reported Items"
           value={reportedItems}
           subtitle="Pending Review"
           icon={<AlertTriangle size={20} />}

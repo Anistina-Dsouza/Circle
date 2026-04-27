@@ -67,10 +67,10 @@ export default function Announcements() {
              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
                 <Megaphone size={24} />
              </div>
-             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60">Broadcast Hub</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400/60">Announcements</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Platform Signal
+            Broadcast System
           </h1>
           <p className="text-white/40 mt-3 text-sm sm:text-base font-black uppercase tracking-widest max-w-xl">
             Broadcast important updates to the entire Circle ecosystem.
@@ -85,13 +85,13 @@ export default function Announcements() {
             <div className="w-8 h-8 bg-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/20 group-hover:rotate-12 transition-transform duration-500">
                 <Radio size={16} className="text-white" />
             </div>
-            <span className="text-2xl font-black text-white tracking-tight">New Transmission</span>
+            <span className="text-2xl font-black text-white tracking-tight">New Announcement</span>
           </div>
 
           {/* Title */}
           <div className="mb-8">
             <label className="block text-[10px] uppercase tracking-[0.2em] text-white/30 mb-4 font-black">
-              Announcement Signature
+              Title
             </label>
             <input
               type="text"
@@ -108,7 +108,7 @@ export default function Announcements() {
           {/* Message */}
           <div className="mb-10">
             <label className="block text-[10px] uppercase tracking-[0.2em] text-white/30 mb-4 font-black">
-              Payload Content
+              Message
             </label>
             <textarea
               rows="6"
@@ -121,7 +121,7 @@ export default function Announcements() {
               required
             />
             <div className="text-right text-[9px] text-white/20 mt-3 font-black uppercase tracking-widest">
-              {message.length} <span className="opacity-50">/ 500 bits</span>
+              {message.length} <span className="opacity-50">/ 500 characters</span>
             </div>
           </div>
 
@@ -133,11 +133,11 @@ export default function Announcements() {
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] text-white flex items-center justify-center gap-3 hover:shadow-2xl hover:shadow-purple-500/40 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-purple-900/20"
           >
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-            {submitting ? 'Broadcasting...' : 'Ignite Transmission'}
+            {submitting ? 'Sending...' : 'Send Announcement'}
           </button>
 
           <p className="text-center text-white/10 text-[9px] mt-6 font-black uppercase tracking-[0.3em] italic">
-            Natively broadcasted to all active nodes immediately.
+            Broadcasted to all users immediately.
           </p>
 
         </form>
@@ -148,12 +148,12 @@ export default function Announcements() {
           <div className="flex flex-col sm:flex-row justify-between items-end mb-10 gap-6 border-b border-white/5 pb-8">
             <div className="space-y-1">
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Archive Log
+                Previous Announcements
                 </h2>
-                <p className="text-white/20 text-[10px] font-black uppercase tracking-widest italic">Historical platform transmissions</p>
+                <p className="text-white/20 text-[10px] font-black uppercase tracking-widest italic">History of platform updates</p>
             </div>
             <span className="text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-all bg-white/5 px-6 py-2 rounded-full border border-white/5">
-              Access Vault
+            View All
             </span>
           </div>
 
@@ -161,11 +161,11 @@ export default function Announcements() {
             {loading ? (
               <div className="flex flex-col items-center justify-center p-20 gap-4">
                 <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
-                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Querying Archive...</span>
+                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Loading...</span>
               </div>
             ) : announcements.length === 0 ? (
               <div className="text-center p-20 text-white/20 border border-white/5 rounded-[32px] bg-white/[0.02] font-black uppercase tracking-[0.3em] italic text-sm">
-                No signal history recorded.
+                No announcements found.
               </div>
             ) : announcements.map((a) => (
               <div
@@ -195,7 +195,7 @@ export default function Announcements() {
                   {a.reach !== undefined && a.reach !== null && (
                     <div className="flex items-center gap-3" title="Reach">
                       <Eye size={14} className="text-purple-500/50" />
-                      <span>{a.reach >= 1000 ? `${(a.reach / 1000).toFixed(1)}K` : a.reach} Node Reach</span>
+                      <span>{a.reach >= 1000 ? `${(a.reach / 1000).toFixed(1)}K` : a.reach} Reach</span>
                     </div>
                   )}
                 </div>

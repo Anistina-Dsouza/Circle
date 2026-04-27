@@ -29,13 +29,13 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                             <TrendingUp size={20} className="animate-pulse sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Growth Velocity</h2>
-                            <p className="text-[10px] text-purple-400/60 mt-1 uppercase tracking-widest font-black">User Acquisition Flux</p>
+                             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">User Growth</h2>
+                             <p className="text-[10px] text-purple-400/60 mt-1 uppercase tracking-widest font-black">Registration stats</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                         <Activity size={12} />
-                        <span>Live Audit</span>
+                        <span>Live Data</span>
                     </div>
                 </div>
  
@@ -61,7 +61,7 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                                         {/* Numerical Value Indicator (Shows on Hover) */}
                                         <div className="absolute opacity-0 group-hover/bar:opacity-100 transition-all duration-300 bottom-full mb-6 z-30 pointer-events-none">
                                             <div className="bg-purple-600 text-white text-[9px] sm:text-[10px] font-black px-3 py-1.5 rounded-lg shadow-xl shadow-purple-900/40 border border-purple-400/30 whitespace-nowrap">
-                                                {d.count} SIGNUPS
+                                                {d.count} USERS
                                             </div>
                                             <div className="w-2 h-2 bg-purple-600 rotate-45 mx-auto -mt-1 border-r border-b border-purple-400/30" />
                                         </div>
@@ -88,7 +88,7 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                                 </div>
                             )) : (
                                 <div className="w-full h-full flex items-center justify-center text-white/10 uppercase tracking-[0.2em] font-black text-[10px]">
-                                    Awaiting Data Stream
+                                    No data available
                                 </div>
                             )}
                         </div>
@@ -118,8 +118,8 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                             <Layout size={20} className="sm:w-6 sm:h-6" />
                         </div>
                         <div>
-                            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Distribution</h2>
-                            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-widest font-black">Niche Saturation</p>
+                             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Circle Categories</h2>
+                             <p className="text-[10px] text-white/40 mt-1 uppercase tracking-widest font-black">Category breakdown</p>
                         </div>
                     </div>
                 </div>
@@ -134,7 +134,7 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs sm:text-sm font-bold text-white tabular-nums">{cat.count}</span>
-                                    <span className="text-[8px] sm:text-[9px] font-black text-indigo-400/40 uppercase tracking-widest">Units</span>
+                                     <span className="text-[8px] sm:text-[9px] font-black text-indigo-400/40 uppercase tracking-widest">Circles</span>
                                 </div>
                             </div>
                             
@@ -150,7 +150,7 @@ const GrowthTrends = ({ trends, hideDistribution = false }) => {
                     )) : (
                         <div className="w-full h-48 flex flex-col items-center justify-center text-white/10 gap-4">
                             <Activity size={32} className="opacity-20" />
-                            <span className="uppercase tracking-[0.3em] font-black text-[10px]">Awaiting Distribution Data</span>
+                             <span className="uppercase tracking-[0.3em] font-black text-[10px]">Loading categories...</span>
                         </div>
                     )}
                 </div>

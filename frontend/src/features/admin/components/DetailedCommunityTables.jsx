@@ -11,7 +11,7 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
             <Users size={24} className="text-indigo-400 animate-pulse" />
           </div>
         </div>
-        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Synchronizing Cluster Data...</span>
+        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Loading Communities...</span>
       </div>
     );
   }
@@ -108,12 +108,12 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
           <div className="min-w-[1000px] lg:min-w-0">
             {/* Table Header */}
             <div className="grid grid-cols-6 px-10 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-white/30 border-b border-white/5 bg-white/[0.02]">
-              <span>Cluster Identity</span>
-              <span>Host Node</span>
-              <span className="text-center">Active Nodes</span>
-              <span className="text-center">Integrity Status</span>
-              <span className="text-center">Protocol</span>
-              <span className="text-right">Access Control</span>
+              <span>Community</span>
+              <span>Host</span>
+              <span className="text-center">Members</span>
+              <span className="text-center">Moderation</span>
+              <span className="text-center">Privacy</span>
+              <span className="text-right">Actions</span>
             </div>
 
             {/* Rows */}
@@ -145,7 +145,7 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
                     <span className="text-sm font-bold text-white/60 truncate block group-hover:text-white transition-colors">
                       @{c.creator?.username || 'unknown'}
                     </span>
-                    <span className="text-[9px] text-white/20 uppercase font-black tracking-widest block italic">Creator Node</span>
+                    <span className="text-[9px] text-white/20 uppercase font-black tracking-widest block italic">Creator</span>
                   </div>
 
                   {/* Members */}
@@ -218,7 +218,7 @@ export default function CommunityTable({ data = [], loading = false, onToggleSta
           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-white/10">
               <Users size={40} />
           </div>
-          <span className="text-white/20 font-black uppercase tracking-[0.4em] text-sm italic">Zero Clusters Discovered in Current Filter</span>
+          <span className="text-white/20 font-black uppercase tracking-[0.4em] text-sm italic">No communities found</span>
         </div>
       )}
     </div>

@@ -54,7 +54,7 @@ export default function AdminReports() {
             }
         } catch (err) {
             console.error("Reports error:", err);
-            setError("Tactical intelligence link failed. Attempting to reconnect...");
+            setError("Failed to connect to reporting service. Retrying...");
         } finally {
             setLoading(false);
         }
@@ -74,10 +74,10 @@ export default function AdminReports() {
     }, [activeTab, userPage, circlePage, meetingPage, fetchReportsData]);
 
     const tabs = [
-        { id: "Resonance", icon: <Activity size={18} />, label: "Resonance", desc: "Live Flux" },
-        { id: "Velocity", icon: <Zap size={18} />, label: "Velocity", desc: "Engagement" },
-        { id: "Activity", icon: <MessageSquare size={18} />, label: "Activity", desc: "Audit Logs" },
-        { id: "Distribution", icon: <BarChart3 size={18} />, label: "Distribution", desc: "Niche Audit" }
+        { id: "Resonance", icon: <Activity size={18} />, label: "Real-time", desc: "Live Activity" },
+        { id: "Velocity", icon: <Zap size={18} />, label: "Engagement", desc: "User Interaction" },
+        { id: "Activity", icon: <MessageSquare size={18} />, label: "Audit Logs", desc: "System Logs" },
+        { id: "Distribution", icon: <BarChart3 size={18} />, label: "Categories", desc: "Platform Spread" }
     ];
 
     return (
@@ -89,15 +89,15 @@ export default function AdminReports() {
                     <div className="relative z-10 text-center lg:text-left">
                         <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
                             <div className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-[0.2em]">
-                                Intelligence Suite v6.0
+                                Platform Analytics
                             </div>
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
                         </div>
                         <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-3 leading-none uppercase">
-                            Platform <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Intelligence</span>
+                            Advanced <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Reports</span>
                         </h1>
                         <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] max-w-lg mx-auto lg:mx-0">
-                            Neural auditing of community nodes and conversational engagement vectors.
+                            Comprehensive analytics of community interactions and user engagement.
                         </p>
                     </div>
 
@@ -130,7 +130,7 @@ export default function AdminReports() {
                         <AlertTriangle size={22} />
                     </div>
                     <div>
-                        <h4 className="text-red-500 font-black uppercase tracking-widest text-[11px]">Anomaly Detected</h4>
+                        <h4 className="text-red-500 font-black uppercase tracking-widest text-[11px]">System Error</h4>
                         <p className="text-red-400/60 text-[9px] font-bold uppercase tracking-tight mt-1">{error}</p>
                     </div>
                 </div>
@@ -145,7 +145,7 @@ export default function AdminReports() {
                                 <Cpu className="text-purple-400 animate-pulse" size={24} />
                             </div>
                         </div>
-                        <span className="text-[10px] font-black text-purple-400/40 uppercase tracking-[0.4em] animate-pulse">Syncing Intelligence...</span>
+                        <span className="text-[10px] font-black text-purple-400/40 uppercase tracking-[0.4em] animate-pulse">Loading Reports...</span>
                     </div>
                 ) : (
                     <div className="transition-all duration-1000 transform">
@@ -178,18 +178,18 @@ function ResonanceReport({ stats, resonanceData }) {
                     icon={<Zap size={20} />}
                     color="text-amber-400"
                     glow="shadow-amber-500/10"
-                    desc="Participation Density"
+                    desc="User Activity Ratio"
                 />
                 <PremiumMetric
-                    label="Platform Nodes"
+                    label="Total Users"
                     value={stats?.totalUsers.toLocaleString()}
                     icon={<Users size={20} />}
                     color="text-purple-400"
                     glow="shadow-purple-500/10"
-                    desc="Global Context Scale"
+                    desc="Total Platform Scale"
                 />
                 <PremiumMetric
-                    label="Pulse Freq"
+                    label="Interactivity"
                     value={resonanceData[resonanceData.length - 1]?.count || 0}
                     icon={<Activity size={20} />}
                     color="text-emerald-400"
@@ -205,12 +205,12 @@ function ResonanceReport({ stats, resonanceData }) {
                         <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Interaction Resonance</h3>
                         <div className="flex items-center gap-2">
                             <Globe size={12} className="text-purple-400/60" />
-                            <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Real-time audit across all node clusters</p>
+                            <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Real-time activity tracking</p>
                         </div>
                     </div>
                     <div className="px-4 py-1.5 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-2.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Active Stream</span>
+                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Live Updates</span>
                     </div>
                 </div>
                 <div className="h-[400px]">
@@ -241,15 +241,15 @@ function VelocityReport({ data }) {
                     icon={<Clock size={20} />}
                     color="text-fuchsia-400"
                     glow="shadow-fuchsia-500/10"
-                    desc="Avg Reply Interval"
+                    desc="Avg Reply Time"
                 />
                 <PremiumMetric
-                    label="Conversational Load"
+                    label="Total Messages"
                     value={data?.platformVolume.toLocaleString()}
                     icon={<MessageSquare size={20} />}
                     color="text-purple-400"
                     glow="shadow-purple-500/10"
-                    desc="7D Signal Volume"
+                    desc="7D Message Volume"
                 />
                 <PremiumMetric
                     label="Activity Velocity"
@@ -257,7 +257,7 @@ function VelocityReport({ data }) {
                     icon={<TrendingUp size={20} />}
                     color="text-emerald-400"
                     glow="shadow-emerald-500/10"
-                    desc="Signals per Minute"
+                    desc="Messages per Minute"
                 />
             </div>
 
@@ -269,7 +269,7 @@ function VelocityReport({ data }) {
                         <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Peak Signal Hours</h3>
                         <div className="flex items-center gap-2 mt-1">
                             <Sparkles size={12} className="text-purple-400" />
-                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Neural Traffic Intensity Map</p>
+                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Interaction Heatmap</p>
                         </div>
                     </div>
                 </div>
@@ -291,7 +291,7 @@ function VelocityReport({ data }) {
                                             >
                                                 <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-50">
                                                     <div className="bg-[#1A0C3F] border border-purple-500/40 text-[9px] font-black px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap text-white">
-                                                        <span className="text-purple-400">{val}</span> SIGNALS @ {hour}:00
+                                                        <span className="text-purple-400">{val}</span> MESSAGES @ {hour}:00
                                                     </div>
                                                     <div className="w-2 h-2 bg-[#1A0C3F] rotate-45 mx-auto -mt-1 border-r border-b border-purple-500/40" />
                                                 </div>
@@ -315,19 +315,19 @@ function VelocityReport({ data }) {
                             <div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                                 <Target size={20} className="animate-pulse sm:w-6 sm:h-6" />
                             </div>
-                            <h3 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter">Engagement Depth</h3>
+                            <h3 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter">Community Engagement</h3>
                         </div>
-                        <p className="text-[10px] sm:text-[12px] text-gray-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Spatial Node Interaction Matrix v2.2</p>
+                        <p className="text-[10px] sm:text-[12px] text-gray-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Interaction Mapping Matrix</p>
                     </div>
                     <div className="flex items-center gap-6 sm:gap-14 px-6 sm:px-10 py-4 sm:py-5 bg-[#1A0C3F]/40 backdrop-blur-2xl border border-white/5 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full sm:w-auto justify-center sm:justify-start">
                         <div className="text-center">
                             <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">20</span>
-                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Audit Population</p>
+                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Circles Analyzed</p>
                         </div>
                         <div className="w-px h-10 sm:h-12 bg-white/10" />
                         <div className="text-center">
                             <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">{data?.platformVolume.toLocaleString()}</span>
-                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Gross Signal Flux</p>
+                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Total Activity</p>
                         </div>
                     </div>
                 </div>
@@ -337,24 +337,24 @@ function VelocityReport({ data }) {
                         {/* Dynamic Axis Labels */}
                         <div className="absolute -left-12 bottom-0 top-0 hidden lg:flex flex-col justify-between py-10 items-end pr-8">
                             <div className="flex flex-col items-end gap-1.5 group/axis">
-                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">High Velocity</span>
-                                <span className="text-[7px] text-white/20 uppercase font-black">Signal Peak</span>
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Most Active</span>
+                                <span className="text-[7px] text-white/20 uppercase font-black">Engagement Peak</span>
                             </div>
                             <div className="w-1.5 h-32 bg-gradient-to-b from-purple-500/40 via-purple-500/10 to-transparent rounded-full shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
                             <div className="flex flex-col items-end gap-1.5">
-                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Low Velocity</span>
-                                <span className="text-[7px] text-white/10 uppercase font-black">Latency Base</span>
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Least Active</span>
+                                <span className="text-[7px] text-white/10 uppercase font-black">Activity Base</span>
                             </div>
                         </div>
 
                         <div className="absolute left-0 right-0 -bottom-16 hidden lg:flex justify-between px-10">
                             <div className="flex flex-col gap-1.5">
-                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Micro Footprint</span>
-                                <span className="text-[7px] text-white/10 uppercase font-black">Sparse Nodes</span>
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Small Scale</span>
+                                <span className="text-[7px] text-white/10 uppercase font-black">Few Members</span>
                             </div>
                             <div className="h-1.5 w-64 bg-gradient-to-r from-transparent via-purple-500/10 to-purple-500/40 rounded-full mt-5 shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
                             <div className="flex flex-col items-end gap-1.5 group/axis">
-                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Global Scale</span>
+                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Large Scale</span>
                                 <span className="text-[7px] text-white/20 uppercase font-black">Mass Population</span>
                             </div>
                         </div>
@@ -412,11 +412,11 @@ function VelocityReport({ data }) {
 
                                                 <div className="grid grid-cols-2 gap-3 sm:gap-5 mb-4 sm:mb-8 relative z-10">
                                                     <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Signals</span>
+                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Messages</span>
                                                         <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.messageCount.toLocaleString()}</span>
                                                     </div>
                                                     <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Nodes</span>
+                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Members</span>
                                                         <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.memberCount.toLocaleString()}</span>
                                                     </div>
                                                 </div>
@@ -458,7 +458,7 @@ function ActivityReport({ data, pages, setPages }) {
 
                 {/* 1. PROFILE INITIALIZATIONS */}
                 <ActivitySegment
-                    title="Profile Sync"
+                    title="Recent Users"
                     icon={<UserPlus size={20} />}
                     color="text-blue-400"
                     bg="bg-blue-500/10"
@@ -469,7 +469,7 @@ function ActivityReport({ data, pages, setPages }) {
                     {users.map((user, i) => (
                         <ActivityCard key={i} color="blue">
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest px-1.5 py-0.5 bg-blue-500/10 rounded">User Node</span>
+                                <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest px-1.5 py-0.5 bg-blue-500/10 rounded">User</span>
                                 <span className="text-[8px] text-gray-600 font-bold">{new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">@{user.username}</h4>
@@ -478,7 +478,7 @@ function ActivityReport({ data, pages, setPages }) {
                                     <div className={`w-1.5 h-1.5 rounded-full ${user.onlineStatus?.status === 'online' ? 'bg-green-500' : 'bg-gray-700'}`} />
                                     <span className="text-[8px] font-black text-gray-600 uppercase">Status: {user.onlineStatus?.status || 'offline'}</span>
                                 </div>
-                                <span className="text-[8px] font-black text-blue-400/60 uppercase">INIT SUCCESS</span>
+                                <span className="text-[8px] font-black text-blue-400/60 uppercase">SUCCESS</span>
                             </div>
                         </ActivityCard>
                     ))}
@@ -486,7 +486,7 @@ function ActivityReport({ data, pages, setPages }) {
 
                 {/* 2. COMMUNITY EXPANSION */}
                 <ActivitySegment
-                    title="Community Expansion"
+                    title="Recent Communities"
                     icon={<Plus size={20} />}
                     color="text-purple-400"
                     bg="bg-purple-500/10"
@@ -497,16 +497,16 @@ function ActivityReport({ data, pages, setPages }) {
                     {circles.map((circle, i) => (
                         <ActivityCard key={i} color="purple">
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest px-1.5 py-0.5 bg-purple-500/10 rounded">Circle Cluster</span>
+                                <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest px-1.5 py-0.5 bg-purple-500/10 rounded">Community</span>
                                 <span className="text-[8px] text-gray-600 font-bold">{new Date(circle.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">{circle.name}</h4>
                             <div className="mt-3 flex items-center justify-between">
                                 <div className="flex items-center gap-1.5">
                                     <Users size={10} className="text-gray-600" />
-                                    <span className="text-[8px] font-black text-gray-600 uppercase">{circle.stats?.memberCount || 0} Nodes</span>
+                                    <span className="text-[8px] font-black text-gray-600 uppercase">{circle.stats?.memberCount || 0} Members</span>
                                 </div>
-                                <span className="text-[8px] font-black text-purple-400/60 uppercase">SEED COMPLETE</span>
+                                <span className="text-[8px] font-black text-purple-400/60 uppercase">CREATED</span>
                             </div>
                         </ActivityCard>
                     ))}
@@ -514,7 +514,7 @@ function ActivityReport({ data, pages, setPages }) {
 
                 {/* 3. MEETING RESONANCE */}
                 <ActivitySegment
-                    title="Meeting Resonance"
+                    title="Recent Meetings"
                     icon={<Video size={20} />}
                     color="text-emerald-400"
                     bg="bg-emerald-500/10"
@@ -525,7 +525,7 @@ function ActivityReport({ data, pages, setPages }) {
                     {meetings.map((meeting, i) => (
                         <ActivityCard key={i} color="emerald">
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest px-1.5 py-0.5 bg-emerald-500/10 rounded">Sync Event</span>
+                                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest px-1.5 py-0.5 bg-emerald-500/10 rounded">Meeting</span>
                                 <span className="text-[8px] text-gray-600 font-bold">{new Date(meeting.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <h4 className="text-sm font-bold text-white truncate">{meeting.title}</h4>
@@ -580,7 +580,7 @@ function ActivitySegment({ title, icon, color, bg, children, page, totalPages, o
                 {children.length > 0 ? children : (
                     <div className="flex-1 flex flex-col items-center justify-center opacity-10 py-20">
                         <Activity size={32} className="mb-4" />
-                        <span className="text-[8px] font-black uppercase tracking-widest">No telemetry found</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest">No activity found</span>
                     </div>
                 )}
             </div>
@@ -605,7 +605,7 @@ function DistributionReport({ data }) {
                     <div className="p-2.5 bg-purple-500/10 rounded-xl text-purple-400">
                         <BarChart3 size={20} />
                     </div>
-                    <h3 className="text-xl font-black text-white uppercase tracking-tight">Niche Saturation</h3>
+                    <h3 className="text-xl font-black text-white uppercase tracking-tight">Category Distribution</h3>
                 </div>
 
                 <div className="space-y-8">
@@ -676,7 +676,7 @@ function DistributionReport({ data }) {
                                 <div className="flex items-center gap-2">
                                     <span className="text-[8px] font-black text-purple-400/60 uppercase tracking-widest">{circle.category}</span>
                                     <div className="w-0.5 h-0.5 rounded-full bg-white/10" />
-                                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-tighter">{circle.stats.messageCount.toLocaleString()} signals</span>
+                                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-tighter">{circle.stats.messageCount.toLocaleString()} messages</span>
                                 </div>
                             </div>
 
@@ -685,7 +685,7 @@ function DistributionReport({ data }) {
                                     <Users size={10} className="text-purple-500" />
                                     <span className="text-lg font-black tabular-nums leading-none tracking-tighter">{circle.stats.memberCount}</span>
                                 </div>
-                                <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest mt-1">Footprint</p>
+                                <p className="text-[7px] text-gray-600 font-black uppercase tracking-widest mt-1">Growth</p>
                             </div>
                         </div>
                     ))}
@@ -701,7 +701,7 @@ function LifecycleReport({ data }) {
             <div className="bg-[#0F0529]/40 border border-white/5 rounded-[40px] p-10">
                 <div className="flex justify-between items-center mb-10">
                     <h3 className="text-xl font-black text-white uppercase tracking-tight">Growth Lifecycle Analytics</h3>
-                    <div className="text-[9px] font-black text-purple-400 uppercase tracking-[0.3em]">Historical Vector Mapping</div>
+                    <div className="text-[9px] font-black text-purple-400 uppercase tracking-[0.3em]">Platform growth stats</div>
                 </div>
                 <GrowthTrends trends={data?.trends} hideDistribution={true} />
             </div>
@@ -735,7 +735,7 @@ function SafetyReport({ data }) {
                     <div className="p-2 bg-red-500/10 rounded-lg text-red-400">
                         <AlertTriangle size={18} />
                     </div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Latest Incident Feed</h4>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Latest Incidents</h4>
                 </div>
 
                 <div className="space-y-4 flex-1">

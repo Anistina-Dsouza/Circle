@@ -26,7 +26,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
       }
     } catch (err) {
       console.error(err);
-      setError("Failed to synchronize with reporting nodes.");
+      setError("Failed to load report data.");
     } finally {
       setLoading(false);
     }
@@ -62,9 +62,9 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
               <AlertTriangle size={24} />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">System Intervention</h2>
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Report Details</h2>
               <p className="text-[10px] sm:text-xs text-white/40 mt-1 uppercase tracking-[0.2em] font-black">
-                {reports.length} Critical Flag{reports.length !== 1 ? 's' : ''} • {itemType} Audit
+                {reports.length} Flag{reports.length !== 1 ? 's' : ''} • {itemType} Reports
               </p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
           {loading ? (
             <div className="flex flex-col items-center justify-center p-20 gap-4">
               <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
-              <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Decoding Signal...</span>
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Loading...</span>
             </div>
           ) : error ? (
             <div className="text-center p-10 bg-red-500/5 border border-red-500/20 rounded-2xl text-red-400 font-bold uppercase tracking-widest text-xs">
@@ -83,7 +83,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
           ) : reports.length === 0 ? (
             <div className="text-center p-20 flex flex-col items-center gap-4">
               <ShieldCheck size={40} className="text-green-500/20" />
-              <span className="text-white/20 font-black uppercase tracking-[0.3em] text-sm italic">Status: Stable Node</span>
+              <span className="text-white/20 font-black uppercase tracking-[0.3em] text-sm italic">Status: No Issues</span>
             </div>
           ) : (
             reports.map((report) => (
@@ -106,7 +106,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
                         "{report.description}"
                       </p>
                     ) : (
-                      <p className="text-white/20 italic text-sm">No secondary telemetry provided.</p>
+                      <p className="text-white/20 italic text-sm">No additional details provided.</p>
                     )}
                   </div>
                 </div>
@@ -116,9 +116,9 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
                     <User size={14} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-white/20 uppercase font-black tracking-widest">Origin Node</span>
+                    <span className="text-[9px] text-white/20 uppercase font-black tracking-widest">Reporter</span>
                     <span className="text-xs font-bold text-white/60">
-                      {report.reporter?.displayName || report.reporter?.username || 'Unknown Operator'}
+                      {report.reporter?.displayName || report.reporter?.username || 'Unknown User'}
                     </span>
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
             onClick={onClose}
             className="order-2 sm:order-1 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 transition-all"
           >
-            Abort Audit
+            Close
           </button>
           
           <button
@@ -140,7 +140,7 @@ export default function ViewReportsModal({ isOpen, onClose, itemId, itemType, on
             disabled={loading || reports.length === 0}
             className="order-1 sm:order-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-900/20 transition-all disabled:opacity-30 disabled:grayscale"
           >
-            Resolve All Violations
+            Dismiss All Reports
           </button>
         </div>
 

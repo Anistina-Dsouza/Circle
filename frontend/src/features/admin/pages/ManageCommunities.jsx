@@ -110,10 +110,10 @@ export default function ManageCommunities() {
                 <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
                     <Layers size={20} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">Community Matrix</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">Management</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Circle Clusters</h1>
-            <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Manage platform community nodes and moderation</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Community Management</h1>
+            <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Manage platform communities and moderation</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -121,7 +121,7 @@ export default function ManageCommunities() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-purple-400 transition-colors" size={16} />
               <input 
                 type="text" 
-                placeholder="Search Clusters..."
+                placeholder="Search communities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-white/10 font-medium"
@@ -135,7 +135,7 @@ export default function ManageCommunities() {
                   onChange={(e) => setPrivacyFilter(e.target.value)}
                   className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
                 >
-                  <option value="all">Privacy: All Nodes</option>
+                  <option value="all">Privacy: All</option>
                   <option value="public">Privacy: Public</option>
                   <option value="private">Privacy: Private</option>
                 </select>
@@ -158,7 +158,7 @@ export default function ManageCommunities() {
         {!loading && totalPages > 1 && (
             <div className="flex flex-col sm:flex-row justify-between items-center gap-6 px-4 mb-16">
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
-                    Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedCircles.length)}</span> of <span className="text-white/60">{processedCircles.length}</span> clusters
+                    Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedCircles.length)}</span> of <span className="text-white/60">{processedCircles.length}</span> communities
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function ManageCommunities() {
         {/* Section Divider */}
         <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-white/5" />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/10 italic">Performance Telemetry</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/10 italic">Statistics</span>
             <div className="h-px flex-1 bg-white/5" />
         </div>
 

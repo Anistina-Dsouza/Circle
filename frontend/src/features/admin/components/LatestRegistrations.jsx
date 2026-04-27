@@ -28,23 +28,23 @@ export default function LatestRegistrations({ users }) {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
               <Activity size={14} className="text-purple-400" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400/60">Live Feed</span>
+               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400/60">Registrations</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter">Recent Identities</h2>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter">Recent Registrations</h2>
         </div>
         <Link to="/admin/users" className="flex items-center gap-3 text-white/40 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all bg-white/5 px-6 py-2.5 rounded-2xl border border-white/5 whitespace-nowrap group">
-          <span>Manage Matrix</span>
+          <span>View All Users</span>
           <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </Link>
       </div>
 
       {/* Table Headers */}
       <div className="flex px-6 sm:px-10 py-5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-white/20 border-b border-white/5 bg-white/[0.01]">
-        <div className="flex-1">Identity Node</div>
+        <div className="flex-1">User</div>
         <div className="hidden lg:flex items-center gap-12">
-          <div className="w-24 text-center">Protocol</div>
-          <div className="w-24 text-center">Sync Time</div>
-          <div className="w-12 text-right pr-2">Access</div>
+          <div className="w-24 text-center">Status</div>
+          <div className="w-24 text-center">Joined</div>
+          <div className="w-12 text-right pr-2">Actions</div>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function LatestRegistrations({ users }) {
                     {u.displayName || u.username}
                   </p>
                   <p className="text-[9px] sm:text-[10px] text-white/20 truncate font-black uppercase tracking-[0.2em] mt-0.5">
-                    {u.onlineStatus?.status === 'online' ? 'Active Sync' : `Last Seen ${formatTimeAgo(u.onlineStatus?.lastSeen)}`}
+                    {u.onlineStatus?.status === 'online' ? 'Online' : `Last Seen ${formatTimeAgo(u.onlineStatus?.lastSeen)}`}
                   </p>
                 </div>
               </div>
@@ -95,7 +95,7 @@ export default function LatestRegistrations({ users }) {
                     </div>
                   ) : u.pendingReports > 0 ? (
                     <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500 text-white text-[9px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse">
-                      <span>{u.pendingReports} Violation</span>
+                      <span>{u.pendingReports} Reported</span>
                     </div>
                   ) : u.isVerified ? (
                     <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-400 text-[9px] font-black uppercase tracking-widest border border-green-500/20">
@@ -132,7 +132,7 @@ export default function LatestRegistrations({ users }) {
           ))
         ) : (
           <div className="px-8 py-32 text-white/10 text-xs text-center italic font-black uppercase tracking-[0.4em]">
-            Zero Identities Discovered
+            No recent users
           </div>
         )}
       </div>

@@ -114,8 +114,8 @@ export default function ManageUsers() {
         {/* Header */}
         <div className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Identity Matrix</h1>
-            <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Platform Network Access Control</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">User Management</h1>
+            <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Manage platform users and account status</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -123,7 +123,7 @@ export default function ManageUsers() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-purple-400 transition-colors" size={16} />
               <input 
                 type="text" 
-                placeholder="Search Identity..."
+                placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-white/10 font-medium"
@@ -139,8 +139,8 @@ export default function ManageUsers() {
                   className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
                 >
                   <option value="all">Status: All</option>
-                  <option value="active">Status: Stable</option>
-                  <option value="suspended">Status: Offline</option>
+                  <option value="active">Status: Active</option>
+                  <option value="suspended">Status: Suspended</option>
                 </select>
               </div>
               
@@ -151,9 +151,9 @@ export default function ManageUsers() {
                   onChange={(e) => setSort(e.target.value)}
                   className="w-full sm:w-auto appearance-none bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer hover:bg-white/10 transition-all"
                 >
-                  <option value="default">Sequence: Default</option>
-                  <option value="alphabetical">Sequence: A-Z</option>
-                  <option value="flagged">Sequence: Flags</option>
+                  <option value="default">Sort: Default</option>
+                  <option value="alphabetical">Sort: A-Z</option>
+                  <option value="flagged">Sort: Reported</option>
                 </select>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function ManageUsers() {
                         <Loader2 size={24} className="text-purple-400 animate-pulse" />
                     </div>
                 </div>
-                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Synchronizing Identity Matrix...</span>
+                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Loading Users...</span>
             </div>
         ) : (
             <>
@@ -222,7 +222,7 @@ export default function ManageUsers() {
                                 ) : (
                                     <div className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/5 border border-white/5 text-white/10">
                                         <UserCheck size={14} className="opacity-20" />
-                                        <span className="text-[9px] font-black uppercase tracking-widest">Secure Node</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest">Clear</span>
                                     </div>
                                 )}
 
@@ -250,11 +250,11 @@ export default function ManageUsers() {
                             {/* Table Head */}
                             <div className="flex px-10 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-white/30 border-b border-white/5 bg-white/[0.02]">
                                 <div className="w-[30%]">User Profile</div>
-                                <div className="w-[20%]">Email Access</div>
-                                <div className="w-[10%] text-center">Node Role</div>
-                                <div className="w-[12%] text-center">Telemetry Flags</div>
+                                <div className="w-[20%]">Email</div>
+                                <div className="w-[10%] text-center">Role</div>
+                                <div className="w-[12%] text-center">Flags</div>
                                 <div className="w-[13%] text-center">Join Date</div>
-                                <div className="w-[15%] text-right">Matrix Control</div>
+                                <div className="w-[15%] text-right">Access Controls</div>
                             </div>
 
                             <div className="divide-y divide-white/5">
@@ -308,7 +308,7 @@ export default function ManageUsers() {
                                             ) : (
                                                 <div className="flex items-center gap-2 text-white/10">
                                                     <UserCheck size={14} className="opacity-20" />
-                                                    <span className="text-[9px] font-black uppercase tracking-widest">Stable</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">-</span>
                                                 </div>
                                             )}
                                         </div>
@@ -352,7 +352,7 @@ export default function ManageUsers() {
                         <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-white/10">
                             <Search size={40} />
                         </div>
-                        <span className="text-white/20 font-black uppercase tracking-[0.4em] text-sm italic">Zero Identities Discovered in Current Filter</span>
+                        <span className="text-white/20 font-black uppercase tracking-[0.4em] text-sm italic">No users found</span>
                     </div>
                 )}
 
@@ -360,7 +360,7 @@ export default function ManageUsers() {
                 {totalPages > 1 && (
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-6 px-4">
                         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
-                            Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedUsers.length)}</span> of <span className="text-white/60">{processedUsers.length}</span> nodes
+                            Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedUsers.length)}</span> of <span className="text-white/60">{processedUsers.length}</span> users
                         </div>
 
                         <div className="flex items-center gap-2">

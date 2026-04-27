@@ -55,7 +55,7 @@ export default function AdminDashboard() {
                             <Activity size={24} className="text-purple-400 animate-pulse" />
                         </div>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Establishing Neural Link...</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Loading Dashboard...</span>
                 </div>
             </AdminLayout>
         );
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
                     <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-6">
                         <ShieldCheck size={32} />
                     </div>
-                    <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Access Restricted</h2>
+                    <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Dashboard Error</h2>
                     <p className="text-white/40 text-sm font-medium mb-8 leading-relaxed">{error}</p>
                     <button 
                         onClick={() => window.location.reload()}
@@ -99,16 +99,16 @@ export default function AdminDashboard() {
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-400/80">System Live • Stable</span>
                         </div>
-                        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tighter">Command Center</h1>
+                        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tighter">Dashboard</h1>
                         <p className="text-white/40 text-xs sm:text-sm font-black uppercase tracking-[0.2em] flex items-center gap-3">
                             <Database size={14} className="text-purple-500" />
-                            Global Platform Telemetry
+                            Overview and Statistics
                         </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6 bg-white/[0.03] backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-[24px] sm:rounded-[32px] group hover:border-white/10 transition-all">
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Pulse Sync</span>
+                             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Last Updated</span>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-white tabular-nums">
                                     {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -120,10 +120,10 @@ export default function AdminDashboard() {
                         </div>
                         <div className="h-10 w-px bg-white/5 hidden sm:block" />
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Global Node</span>
+                            <span className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Environment</span>
                             <div className="flex items-center gap-2 text-purple-400">
                                 <Globe size={14} />
-                                <span className="text-xs font-black uppercase">Circle-OS/Main</span>
+                                <span className="text-xs font-black uppercase">Production</span>
                             </div>
                         </div>
                     </div>
@@ -132,14 +132,14 @@ export default function AdminDashboard() {
                 {/* KPI Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
                     <KPICard value={stats.totalUsers.toLocaleString()} label="Users" badge="Total" />
-                    <KPICard value={stats.totalCircles.toLocaleString()} label="Circles" badge="Clusters" />
+                    <KPICard value={stats.totalCircles.toLocaleString()} label="Circles" badge="Communities" />
                     <KPICard value={stats.activeUsers.toLocaleString()} label="Active" badge="Online" />
                     <KPICard value={stats.flaggedItems.toLocaleString()} label="Flagged" badge={stats.flaggedItems > 0 ? "Review" : "Clean"} />
                 </div>
 
                 {/* Data Section Divider */}
                 <div className="flex items-center gap-6 mb-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 whitespace-nowrap italic">Neural Activity Feed</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 whitespace-nowrap italic">Recent Activity</span>
                     <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent" />
                 </div>
 
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
 
                 {/* Analytics Section Divider */}
                 <div className="flex items-center gap-6 mb-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 whitespace-nowrap italic">Spatial Signal Analysis</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 whitespace-nowrap italic">Analytics</span>
                     <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent" />
                 </div>
 
