@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone, ChevronDown } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,10 +7,24 @@ import axios from 'axios';
 const NotificationsPage = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
     const [notifications, setNotifications] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+    const tabs = ['all', 'unread', 'mention', 'like', 'followers', 'announcements'];
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleNotifClick = (noti) => {
         // Mark as read
@@ -202,20 +216,60 @@ const NotificationsPage = () => {
                 </div>
 
                 {/* Tabs / Filter Area */}
-                <div className="flex flex-wrap items-center justify-center gap-2 bg-white/2 backdrop-blur-xl p-2 rounded-3xl border border-white/5 mb-8 shadow-xl">
-                    {['all', 'unread', 'mention', 'like', 'followers', 'announcements'].map(tab => (
+                <div className="mb-8 relative" ref={dropdownRef}>
+                    {/* Desktop View: Horizontal Tabs */}
+                    <div className="hidden sm:flex flex-wrap items-center justify-center gap-2 bg-white/2 backdrop-blur-xl p-2 rounded-3xl border border-white/5 shadow-xl">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
+                                    activeTab === tab 
+                                    ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]' 
+                                    : 'text-white/60 hover:text-white border-transparent hover:bg-white/5'
+                                }`}
+                            >
+                                {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1).replace('_', ' ')}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Mobile View: Premium Dropdown */}
+                    <div className="sm:hidden relative">
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
-                                activeTab === tab 
-                                ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-purple-400/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]' 
-                                : 'text-white/60 hover:text-white border-transparent hover:bg-white/5'
-                            }`}
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className={`w-full flex items-center justify-between gap-3 px-6 py-4 rounded-[24px] bg-white/5 backdrop-blur-xl border border-white/10 text-sm font-bold text-white transition-all shadow-xl active:scale-[0.98] ${isDropdownOpen ? 'ring-2 ring-purple-500/50 border-purple-500/50' : ''}`}
                         >
-                            {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1).replace('_', ' ')}
+                            <div className="flex items-center gap-3">
+                                <Filter size={18} className="text-purple-400" />
+                                <span>{activeTab === 'all' ? 'All Notifications' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}</span>
+                            </div>
+                            <ChevronDown size={18} className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-purple-400' : 'text-white/40'}`} />
                         </button>
-                    ))}
+
+                        {isDropdownOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-3 bg-[#1A1140]/95 backdrop-blur-2xl border border-white/10 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                                <div className="p-3 max-h-[60vh] overflow-y-auto no-scrollbar">
+                                    {tabs.map(tab => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => {
+                                                setActiveTab(tab);
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className={`w-full text-left px-5 py-4 rounded-2xl text-sm font-bold transition-all mb-1 last:mb-0 ${
+                                                activeTab === tab 
+                                                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' 
+                                                : 'text-white/60 hover:bg-white/5 hover:text-white'
+                                            }`}
+                                        >
+                                            {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1).replace('_', ' ')}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Notifications List */}

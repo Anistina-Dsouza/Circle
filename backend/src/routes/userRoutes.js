@@ -14,11 +14,11 @@ const {
 const cacheMiddleware = require('../middleware/cacheMiddleware');
 
 // Public routes
+router.get('/suggested-list', protect, getSuggestedUsers);
 // Cache search results for 1 minute
 router.get('/search', cacheMiddleware(60), searchUsers);
-router.get('/suggested', protect, getSuggestedUsers);
 // Cache profiles for 1 minute
-router.get('/:username', protect, cacheMiddleware(60), getUserProfile); // protect optional, but we want userId for isFollowing
+router.get('/:username', protect, cacheMiddleware(60), getUserProfile);
 router.get('/:username/followers', getFollowers);
 router.get('/:username/following', getFollowing);
 

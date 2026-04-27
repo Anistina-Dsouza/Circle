@@ -21,7 +21,7 @@ const ExploreUsersPage = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/suggested`, {
+            const response = await axios.get(`${baseUrl}/api/users/suggested-list`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
