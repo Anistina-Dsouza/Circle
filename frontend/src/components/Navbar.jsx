@@ -101,30 +101,39 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             </button>
 
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl py-3 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-3 w-56 bg-[#1A1140]/95 border border-white/10 rounded-2xl shadow-2xl py-3 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200 z-[110]">
+                <div className="px-5 py-2 mb-1">
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Account Settings</p>
+                </div>
                 <Link
                   to={`/profile/${user?.username}`}
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-white/5 transition group"
+                  className="flex items-center space-x-3 px-5 py-3 hover:bg-white/5 transition group"
                   onClick={() => setProfileMenuOpen(false)}
                 >
-                  <User size={16} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold">My Profile</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <User size={16} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-wider">My Profile</span>
                 </Link>
                 <Link
                   to="/settings"
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-white/5 transition group"
+                  className="flex items-center space-x-3 px-5 py-3 hover:bg-white/5 transition group"
                   onClick={() => setProfileMenuOpen(false)}
                 >
-                  <Settings size={16} className="text-purple-400 group-hover:rotate-45 transition-transform" />
-                  <span className="text-xs font-bold">Settings</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:rotate-45 transition-transform">
+                    <Settings size={16} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-wider">Settings</span>
                 </Link>
                 <div className="h-px bg-white/5 my-2 mx-5" />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-3 px-5 py-2.5 hover:bg-red-500/10 transition w-full text-left text-red-400 group"
+                  className="flex items-center space-x-3 px-5 py-3 hover:bg-red-500/10 transition w-full text-left text-red-400 group"
                 >
-                  <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-                  <span className="text-xs font-bold">Logout</span>
+                  <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 group-hover:-translate-x-1 transition-transform">
+                    <LogOut size={16} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-wider">Logout</span>
                 </button>
               </div>
             )}

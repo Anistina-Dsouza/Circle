@@ -151,7 +151,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                         </button>
                         
                         {showFilterMenu && (
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-[#1A1140] border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl">
+                            <div className="absolute top-full left-0 mt-3 w-56 bg-[#1A1140]/95 border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="p-2 space-y-1">
                                     {[
                                         { id: 'all', label: 'All Conversations' },
@@ -164,7 +164,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
                                                 setFilterType(opt.id);
                                                 setShowFilterMenu(false);
                                             }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${filterType === opt.id ? 'bg-violet-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+                                            className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterType === opt.id ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
                                         >
                                             {opt.label}
                                         </button>

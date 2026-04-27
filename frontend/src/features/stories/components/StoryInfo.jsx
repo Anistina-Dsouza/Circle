@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trash2, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const StoryInfo = ({ user, createdAt, isOwnStory, onDelete, onClose }) => {
     const formatTime = (dateString) => {
@@ -16,8 +17,8 @@ const StoryInfo = ({ user, createdAt, isOwnStory, onDelete, onClose }) => {
 
     return (
         <div className="w-full flex items-center justify-between px-1">
-            <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full border-2 border-purple-500/50 p-0.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0">
+            <Link to={`/profile/${user?.username}`} onClick={(e) => e.stopPropagation()} className="flex items-center space-x-3 group">
+                <div className="w-10 h-10 rounded-full border-2 border-purple-500/50 p-0.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0 group-hover:border-purple-400 transition-colors">
                     <img 
                         src={user?.profilePic || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"} 
                         alt={user?.username} 
@@ -25,14 +26,14 @@ const StoryInfo = ({ user, createdAt, isOwnStory, onDelete, onClose }) => {
                     />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-sm font-bold text-white tracking-wide">
+                    <span className="text-sm font-bold text-white tracking-wide group-hover:text-purple-300 transition-colors">
                         {user?.username || 'User'}
                     </span>
                     <span className="text-xs font-semibold text-purple-300/80 tracking-wide mt-0.5">
                         {formatTime(createdAt)}
                     </span>
                 </div>
-            </div>
+            </Link>
             
             <div className="flex items-center space-x-3">
                 {isOwnStory && (

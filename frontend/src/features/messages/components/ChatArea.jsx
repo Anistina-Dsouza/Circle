@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Smile, Phone, Video, MoreVertical, MessageCircle, ChevronDown, User, Heart as HeartIcon, Coffee, Music, Camera, Reply, X, Trash2, Heart } from 'lucide-react';
+import { Send, Smile, Phone, Video, MoreVertical, MessageCircle, ChevronDown, ChevronLeft, User, Heart as HeartIcon, Coffee, Music, Camera, Reply, X, Trash2, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
@@ -108,7 +108,7 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
     );
 };
 
-const ChatArea = ({ chatId }) => {
+const ChatArea = ({ chatId, onBack }) => {
     // const navigate = useNavigate();
     
     // Safe user ID retrieval
@@ -452,8 +452,16 @@ const ChatArea = ({ chatId }) => {
     return (
         <div className="flex flex-col h-full bg-[#0F0529]">
             {/* Header */}
-            <div className="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/2 backdrop-blur-md">
-                <div className="flex items-center space-x-4">
+            <div className="px-4 sm:px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/2 backdrop-blur-md">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                    {/* Back Button for Mobile */}
+                    <button 
+                        onClick={onBack}
+                        className="md:hidden p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors mr-1"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+
                     {otherParticipant ? (
                         <>
                             <Link to={`/profile/${otherParticipant.username}`} className="relative shrink-0 active:scale-95 transition-transform">

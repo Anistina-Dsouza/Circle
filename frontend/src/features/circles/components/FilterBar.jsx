@@ -12,15 +12,16 @@ const categories = [
 
 const FilterBar = ({ selectedCategory, onSelectCategory }) => {
     return (
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="flex items-center gap-2 mb-12 bg-white/2 backdrop-blur-xl p-2 rounded-[24px] border border-white/5 max-w-4xl mx-auto overflow-x-auto no-scrollbar scroll-smooth">
             {categories.map((category) => (
                 <button
                     key={category}
                     onClick={() => onSelectCategory(category)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${selectedCategory === category
-                        ? 'bg-[#7C3AED] text-white shadow-lg shadow-purple-500/20'
-                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
-                        }`}
+                    className={`px-6 py-3 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap active:scale-95 ${
+                        selectedCategory === category
+                        ? 'bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
+                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5 border border-transparent'
+                    }`}
                 >
                     {category}
                 </button>
