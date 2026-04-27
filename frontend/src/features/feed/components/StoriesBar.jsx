@@ -66,7 +66,17 @@ const StoriesBar = ({ onPostSuccess }) => {
                 });
 
                 if (response.data.success) {
-                    const follows = response.data.followingMoments || [];
+                    let follows = response.data.followingMoments || [];
+                    
+                    // Sort such that the logged-in user's story is always first
+                    if (user && user.username) {
+                        follows = [...follows].sort((a, b) => {
+                            if (a.user?.username === user.username) return -1;
+                            if (b.user?.username === user.username) return 1;
+                            return 0;
+                        });
+                    }
+                    
                     setFollowingStories(follows);
                     window._stories_list = follows.map(s => s.user?.username).filter(Boolean);
                 }
