@@ -71,66 +71,47 @@ exports.createMoment = async (req, res) => {
 // =========== GET MOMENT FEED ===========
 exports.getFeed = async (req, res) => {
   try {
-    const myId = req.userId.toString();
-
-    // 1. Get users I follow
+    // Get users I follow (accepted follows only)
     const follows = await Follow.find({ 
       follower: req.userId,
       status: 'accepted'
     }).select('following');
-    const followingIds = follows.map(f => f.following.toString());
+    const followingIds = follows.map(f => f.following);
+    followingIds.push(req.userId); // Include my own moments
 
-    // 2. Fetch moments from followed users + self
-    // This includes Public, Followers-only, and if audience is "selected" and I'm in visibleTo
-    const followingMomentsRaw = await Moment.find({
+    const moments = await Moment.find({
       $or: [
-        { user: { $in: [...followingIds, myId] } },
-        { visibleTo: req.userId }
+        { audience: 'public' },
+        { 
+          user: { $in: followingIds }, 
+          audience: 'followers' 
+        }
       ],
       expiresAt: { $gt: new Date() },
       isActive: true
     })
       .sort({ createdAt: -1 })
+      .limit(50)
       .populate('user', 'username displayName profilePic')
       .populate('viewers', 'username displayName profilePic');
 
+    // Separate followed stories from discover stories
     const followingMoments = [];
+    const discoverMoments = [];
     const seenUsers = new Set();
 
-    followingMomentsRaw.forEach(m => {
+    moments.forEach(m => {
       if (!m.user) return;
       const uid = m.user._id.toString();
-      // Ensure it's someone I follow OR me OR I'm explicitly selected
-      const isFriend = followingIds.includes(uid) || uid === myId;
-      const isSelected = m.audience === 'selected' && m.visibleTo.some(id => id.toString() === myId);
+      const isFriend = followingIds.some(id => id.toString() === uid);
       
-      if (isFriend || isSelected) {
+      if (isFriend) {
         if (!seenUsers.has(uid)) {
           followingMoments.push(m);
           seenUsers.add(uid);
         }
-      }
-    });
-
-    // 3. Fetch public moments for Discover (excluding followed + self)
-    const discoverMomentsRaw = await Moment.find({
-      user: { $nin: [...followingIds, myId] },
-      audience: 'public',
-      expiresAt: { $gt: new Date() },
-      isActive: true
-    })
-      .sort({ createdAt: -1 })
-      .limit(30)
-      .populate('user', 'username displayName profilePic');
-
-    const discoverMoments = [];
-    const seenDiscoverUsers = new Set();
-    discoverMomentsRaw.forEach(m => {
-      if (!m.user) return;
-      const uid = m.user._id.toString();
-      if (!seenDiscoverUsers.has(uid)) {
+      } else {
         discoverMoments.push(m);
-        seenDiscoverUsers.add(uid);
       }
     });
 
@@ -141,7 +122,6 @@ exports.getFeed = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('getFeed error:', error);
     res.status(500).json({ error: error.message });
   }
 };
