@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link as LinkIcon, Send, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
+import { Link as LinkIcon, Plus, Loader2, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 
 const CreateStoryBar = ({ onPostSuccess }) => {

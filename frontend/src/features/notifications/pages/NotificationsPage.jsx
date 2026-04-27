@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Filter, Megaphone } from 'lucide-react';
+import { Bell, Heart, MessageCircle, UserPlus, Star, ChevronRight, Check, Trash2, Megaphone } from 'lucide-react';
 import FeedNavbar from '../../feed/components/FeedNavbar';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';

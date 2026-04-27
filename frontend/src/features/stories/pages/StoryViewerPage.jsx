@@ -236,7 +236,7 @@ const StoryViewerPage = () => {
         };
 
         if (username) fetchUserStories();
-    }, [username, baseUrl]);
+    }, [username, baseUrl, targetMomentId]);
 
     useEffect(() => {
         if (loading || stories.length === 0 || isPaused || error || showViewers) return;
@@ -370,9 +370,9 @@ const StoryViewerPage = () => {
                                 <span className="text-xs font-bold text-white tracking-wide">
                                     {(currentStory.viewers || []).filter(v => {
                                         const vId = (v._id || v).toString();
-                                        const curId = (currentUser?._id).toString();
+                                        const curId = currentUser?._id?.toString();
                                         const ownerId = (currentStory.user?._id || currentStory.user).toString();
-                                        return vId !== ownerId && vId !== curId;
+                                        return vId !== ownerId && (curId ? vId !== curId : true);
                                     }).length} Viewers
                                 </span>
                                 <ChevronUp size={16} className="text-purple-300 ml-1" />

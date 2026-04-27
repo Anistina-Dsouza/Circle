@@ -79,7 +79,7 @@ const MessagesSidebar = ({ selectedChat, onSelectChat }) => {
         }
 
         setFilteredConversations(filtered);
-    }, [searchTerm, filterType, conversations]);
+    }, [searchTerm, filterType, conversations, currentUserId]);
 
 
     useEffect(() => {
