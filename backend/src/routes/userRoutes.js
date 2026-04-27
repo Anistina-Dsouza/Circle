@@ -15,6 +15,7 @@ const cacheMiddleware = require('../middleware/cacheMiddleware');
 
 // Public routes
 router.get('/suggestions', protect, getSuggestedUsers);
+router.get('/suggested-list', protect, getSuggestedUsers); // Alias for backward compatibility
 // Cache search results for 1 minute
 router.get('/search', cacheMiddleware(60), searchUsers);
 // Cache profiles for 1 minute
