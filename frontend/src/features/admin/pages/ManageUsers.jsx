@@ -164,10 +164,10 @@ export default function ManageUsers() {
                 return (
                   <div className="divide-y divide-white/5">
                     {processed.map(user => (
-                      <div key={user._id} className={`flex items-center px-8 py-6 group transition-all duration-300 ${user.isActive ? 'hover:bg-white/[0.03]' : 'bg-red-900/5 opacity-75 grayscale-[20%]'}`}>
+                      <div key={user._id} className={`flex flex-col lg:flex-row lg:items-center px-8 py-6 group transition-all duration-300 ${user.isActive ? 'hover:bg-white/[0.03]' : 'bg-red-900/5 opacity-75 grayscale-[20%]'}`}>
 
                         {/* User */}
-                        <div className="w-[30%] flex items-center gap-4 overflow-hidden pr-4">
+                        <div className="w-full lg:w-[30%] flex items-center gap-4 overflow-hidden pr-4 mb-4 lg:mb-0">
                           <div className="relative flex-shrink-0">
                             <img
                               src={user.profilePic || `https://api.dicebear.com/7.x/initials/svg?seed=${user.displayName}`}
@@ -185,12 +185,16 @@ export default function ManageUsers() {
                         </div>
 
                         {/* Email */}
-                        <div className="w-[20%] text-white/60 text-sm font-medium truncate pr-4 tabular-nums">
-                          {user.email}
+                        <div className="flex items-center justify-between lg:block w-full lg:w-[20%] mb-4 lg:mb-0 lg:pr-4">
+                          <span className="lg:hidden text-[9px] font-black text-white/20 uppercase tracking-widest">Digital Address</span>
+                          <span className="text-white/60 text-sm font-medium truncate tabular-nums">
+                            {user.email}
+                          </span>
                         </div>
 
                         {/* Role */}
-                        <div className="w-[10%] flex justify-center">
+                        <div className="flex items-center justify-between lg:justify-center w-full lg:w-[10%] mb-4 lg:mb-0">
+                          <span className="lg:hidden text-[9px] font-black text-white/20 uppercase tracking-widest">Node Level</span>
                           <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border ${
                             user.role === "admin"
                               ? "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
@@ -201,7 +205,8 @@ export default function ManageUsers() {
                         </div>
 
                         {/* Flags (Reports) */}
-                        <div className="w-[10%] flex justify-center">
+                        <div className="flex items-center justify-between lg:justify-center w-full lg:w-[10%] mb-4 lg:mb-0">
+                          <span className="lg:hidden text-[9px] font-black text-white/20 uppercase tracking-widest">Audit Logs</span>
                           {user.pendingReports > 0 ? (
                             <button 
                               onClick={() => setViewReportItemId(user._id)} 
@@ -219,20 +224,23 @@ export default function ManageUsers() {
                         </div>
 
                         {/* Joined */}
-                        <div className="w-[15%] text-white/40 text-[10px] font-black uppercase tracking-widest text-center">
-                          {formatDate(user.createdAt)}
+                        <div className="flex items-center justify-between lg:justify-center w-full lg:w-[15%] mb-4 lg:mb-0">
+                          <span className="lg:hidden text-[9px] font-black text-white/20 uppercase tracking-widest">Sync Date</span>
+                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">
+                            {formatDate(user.createdAt)}
+                          </span>
                         </div>
 
                         {/* Access Control Action */}
-                        <div className="w-[15%] flex justify-end">
+                        <div className="flex items-center justify-end w-full lg:w-[15%] pt-4 lg:pt-0 border-t lg:border-none border-white/5 gap-3">
                           {user.role === 'admin' ? (
-                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/5 text-white/20 border border-white/5 opacity-50">
+                            <div className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-white/5 text-white/20 border border-white/5 opacity-50">
                               <span>PROTECTED NODE</span>
                             </div>
                           ) : (
                             <button 
                               onClick={() => toggleStatus(user._id, user.role)}
-                              className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${
+                              className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] ${
                                 user.isActive 
                                   ? "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white"
                                   : "bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500 hover:text-white"
@@ -246,6 +254,7 @@ export default function ManageUsers() {
 
                       </div>
                     ))}
+
                     
                     {processed.length === 0 && (
                         <div className="p-32 text-center flex flex-col items-center gap-4">
