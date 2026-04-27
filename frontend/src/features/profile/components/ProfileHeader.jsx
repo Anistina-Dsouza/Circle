@@ -7,10 +7,10 @@ import ReportModal from '../../../components/common/ReportModal';
 const StatCard = ({ value, label, onClick }) => (
     <button
         onClick={onClick}
-        className="flex flex-col items-center justify-center bg-[#1E1B3A] border border-white/5 rounded-2xl px-8 py-5 flex-1 hover:border-purple-500/30 transition-all duration-300 active:scale-95"
+        className="flex flex-col items-center justify-center bg-[#1E1B3A] border border-white/5 rounded-2xl px-4 sm:px-8 py-3 sm:py-5 flex-1 hover:border-purple-500/30 transition-all duration-300 active:scale-95 min-w-0"
     >
-        <span className="text-2xl font-bold text-white">{value}</span>
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">{label}</span>
+        <span className="text-lg sm:text-2xl font-bold text-white truncate w-full">{value}</span>
+        <span className="text-[9px] sm:text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1 truncate w-full">{label}</span>
     </button>
 );
 
@@ -88,7 +88,7 @@ const ProfileHeader = ({
             </div>
 
             {/* Stats Row */}
-            <div className="flex items-center space-x-4 w-full max-w-lg">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full max-w-lg px-2">
                 <StatCard 
                     value={user.followers} 
                     label="Followers" 

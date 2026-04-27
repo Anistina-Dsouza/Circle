@@ -61,7 +61,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-white" />
           </div>
         </div>
-        <span className="text-xl font-black tracking-tight text-white uppercase italic">
+        <span className="text-xl font-black tracking-tight text-white">
           Circle
         </span>
       </Link>

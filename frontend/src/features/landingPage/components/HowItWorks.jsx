@@ -21,7 +21,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 bg-[#0F0529] relative overflow-hidden">
+    <section id="how-it-works" className="py-24 bg-[#0F0529] relative overflow-hidden">
       {/* Decorative gradient blur */}
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-fuchsia-600/10 blur-[100px] rounded-full" />
 
