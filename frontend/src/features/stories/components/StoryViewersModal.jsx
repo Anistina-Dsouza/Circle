@@ -15,7 +15,7 @@ const StoryViewersModal = ({ viewers = [], reactions = [], isOpen, onClose }) =>
     })();
 
     const filteredViewers = viewers.filter(viewer => {
-        const vId = (viewer._id || viewer.id || viewer).toString();
+        const vId = (viewer._id || viewer.id || viewer || '').toString();
         const isSelf = vId === currentUserId?.toString();
         const matchesSearch = (viewer.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                               (viewer.displayName || '').toLowerCase().includes(searchQuery.toLowerCase());

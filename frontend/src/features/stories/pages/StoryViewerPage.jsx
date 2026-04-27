@@ -197,18 +197,6 @@ const StoryViewerPage = () => {
             }
         };
 
-        const currentUserId = (() => {
-        if (typeof window === 'undefined') return null;
-        try {
-            const userStr = localStorage.getItem('user');
-            if (!userStr || userStr === 'undefined') return null;
-            return JSON.parse(userStr)?._id;
-        } catch (err) {
-            console.error("Error parsing user from localStorage", err);
-            return null;
-        }
-    })();
-
         fetchUserList();
     }, [location.state, username, baseUrl]);
 
@@ -382,9 +370,9 @@ const StoryViewerPage = () => {
                                 <Eye size={16} className="text-purple-300" />
                                 <span className="text-xs font-bold text-white tracking-wide">
                                     {(currentStory.viewers || []).filter(v => {
-                                        const vId = (v._id || v).toString();
+                                        const vId = (v._id || v || '').toString();
                                         const curId = currentUser?._id?.toString();
-                                        const ownerId = (currentStory.user?._id || currentStory.user).toString();
+                                        const ownerId = (currentStory.user?._id || currentStory.user || '').toString();
                                         return vId !== ownerId && (curId ? vId !== curId : true);
                                     }).length} Viewers
                                 </span>
