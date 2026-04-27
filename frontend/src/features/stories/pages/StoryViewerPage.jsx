@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, ChevronUp, AlertCircle, X, Trash2, Volume2, VolumeX } from 'lucide-react';
 import ProgressBar from '../components/ProgressBar';
 import StoryInfo from '../components/StoryInfo';
 import StoryViewersModal from '../components/StoryViewersModal';
@@ -27,6 +27,7 @@ const StoryViewerPage = () => {
     const [userList, setUserList] = useState([]);
     const [touchStart, setTouchStart] = useState(null);
     const [translateY, setTranslateY] = useState(0);
+    const [isMuted, setIsMuted] = useState(false);
 
     const progressTimer = useRef(null);
     const baseUrl = import.meta.env.VITE_API_URL;
@@ -350,7 +351,15 @@ const StoryViewerPage = () => {
                             </p>
                         </div>
                     ) : currentStory.media?.type === 'video' ? (
-                        <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay loop playsInline />
+                        <>
+                            <video src={currentStory.media.url} className="w-full h-full object-cover" autoPlay muted={isMuted} loop playsInline />
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                                className="absolute top-6 right-6 z-40 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-colors"
+                            >
+                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                            </button>
+                        </>
                     ) : (
                         <img src={currentStory.media?.url} className="w-full h-full object-cover" alt="story" />
                     )}
