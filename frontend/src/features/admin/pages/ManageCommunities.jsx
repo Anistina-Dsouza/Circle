@@ -116,7 +116,7 @@ export default function ManageCommunities() {
                         onClick={() => setCurrentPage(page)}
                         className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
                             page === currentPage 
-                                ? "bg-indigo-600 text-white border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                                ? "bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-white/20 shadow-[0_10px_25px_rgba(79,70,229,0.4)] scale-110 z-10"
                                 : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
                         }`}
                     >

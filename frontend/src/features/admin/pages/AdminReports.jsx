@@ -101,7 +101,7 @@ export default function AdminReports() {
                         </p>
                     </div>
 
-                    <div className="flex p-1 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
+                    <div className="flex p-1 bg-[#1A0C3F]/20 backdrop-blur-xl rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl overflow-x-auto no-scrollbar scroll-smooth mx-auto lg:mx-0 w-fit">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
@@ -276,18 +276,18 @@ function VelocityReport({ data }) {
                 </div>
 
                 <div className="overflow-x-auto no-scrollbar -mx-6 sm:mx-0 px-6 sm:px-0">
-                    <div className="min-w-[600px] flex flex-col gap-3">
+                    <div className="min-w-[700px] flex flex-col gap-4">
                         {days.map((day, dIdx) => (
                             <div key={day} className="flex items-center gap-6 group/row">
                                 <span className="text-[10px] font-black text-white/30 uppercase w-10 transition-colors group-hover/row:text-purple-400">{day}</span>
-                                <div className="flex-1 flex gap-2">
+                                <div className="flex-1 flex gap-2 sm:gap-2.5">
                                     {hours.map(hour => {
                                         const val = getIntensity(dIdx + 1, hour);
                                         const opacity = (val / maxIntensity) * 0.9 + 0.1;
                                         return (
                                             <div
                                                 key={hour}
-                                                className="flex-1 h-8 rounded-[4px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20"
+                                                className="flex-1 h-10 sm:h-12 rounded-[6px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20 border border-white/[0.02]"
                                                 style={{ backgroundColor: `rgba(168, 85, 247, ${opacity})` }}
                                             >
                                                 <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-50">
@@ -364,11 +364,15 @@ function VelocityReport({ data }) {
                         <div className="absolute inset-0 border-l-2 border-b-2 border-white/10 rounded-bl-[20px] lg:rounded-bl-[40px]">
                             {/* Spatial Bubbles with Precision Arrow Tooltips */}
                             {data?.circleEngagement.map((circle, i) => {
-                                const maxMsg = Math.max(...data.circleEngagement.map(c => c.stats.messageCount), 1);
-                                const maxMem = Math.max(...data.circleEngagement.map(c => c.stats.memberCount), 1);
-                                const bottom = (circle.stats.messageCount / maxMsg) * 80 + 10;
-                                const left = (circle.stats.memberCount / maxMem) * 80 + 10;
-                                const size = Math.max((circle.stats.messageCount / maxMsg) * 70 + 25, 30);
+                                // Better distribution logic to avoid clustering
+                                const normalizedMsg = circle.stats.messageCount / (maxMsg || 1);
+                                const normalizedMem = circle.stats.memberCount / (maxMem || 1);
+                                
+                                // Apply a non-linear scale and jitter for better spread when values are low
+                                const bottom = Math.min(Math.max((Math.sqrt(normalizedMsg) * 75) + (i * 4) % 12 + 5, 8), 92);
+                                const left = Math.min(Math.max((Math.sqrt(normalizedMem) * 75) + (i * 7) % 15 + 5, 8), 92);
+                                
+                                const size = Math.max((normalizedMsg * 50) + 35, 32);
                                 const efficiency = (circle.stats.messageCount / (circle.stats.memberCount || 1)).toFixed(1);
 
                                 const showBelow = bottom > 70;
@@ -377,19 +381,19 @@ function VelocityReport({ data }) {
                                 return (
                                     <div
                                         key={i}
-                                        className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center"
+                                        className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center border-2"
                                         style={{
                                             bottom: `${bottom}%`,
                                             left: `${left}%`,
                                             width: `${size}px`,
                                             height: `${size}px`,
                                             background: `radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(124, 58, 237, 0.2))`,
-                                            border: `2.5px solid rgba(192, 132, 252, 0.5)`,
+                                            borderColor: `rgba(192, 132, 252, 0.5)`,
                                             boxShadow: `0 0 50px rgba(168, 85, 247, 0.2), inset 0 0 25px rgba(255,255,255,0.1)`,
                                             animation: `pulse-slow ${5 + i % 4}s infinite alternate ease-in-out`
                                         }}
                                     >
-                                        <span className="text-[9px] font-black text-white/60 group-hover/bubble:text-white transition-colors">{i + 1}</span>
+                                        <span className="text-[10px] font-black text-white group-hover/bubble:scale-125 transition-transform">{i + 1}</span>
 
                                         {/* High-Precision Beacon Tooltip */}
                                         <div className={`absolute ${showBelow ? 'top-full mt-4 sm:mt-8' : 'bottom-full mb-4 sm:mb-8'} ${showLeft ? 'right-0' : 'left-1/2 -translate-x-1/2'} opacity-0 group-hover/bubble:opacity-100 transition-all duration-500 pointer-events-none w-64 sm:w-80 z-[150]`}>
