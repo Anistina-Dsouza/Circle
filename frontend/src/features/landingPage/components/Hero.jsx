@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 const AVATAR_COUNT = 60;
 const AVATAR_SIZE = 80; // slightly smaller
@@ -54,11 +55,14 @@ export default function Hero() {
           A calm, flowing social space designed for meaningful circles.
         </p>
 
-        <button className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold
+        <Link 
+          to="/signup"
+          className="mt-8 md:mt-10 px-8 py-3 md:py-4 rounded-xl font-semibold
                            bg-[#7C3AED]/90 hover:bg-[#6D28D9]
-                           transition shadow-md hover:shadow-lg">
+                           transition shadow-md hover:shadow-lg inline-block text-white"
+        >
           Join Circle
-        </button>
+        </Link>
       </div>
 
       {/* flow animation */}

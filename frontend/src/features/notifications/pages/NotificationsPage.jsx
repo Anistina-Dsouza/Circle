@@ -36,7 +36,11 @@ const NotificationsPage = () => {
             case 'mention':
                 if (noti.relatedItem?.type === 'circle' && noti.relatedItem?.id) {
                     navigate(`/circles/${noti.relatedItem.id}`);
+                } else if (noti.relatedItem?.type === 'moment' && noti.sender?.username) {
+                    navigate(`/stories/${noti.sender.username}`);
                 } else if (noti.relatedItem?.id) {
+                    // Default to messages only if we are reasonably sure it's a DM
+                    // (e.g., if type is 'message' or null and ID exists)
                     navigate(`/messages`, { state: { selectedChat: noti.relatedItem.id } });
                 } else {
                     navigate(`/messages`);

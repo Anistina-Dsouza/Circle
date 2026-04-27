@@ -47,7 +47,26 @@ const ChatMessage = ({ msg, onToggleReaction, onReply, onDelete }) => {
                             className="text-sm leading-relaxed whitespace-pre-wrap cursor-pointer md:cursor-auto"
                             onClick={() => setShowActionsMobile(!showActionsMobile)}
                         >
-                            {msg.isDeleted ? <span className="italic opacity-50">This message was deleted</span> : msg.text}
+                            {msg.isDeleted ? (
+                                <span className="italic opacity-50">This message was deleted</span>
+                            ) : (
+                                msg.text.split(/(@[a-zA-Z0-9_]+)/g).map((part, i) => {
+                                    if (part.startsWith('@')) {
+                                        const username = part.substring(1);
+                                        return (
+                                            <Link 
+                                                key={i} 
+                                                to={`/profile/${username}`} 
+                                                className={`font-black hover:underline ${isMe ? 'text-violet-200' : 'text-violet-400'}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {part}
+                                            </Link>
+                                        );
+                                    }
+                                    return part;
+                                })
+                            )}
                         </p>
 
                         {!msg.isDeleted && (
@@ -146,6 +165,8 @@ const ChatArea = ({ chatId, onBack }) => {
 
 
 
+    const [error, setError] = useState(null);
+
     const scrollToBottom = (resetNewMessages = true) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         if (resetNewMessages) {
@@ -174,6 +195,7 @@ const ChatArea = ({ chatId, onBack }) => {
         if (!chatId) return;
         setMessages([]); // Clear old messages
         setChatDetails(null); // Clear old details
+        setError(null);
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
@@ -193,6 +215,7 @@ const ChatArea = ({ chatId, onBack }) => {
                 setMessages(formatted);
             } catch (err) {
                 console.error("Failed to fetch chat data", err);
+                setError(err.response?.status === 404 ? "Conversation not found" : "Failed to load chat");
             }
         };
         fetchData();
@@ -381,6 +404,27 @@ const ChatArea = ({ chatId, onBack }) => {
         }
     };
 
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full bg-[#0a041c] text-center px-10 relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="relative z-10">
+                    <div className="w-20 h-20 rounded-3xl bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20 mx-auto">
+                        <X size={32} className="text-red-400" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white mb-2">{error}</h2>
+                    <p className="text-gray-500 text-sm mb-8">This conversation might have been deleted or you don't have access to it.</p>
+                    <button 
+                        onClick={onBack}
+                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     if (!chatId) {
         return (
             <div className="flex flex-col items-center justify-center h-full bg-[#0a041c] relative overflow-hidden">
@@ -452,12 +496,12 @@ const ChatArea = ({ chatId, onBack }) => {
     return (
         <div className="flex flex-col h-full bg-[#0F0529]">
             {/* Header */}
-            <div className="px-4 sm:px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/2 backdrop-blur-md">
-                <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="px-4 sm:px-8 py-5 border-b border-white/5 flex items-center bg-white/2 backdrop-blur-md">
+                <div className="flex items-center flex-1 min-w-0">
                     {/* Back Button for Mobile */}
                     <button 
                         onClick={onBack}
-                        className="md:hidden p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors mr-1"
+                        className="md:hidden p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors mr-2"
                     >
                         <ChevronLeft size={24} />
                     </button>

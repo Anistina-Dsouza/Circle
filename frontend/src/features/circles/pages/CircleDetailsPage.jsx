@@ -61,12 +61,7 @@ const CircleDetailsPage = () => {
                     headers: token ? { Authorization: `Bearer ${token}` } : {}
                 });
                 if (res.data.success) {
-                    const c = res.data.circle;
-                    if (!c.isMember) {
-                        navigate(`/circles/${slug}/join`);
-                        return;
-                    }
-                    setCircle(c);
+                    setCircle(res.data.circle);
                 }
             } catch (err) {
                 setError(err.response?.data?.error || 'Failed to load circle.');
@@ -208,7 +203,7 @@ const CircleDetailsPage = () => {
                             </button>
                         )}
 
-                        {/* canManage (Creator/Admin/Moderator) → Manage | Member → Joined + Leave */}
+                        {/* canManage (Creator/Admin/Moderator) → Manage | Member → Joined + Leave | Else → Join */}
                         {canManage ? (
                             <Link
                                 to={`/circles/${slug}/manage`}
@@ -216,7 +211,7 @@ const CircleDetailsPage = () => {
                             >
                                 <Settings size={14} /> Manage
                             </Link>
-                        ) : (
+                        ) : circle.isMember ? (
                             <>
                                 <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-violet-600/20 border border-violet-500/30 text-violet-300 text-sm font-semibold">
                                     <CheckCircle size={14} /> Joined
@@ -228,6 +223,13 @@ const CircleDetailsPage = () => {
                                     <LogOut size={14} /> Leave
                                 </button>
                             </>
+                        ) : (
+                            <Link
+                                to={`/circles/${slug}/join`}
+                                className="inline-flex items-center gap-2 px-8 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold shadow-lg hover:from-violet-500 hover:to-fuchsia-500 transition-all"
+                            >
+                                <UserPlus size={14} /> Join Community
+                            </Link>
                         )}
 
                     </div>
@@ -237,19 +239,52 @@ const CircleDetailsPage = () => {
             {/* 3-COLUMN BODY (Responsive Layout) */}
             <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pb-10 flex flex-col lg:flex-row gap-6 lg:gap-10 flex-1 items-start">
 
-                {/* CENTER: stories + chat */}
-                <div className="flex-1 min-w-0 flex flex-col gap-4 w-full">
-                    <CircleStoriesBar
-                        circleMemberIds={memberIds}
-                        onPostSuccess={() => setRefreshKey(k => k + 1)}
-                    />
-                    <CircleChatArea
-                        circle={circle}
-                    />
-                </div>
+                {circle.isMember ? (
+                    <>
+                        {/* CENTER: stories + chat */}
+                        <div className="flex-1 min-w-0 flex flex-col gap-4 w-full">
+                            <CircleStoriesBar
+                                circleMemberIds={memberIds}
+                                onPostSuccess={() => setRefreshKey(k => k + 1)}
+                            />
+                            <CircleChatArea
+                                circle={circle}
+                            />
+                        </div>
 
-                {/* RIGHT: meetings + members */}
-                <CircleMembersPanel circle={circle} slug={slug} />
+                        {/* RIGHT: meetings + members */}
+                        <CircleMembersPanel circle={circle} slug={slug} />
+                    </>
+                ) : (
+                    <div className="flex-1 w-full flex flex-col items-center justify-center py-20 px-6">
+                        <div className="max-w-md w-full bg-[#1A0D40]/50 backdrop-blur-xl border border-white/10 rounded-[40px] p-10 text-center shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-fuchsia-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            
+                            <div className="w-20 h-20 bg-violet-600/20 rounded-3xl flex items-center justify-center mb-8 mx-auto border border-violet-500/30 shadow-[0_0_30px_rgba(139,92,246,0.2)]">
+                                <Lock size={32} className="text-violet-400" />
+                            </div>
+
+                            <h2 className="text-2xl font-black text-white mb-4 tracking-tight">
+                                Private Community
+                            </h2>
+                            
+                            <p className="text-gray-400 text-sm leading-relaxed mb-10">
+                                You are not a part of this circle yet. Join the community to see the stories, participate in chats, and meet other members.
+                            </p>
+
+                            <Link
+                                to={`/circles/${slug}/join`}
+                                className="inline-flex items-center justify-center w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-violet-900/40 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                Join Community
+                            </Link>
+                            
+                            <p className="mt-6 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                Membership required to view content
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* MODALS */}

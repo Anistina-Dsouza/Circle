@@ -100,45 +100,48 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
     return (
         <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-2xl p-4 mb-8 shadow-lg shadow-purple-900/10">
-            <div className="flex items-center space-x-4">
-                {/* User Avatar */}
-                <div className="relative shrink-0">
-                    <img
-                        src={profilePic || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"}
-                        alt="Profile"
-                        className="w-12 h-12 rounded-full border-2 border-purple-500/30 object-cover"
-                    />
-                    <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1 border-2 border-[#1E1B3A]">
-                        <Plus size={10} className="text-white" />
-                    </div>
-                </div>
-
-                <div className="flex-1 flex flex-col">
-                    {/* Caption Input */}
-                    <div className="flex-1 bg-[#2D2A4A]/50 rounded-2xl px-6 py-2 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
-                        <textarea
-                            rows="1"
-                            value={caption}
-                            onChange={(e) => setCaption(e.target.value)}
-                            placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
-                            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm resize-none py-1 custom-scrollbar"
-                            onInput={(e) => {
-                                e.target.style.height = 'auto';
-                                e.target.style.height = e.target.scrollHeight + 'px';
-                            }}
+            <div className="flex flex-col sm:flex-row gap-4">
+                {/* Content Section (Avatar + Input) */}
+                <div className="flex items-start space-x-4 flex-1">
+                    {/* User Avatar */}
+                    <div className="relative shrink-0 pt-1">
+                        <img
+                            src={profilePic || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"}
+                            alt="Profile"
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-purple-500/30 object-cover"
                         />
+                        <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-0.5 sm:p-1 border-2 border-[#1E1B3A]">
+                            <Plus size={8} className="text-white sm:w-[10px] sm:h-[10px]" />
+                        </div>
+                    </div>
+
+                    <div className="flex-1">
+                        {/* Caption Input */}
+                        <div className="bg-[#2D2A4A]/50 rounded-2xl px-4 sm:px-6 py-2 sm:py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
+                            <textarea
+                                rows="1"
+                                value={caption}
+                                onChange={(e) => setCaption(e.target.value)}
+                                placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
+                                className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm resize-none py-1 custom-scrollbar min-h-[36px]"
+                                onInput={(e) => {
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = e.target.scrollHeight + 'px';
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-3 shrink-0 ml-4 pr-1">
-                    <div className="relative flex items-center gap-2">
+                {/* Actions Section */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 sm:ml-4 pr-1">
+                    <div className="relative flex items-center gap-1 sm:gap-2">
                         <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className={`p-3 transition-all rounded-full ${mediaFile ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            className={`p-2.5 sm:p-3 transition-all rounded-full ${mediaFile ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                             title="Upload Image"
                         >
-                            <ImageIcon size={24} />
+                            <ImageIcon size={22} className="sm:w-6 sm:h-6" />
                         </button>
                         <input 
                             type="file" 
@@ -149,15 +152,15 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                         />
                         <button 
                             onClick={() => setShowUrlInput(!showUrlInput)}
-                            className={`p-3 transition-all rounded-full ${(!mediaFile && mediaUrl) || showUrlInput ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            className={`p-2.5 sm:p-3 transition-all rounded-full ${(!mediaFile && mediaUrl) || showUrlInput ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                             title="Add Image URL"
                         >
-                            <LinkIcon size={24} />
+                            <LinkIcon size={22} className="sm:w-6 sm:h-6" />
                         </button>
 
                         {/* Pop-over URL Input */}
                         {showUrlInput && (
-                            <div className="absolute right-0 bottom-full mb-4 w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200 z-30">
+                            <div className="absolute right-0 bottom-full mb-4 w-64 sm:w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200 z-30">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
                                     <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
@@ -190,7 +193,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                         onClick={handlePostStory}
                         disabled={loading || status === 'success'}
                         className={`
-                            bg-gradient-to-r from-purple-400 to-purple-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-105 active:scale-95 flex items-center space-x-2
+                            bg-gradient-to-r from-purple-400 to-purple-600 text-white px-5 sm:px-8 py-2.5 rounded-full font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-105 active:scale-95 flex items-center justify-center space-x-2 flex-1 sm:flex-none
                             ${(loading || status === 'success') ? 'opacity-70 scale-100' : ''}
                         `}
                     >
@@ -200,7 +203,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <CheckCircle2 size={16} />
                         ) : (
                             <>
-                                <span className="hidden sm:inline font-bold">POST</span>
+                                <span className="text-xs sm:text-sm font-black tracking-widest">POST</span>
                                 <Plus size={16} />
                             </>
                         )}

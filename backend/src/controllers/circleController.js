@@ -135,8 +135,14 @@ exports.getMyCircles = async (req, res) => {
 // =========== GET CIRCLE BY SLUG ===========
 exports.getCircleBySlug = async (req, res) => {
   try {
+    const { slug } = req.params;
+    const isId = slug.match(/^[0-9a-fA-F]{24}$/);
+    
     const circle = await Circle.findOne({ 
-      slug: req.params.slug,
+      $or: [
+        { slug: slug },
+        ...(isId ? [{ _id: slug }] : [])
+      ],
       isActive: true 
     })
     .populate('creator', 'username displayName profilePic')

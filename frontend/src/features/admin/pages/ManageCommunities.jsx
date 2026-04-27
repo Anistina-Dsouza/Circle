@@ -5,6 +5,7 @@ import CommunityStats from "../components/CommunityStats";
 import ViewReportsModal from "../components/ViewReportsModal";
 import { Search, Filter, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
+import PremiumDropdown from "../components/PremiumDropdown";
 
 export default function ManageCommunities() {
   const [circles, setCircles] = useState([]);

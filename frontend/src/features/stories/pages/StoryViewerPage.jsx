@@ -372,7 +372,22 @@ const StoryViewerPage = () => {
                         <div className="absolute bottom-12 left-0 right-0 px-8 z-20 pointer-events-none">
                             <div className="bg-black/20 backdrop-blur-sm p-4 rounded-3xl border border-white/5 pointer-events-auto">
                                 <p className="text-white text-sm md:text-base font-medium leading-relaxed drop-shadow-lg max-h-32 overflow-y-auto custom-scrollbar">
-                                    {currentStory.caption}
+                                    {currentStory.caption.split(/(@[a-zA-Z0-9_]+)/g).map((part, i) => {
+                                        if (part.startsWith('@')) {
+                                            const username = part.substring(1);
+                                            return (
+                                                <Link 
+                                                    key={i} 
+                                                    to={`/profile/${username}`} 
+                                                    className="text-purple-400 hover:text-purple-300 font-bold"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {part}
+                                                </Link>
+                                            );
+                                        }
+                                        return part;
+                                    })}
                                 </p>
                             </div>
                         </div>
