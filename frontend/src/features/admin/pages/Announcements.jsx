@@ -157,6 +157,30 @@ export default function Announcements() {
             </span>
           </div>
 
+          {/* Top Pagination */}
+          {!loading && announcements.length > 0 && (
+            <div className="flex justify-center items-center gap-3 mb-10">
+              <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
+                <ChevronLeft size={18} />
+              </button>
+              {[1, 2, 3].map((p) => (
+                <button
+                  key={p}
+                  className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
+                    p === 1
+                      ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                      : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/20 hover:text-white hover:bg-purple-600 hover:border-purple-500 transition-all shadow-xl">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+
           <div className="space-y-8">
             {loading ? (
               <div className="flex flex-col items-center justify-center p-20 gap-4">

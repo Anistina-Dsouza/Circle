@@ -108,6 +108,52 @@ export default function ManageUsers() {
     setCurrentPage(1);
   }, [search, filter, sort]);
 
+  // Pagination Component
+  const Pagination = ({ className = "" }) => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className={`flex flex-col sm:flex-row justify-between items-center gap-6 px-4 ${className}`}>
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+            Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedUsers.length)}</span> of <span className="text-white/60">{processedUsers.length}</span> users
+        </div>
+
+        <div className="flex items-center gap-2">
+            <button 
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-purple-600 hover:border-purple-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
+            >
+                <ChevronLeft size={18} />
+            </button>
+
+            <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
+                            page === currentPage 
+                                ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                                : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
+                        }`}
+                    >
+                        {page}
+                    </button>
+                ))}
+            </div>
+
+            <button 
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-purple-600 hover:border-purple-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
+            >
+                <ChevronRight size={18} />
+            </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-7xl mx-auto px-2">
@@ -172,6 +218,7 @@ export default function ManageUsers() {
             </div>
         ) : (
             <>
+                <Pagination className="mb-8" />
                 {/* Mobile Card View (hidden on lg+) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden mb-8">
                     {currentItems.map(user => (
@@ -356,48 +403,7 @@ export default function ManageUsers() {
                     </div>
                 )}
 
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 px-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
-                            Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedUsers.length)}</span> of <span className="text-white/60">{processedUsers.length}</span> users
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-purple-600 hover:border-purple-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
-                            >
-                                <ChevronLeft size={18} />
-                            </button>
-
-                            <div className="flex items-center gap-2">
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                    <button
-                                        key={page}
-                                        onClick={() => setCurrentPage(page)}
-                                        className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
-                                            page === currentPage 
-                                                ? "bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                                                : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-purple-600 hover:border-purple-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
-                            >
-                                <ChevronRight size={18} />
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <Pagination />
             </>
         )}
 
