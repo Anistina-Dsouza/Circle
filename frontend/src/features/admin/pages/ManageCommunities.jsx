@@ -3,7 +3,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import CommunityTable from "../components/DetailedCommunityTables";
 import CommunityStats from "../components/CommunityStats";
 import ViewReportsModal from "../components/ViewReportsModal";
-import { Search, Filter, Layers, PlusCircle } from "lucide-react";
+import { Search, Filter, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
 
 export default function ManageCommunities() {
@@ -13,6 +13,10 @@ export default function ManageCommunities() {
   const [privacyFilter, setPrivacyFilter] = useState("all");
   const [dashboardStats, setDashboardStats] = useState(null);
   const [viewReportItemId, setViewReportItemId] = useState(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   const fetchCircles = async () => {
     try {
@@ -70,11 +74,22 @@ export default function ManageCommunities() {
 
   // Compute filtered circles
   const processedCircles = circles.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = (c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (c.creator?.displayName || c.creator?.username || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPrivacy = privacyFilter === "all" || c.type === privacyFilter;
     return matchesSearch && matchesPrivacy;
   });
+
+  // Pagination Logic
+  const totalPages = Math.ceil(processedCircles.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCircles = processedCircles.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Reset to page 1 when search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, privacyFilter]);
 
   const newCirclesCount = circles.filter(c => {
      const oneDay = 24 * 60 * 60 * 1000;
@@ -109,7 +124,7 @@ export default function ManageCommunities() {
                 placeholder="Search Clusters..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-white/10"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all placeholder:text-white/10 font-medium"
               />
             </div>
 
@@ -130,14 +145,57 @@ export default function ManageCommunities() {
         </div>
 
         {/* Community Table Container */}
-        <div className="mb-10">
+        <div className="mb-12">
           <CommunityTable 
-            data={processedCircles} 
+            data={currentCircles} 
             loading={loading} 
             onToggleStatus={handleToggleStatus} 
             onViewReports={(id) => setViewReportItemId(id)} 
           />
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-6 px-4 mb-16">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                    Showing <span className="text-white/60">{indexOfFirstItem + 1}</span> to <span className="text-white/60">{Math.min(indexOfLastItem, processedCircles.length)}</span> of <span className="text-white/60">{processedCircles.length}</span> clusters
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-indigo-600 hover:border-indigo-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`w-10 h-10 rounded-2xl text-[10px] font-black transition-all border ${
+                                    page === currentPage 
+                                        ? "bg-indigo-600 text-white border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                                        : "bg-white/5 text-white/20 border-white/10 hover:text-white hover:bg-white/10"
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-indigo-600 hover:border-indigo-500 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
+                </div>
+            </div>
+        )}
 
         {/* Section Divider */}
         <div className="flex items-center gap-4 mb-8">
@@ -163,4 +221,5 @@ export default function ManageCommunities() {
     </AdminLayout>
   );
 }
+
 
