@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-const AVATAR_COUNT = 60;
 const AVATAR_SIZE = 80; // slightly smaller
 
 // Better DiceBear avatars (clean & aesthetic)
@@ -10,8 +9,23 @@ const avatarUrl = (i) =>
 
 export default function Hero() {
   const ref = useRef(null);
+  const [avatarCount, setAvatarCount] = useState(60);
 
   useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setAvatarCount(15);
+      } else if (width < 1024) {
+        setAvatarCount(35);
+      } else {
+        setAvatarCount(60);
+      }
+    };
+
+    handleResize(); // Set initial count
+    window.addEventListener("resize", handleResize);
+
     const onMove = (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * -100;
       const y = (e.clientY / window.innerHeight - 0.5) * -100;
@@ -21,7 +35,10 @@ export default function Hero() {
     };
 
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return (
@@ -36,7 +53,7 @@ export default function Hero() {
 
       {/* AVATAR FIELD */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: AVATAR_COUNT }).map((_, i) => (
+        {Array.from({ length: avatarCount }).map((_, i) => (
           <Avatar key={i} index={i} />
         ))}
       </div>

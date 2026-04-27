@@ -115,16 +115,6 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                   </div>
                   <span className="text-sm font-medium text-white/80 group-hover:text-white">My Profile</span>
                 </Link>
-                <Link
-                  to="/settings"
-                  className="flex items-center space-x-3 px-5 py-3 hover:bg-white/5 transition group"
-                  onClick={() => setProfileMenuOpen(false)}
-                >
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:rotate-45 transition-transform">
-                    <Settings size={16} />
-                  </div>
-                  <span className="text-sm font-medium text-white/80 group-hover:text-white">Settings</span>
-                </Link>
                 <div className="h-px bg-white/5 my-2 mx-5" />
                 <button
                   onClick={handleLogout}
@@ -180,7 +170,6 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                 <NavItem icon={Home} label="Feed" to="/feed" isMobile />
                 <NavItem icon={Users} label="Circles" to="/circles" isMobile />
                 <NavItem icon={User} label="Profile" to={`/profile/${user?.username}`} isMobile />
-                <NavItem icon={Settings} label="Settings" to="/settings" isMobile />
                 
                 <div className="pt-6 mt-4 border-t border-white/5">
                   <div className="flex items-center justify-between px-2">
