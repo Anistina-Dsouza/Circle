@@ -1,7 +1,8 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Save, Shield, Palette, User, Image as ImageIcon, Link as LinkIcon, X } from 'lucide-react';
 import FeedNavbar from '../feed/components/FeedNavbar';
 import axios from 'axios';
-import { useRef } from 'react';
 
 const EditProfilePage = () => {
     const navigate = useNavigate();
