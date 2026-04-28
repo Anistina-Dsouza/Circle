@@ -6,7 +6,6 @@ import ViewReportsModal from "../components/ViewReportsModal";
 import { Search, Filter, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
 import PremiumDropdown from "../../../components/ui/PremiumDropdown";
-import CommunityEngagementGraph from "../components/CommunityEngagementGraph";
 
 export default function ManageCommunities() {
   const [circles, setCircles] = useState([]);
@@ -191,9 +190,6 @@ export default function ManageCommunities() {
 
         <Pagination className="mb-8" />
 
-        <div className="mb-12">
-           <CommunityEngagementGraph data={circles.slice(0, 20)} />
-        </div>
 
         {/* Community Table Container */}
         <div className="mb-12">

@@ -7,7 +7,7 @@ const CircleMessage = require('../models/CircleMessage');
 const getDashboardStats = async (req, res) => {
   try {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
 
     const [
       totalUsers,
@@ -60,15 +60,15 @@ const getDashboardStats = async (req, res) => {
       ]),
 
       User.aggregate([
-        { $match: { createdAt: { $gte: sevenDaysAgo } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "+05:30" } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
       ]),
       Circle.aggregate([
-        { $match: { createdAt: { $gte: sevenDaysAgo } } },
+        { $match: { createdAt: { $gte: tenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
       ]),
       Meeting.aggregate([
-        { $match: { createdAt: { $gte: sevenDaysAgo } } },
+        { $match: { createdAt: { $gte: tenDaysAgo } } },
         { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } }
       ]),
       
@@ -102,32 +102,27 @@ const getDashboardStats = async (req, res) => {
         });
     }
 
-    // Calculate cumulative growth for a proper growth trend
-    let currentCumulative = totalUsers;
     const registrationsTrend = [];
-    
-    // We iterate backwards from today to get daily counts, then we will calculate cumulative going forward
-    const dailyCounts = [];
-    for (let i = 0; i <= 6; i++) {
-        const d = new Date();
-        d.setUTCHours(0, 0, 0, 0);
-        d.setUTCDate(d.getUTCDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const count = userDaily.find(t => t._id === dateStr)?.count || 0;
-        dailyCounts.push({ dateStr, count });
-    }
-    
-    // Now calculate cumulative starting from 7 days ago
-    // Total users 7 days ago = totalUsers - sum of registrations in last 7 days (including today)
-    const sevenDaySum = dailyCounts.reduce((acc, curr) => acc + curr.count, 0);
-    let runningTotal = totalUsers - sevenDaySum;
-    
-    // Fill the trend from oldest to newest (index 6 to 0 of our dailyCounts is oldest to newest)
+    const userDailyMap = {};
+    userDaily.forEach(item => {
+      userDailyMap[item._id] = item.count;
+    });
+
+    // Generate trend for the last 7 days (synchronized with local timezone)
     for (let i = 6; i >= 0; i--) {
-        runningTotal += dailyCounts[i].count;
+        const d = new Date();
+        d.setHours(0, 0, 0, 0); // Local day start
+        d.setDate(d.getDate() - i);
+        
+        // Manual format to match YYYY-MM-DD local
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
         registrationsTrend.push({
-            _id: dailyCounts[i].dateStr,
-            count: runningTotal
+            _id: dateStr,
+            count: userDailyMap[dateStr] || 0
         });
     }
 
@@ -156,7 +151,7 @@ const getDashboardStats = async (req, res) => {
         },
         latestReports,
         trends: {
-          registrations: combinedDaily,
+          registrations: registrationsTrend,
           categories: categoryStats,
           hourly: combinedHourly
         },

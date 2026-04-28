@@ -66,7 +66,6 @@ export default function AdminReports() {
     }, [activeTab, userPage, circlePage, meetingPage, fetchReportsData]);
 
     const tabs = [
-
         { id: "Velocity", icon: <Zap size={18} />, label: "Engagement", desc: "User Interaction" },
         { id: "Activity", icon: <MessageSquare size={18} />, label: "Audit Logs", desc: "System Logs" },
         { id: "Distribution", icon: <BarChart3 size={18} />, label: "Categories", desc: "Platform Spread" }
@@ -224,11 +223,11 @@ function VelocityReport({ data }) {
                                 <div className="flex-1 flex gap-2 sm:gap-2.5">
                                     {hours.map(hour => {
                                         const val = getIntensity(dIdx + 1, hour);
-                                        const opacity = (val / maxIntensity) * 0.9 + 0.1;
+                                        const opacity = val === 0 ? 0.03 : (val / maxIntensity) * 0.8 + 0.2;
                                         return (
                                             <div
                                                 key={hour}
-                                                className="flex-1 h-10 sm:h-12 rounded-[6px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20 border border-white/[0.02]"
+                                                className="flex-1 h-10 sm:h-12 rounded-[6px] transition-all duration-700 relative group/cell hover:scale-110 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:z-20 border border-white/5 bg-purple-500/[0.02]"
                                                 style={{ backgroundColor: `rgba(168, 85, 247, ${opacity})` }}
                                             >
                                                 <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-50">
