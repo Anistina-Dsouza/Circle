@@ -170,35 +170,6 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <LinkIcon size={22} className="sm:w-6 sm:h-6" />
                         </button>
 
-                        {/* Pop-over URL Input — anchored right so it never overflows off-screen on mobile */}
-                        {showUrlInput && (
-                            <div className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] max-w-xs bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-30">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
-                                    <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                                <div className="space-y-3">
-                                    <input
-                                        type="url"
-                                        value={tempUrl}
-                                        onChange={(e) => setTempUrl(e.target.value)}
-                                        placeholder="https://example.com/image.jpg"
-                                        className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
-                                        autoFocus
-                                        onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
-                                    />
-                                    <button 
-                                        onClick={handleUrlSubmit}
-                                        className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors"
-                                    >
-                                        Apply Image
-                                    </button>
-                                </div>
-                                <div className="absolute -top-2 right-6 w-4 h-4 bg-[#1A1140] border-l border-t border-purple-500/30 rotate-45"></div>
-                            </div>
-                        )}
                     </div>
                     
                     <button 
@@ -222,6 +193,37 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Pop-over URL Input — Centered relative to the entire bar to prevent off-screen overflow */}
+            {showUrlInput && (
+                <div className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-30">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
+                        <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
+                            <X size={14} />
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        <input
+                            type="url"
+                            value={tempUrl}
+                            onChange={(e) => setTempUrl(e.target.value)}
+                            placeholder="https://example.com/image.jpg"
+                            className="w-full bg-[#0F0529] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                            autoFocus
+                            onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                        />
+                        <button 
+                            onClick={handleUrlSubmit}
+                            className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors"
+                        >
+                            Apply Image
+                        </button>
+                    </div>
+                    {/* Centered arrow for mobile, right-aligned for desktop */}
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 bg-[#1A1140] border-l border-t border-purple-500/30 rotate-45"></div>
+                </div>
+            )}
 
             {/* Media Preview - Popping from the side/bottom */}
             {mediaUrl && (
