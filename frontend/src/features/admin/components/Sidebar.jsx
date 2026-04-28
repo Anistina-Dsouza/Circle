@@ -26,15 +26,17 @@ export default function Sidebar({ isOpen, onClose }) {
       <aside
         className={`
         fixed left-0 top-0
-        h-screen w-64
+        w-64
         p-6
         flex flex-col
         bg-gradient-to-b from-[#10001d] to-[#06000c]
         border-r border-white/5
         z-50
+        overflow-hidden
         transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
+        style={{ height: '100dvh', maxHeight: '100dvh' }}
       >
         {/* Mobile Close Button */}
         <button
@@ -45,10 +47,10 @@ export default function Sidebar({ isOpen, onClose }) {
         </button>
 
         {/* Logo */}
-        <h2 className="text-2xl font-semibold mb-10 tracking-tight text-white/90">Circle</h2>
+        <h2 className="text-2xl font-semibold mb-10 tracking-tight text-white/90 shrink-0">Circle</h2>
 
-        {/* Navigation (scrollable if long) */}
-        <nav className="flex-1 space-y-4 overflow-y-auto pr-2">
+        {/* Navigation — scrollable, constrained so logout stays visible */}
+        <nav className="flex-1 min-h-0 space-y-4 overflow-y-auto pr-2">
 
           <Link to="/admin" onClick={() => { if (window.innerWidth < 1024) onClose(); }}>
             <Item icon={<LayoutDashboard size={18} />} label="Dashboard" active={isActive("/admin")} />
@@ -72,8 +74,8 @@ export default function Sidebar({ isOpen, onClose }) {
 
         </nav>
 
-        {/* Logout pinned bottom */}
-        <div className="pt-6 border-t border-white/5">
+        {/* Logout — always pinned at bottom, never scrolled away */}
+        <div className="pt-6 mt-auto border-t border-white/5 shrink-0">
           <Item icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
         </div>
 
