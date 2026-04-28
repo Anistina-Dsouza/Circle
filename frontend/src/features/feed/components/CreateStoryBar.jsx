@@ -194,11 +194,11 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                 </div>
             </div>
 
-            {/* Pop-over URL Input — FORCED OPAQUE and centered */}
+            {/* Pop-over URL Input — ABSOLUTELY OPAQUE (NO TRANSPARENCY) */}
             {showUrlInput && (
                 <div 
-                    className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs border border-purple-500/50 rounded-2xl p-4 shadow-[0_20px_60px_rgba(0,0,0,1)] z-[100] backdrop-blur-3xl"
-                    style={{ backgroundColor: '#0F0529', opacity: 1 }}
+                    className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs border-2 border-purple-500 rounded-2xl p-4 shadow-[0_0_40px_rgba(0,0,0,1)] z-[9999] !opacity-100"
+                    style={{ backgroundColor: '#000000', opacity: '1 !important' }}
                 >
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
@@ -212,21 +212,21 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             value={tempUrl}
                             onChange={(e) => setTempUrl(e.target.value)}
                             placeholder="https://example.com/image.jpg"
-                            className="w-full bg-[#1A1140] border border-white/20 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                            className="w-full bg-[#1A1140] border border-white/40 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500 !opacity-100"
                             autoFocus
                             onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
                         />
                         <button 
                             onClick={handleUrlSubmit}
-                            className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors shadow-lg"
+                            className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors shadow-xl !opacity-100"
                         >
                             Apply Image
                         </button>
                     </div>
-                    {/* Solid Opaque arrow */}
+                    {/* Solid Black Opaque arrow */}
                     <div 
-                        className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 border-l border-t border-purple-500/50 rotate-45"
-                        style={{ backgroundColor: '#0F0529', opacity: 1 }}
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 border-l border-t border-purple-500 rotate-45 z-[10000] !opacity-100"
+                        style={{ backgroundColor: '#000000', opacity: '1 !important' }}
                     ></div>
                 </div>
             )}
