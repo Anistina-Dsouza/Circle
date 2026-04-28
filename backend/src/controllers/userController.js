@@ -344,6 +344,12 @@ exports.getSuggestedUsers = async (req, res) => {
     const followingIds = following.map(f => f.following.toString());
     followingIds.push(currentUserId.toString()); // Exclude self
 
+    // 1.5. Find people who follow me but I don't follow back
+    const myFollowers = await Follow.find({ following: currentUserId }).select('follower');
+    const followBackIds = myFollowers
+      .map(f => f.follower.toString())
+      .filter(id => !followingIds.includes(id));
+
     // 2. Find Interests (Categories of circles I've joined)
     const myJoinedCircles = await Circle.find({ 'members.user': currentUserId }).select('category members.user');
     const myCategories = [...new Set(myJoinedCircles.map(c => c.category).filter(Boolean))];
@@ -388,8 +394,8 @@ exports.getSuggestedUsers = async (req, res) => {
     const popularIds = popularUsers.map(u => u._id.toString());
 
     // Combine all and shuffle/limit
-    // Weight: Interests > Mutuals > Same Circles > Popular
-    const allSuggestedIds = [...new Set([...interestIds, ...mutualIds, ...circleMemberIds, ...popularIds])];
+    // Weight: Follow Back > Interests > Mutuals > Same Circles > Popular
+    const allSuggestedIds = [...new Set([...followBackIds, ...interestIds, ...mutualIds, ...circleMemberIds, ...popularIds])];
     
     // Fetch full profiles for the top suggestions
     const suggestedUsers = await User.find({
