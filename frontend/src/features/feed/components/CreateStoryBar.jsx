@@ -110,7 +110,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     };
 
     return (
-        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-4 mb-8 shadow-lg shadow-purple-900/10">
+        <div className="relative z-50 bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-4 mb-8 shadow-lg shadow-purple-900/10">
             <div className="flex flex-col sm:flex-row gap-4">
                 {/* Content Section (Avatar + Input) */}
                 <div className="flex items-start space-x-4 flex-1">
@@ -170,42 +170,6 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <LinkIcon size={22} className="sm:w-6 sm:h-6" />
                         </button>
 
-                        {/* Pop-over URL Input */}
-                        {showUrlInput && (
-                            <div className="fixed sm:absolute inset-x-4 sm:inset-auto sm:right-0 top-[30%] sm:top-full mt-4 sm:w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-50">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">Add Media</span>
-                                        <span className="text-xs font-bold text-white">Paste Image Link</span>
-                                    </div>
-                                    <button onClick={() => setShowUrlInput(false)} className="p-2 hover:bg-white/10 rounded-full text-gray-500 hover:text-white transition-colors">
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="relative">
-                                        <LinkIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500/50" />
-                                        <input
-                                            type="url"
-                                            value={tempUrl}
-                                            onChange={(e) => setTempUrl(e.target.value)}
-                                            placeholder="https://example.com/image.jpg"
-                                            className="w-full bg-[#0F0529] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500 placeholder:text-gray-600 transition-all"
-                                            autoFocus
-                                            onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
-                                        />
-                                    </div>
-                                    <button 
-                                        onClick={handleUrlSubmit}
-                                        className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white py-3 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-lg shadow-purple-500/20 active:scale-[0.98]"
-                                    >
-                                        Apply Image
-                                    </button>
-                                </div>
-                                {/* Arrow only on desktop */}
-                                <div className="hidden sm:block absolute -top-2 right-6 w-4 h-4 bg-[#1A1140] border-l border-t border-purple-500/30 rotate-45"></div>
-                            </div>
-                        )}
                     </div>
                     
                     <button 
@@ -229,6 +193,41 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Pop-over URL Input — ABSOLUTELY OPAQUE (NO TRANSPARENCY) */}
+            {showUrlInput && (
+                <div 
+                    className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs border-2 border-purple-500 rounded-2xl p-4 shadow-[0_0_40px_rgba(0,0,0,1)] force-opaque"
+                >
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
+                        <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
+                            <X size={14} />
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        <input
+                            type="url"
+                            value={tempUrl}
+                            onChange={(e) => setTempUrl(e.target.value)}
+                            placeholder="https://example.com/image.jpg"
+                            className="w-full bg-[#1A1140] border border-white/40 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                            autoFocus
+                            onKeyPress={(e) => e.key === 'Enter' && handleUrlSubmit()}
+                        />
+                        <button 
+                            onClick={handleUrlSubmit}
+                            className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-bold transition-colors shadow-xl"
+                        >
+                            Apply Image
+                        </button>
+                    </div>
+                    {/* Solid Black Opaque arrow */}
+                    <div 
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 border-l border-t border-purple-500 rotate-45 force-opaque"
+                    ></div>
+                </div>
+            )}
 
             {/* Media Preview - Popping from the side/bottom */}
             {mediaUrl && (
