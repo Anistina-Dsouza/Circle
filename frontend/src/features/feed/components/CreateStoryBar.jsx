@@ -110,7 +110,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     };
 
     return (
-        <div className="relative bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-4 mb-8 shadow-lg shadow-purple-900/10">
+        <div className="relative z-50 bg-[#1E1B3A]/50 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-4 mb-8 shadow-lg shadow-purple-900/10">
             <div className="flex flex-col sm:flex-row gap-4">
                 {/* Content Section (Avatar + Input) */}
                 <div className="flex items-start space-x-4 flex-1">
