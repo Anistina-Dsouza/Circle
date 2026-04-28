@@ -125,7 +125,10 @@ const StoriesBar = ({ onPostSuccess }) => {
                 />
                 
                 {followingStories.map(story => {
-                    const isSeen = story.viewers?.some(v => {
+                    // Own story: addView intentionally skips the owner, so check ownership directly
+                    const isOwnStory = story.user?._id?.toString() === user?._id?.toString() 
+                                    || story.user?._id?.toString() === user?.id?.toString();
+                    const isSeen = isOwnStory || story.viewers?.some(v => {
                         const viewerId = v._id || v;
                         return viewerId.toString() === user?._id?.toString() || viewerId.toString() === user?.id?.toString();
                     });

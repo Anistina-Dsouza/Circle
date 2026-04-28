@@ -117,7 +117,7 @@ const CreateStoryBar = ({ onPostSuccess }) => {
 
                     <div className="flex-1">
                         {/* Caption Input */}
-                        <div className="bg-[#2D2A4A]/50 rounded-full px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50">
+                        <div className="bg-[#2D2A4A]/50 rounded-2xl px-6 py-3 border border-white/5 hover:border-purple-500/30 transition-colors focus-within:border-purple-500/50 overflow-hidden">
                             <textarea
                                 rows="1"
                                 value={caption}
