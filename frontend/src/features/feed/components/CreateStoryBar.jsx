@@ -35,9 +35,8 @@ const CreateStoryBar = ({ onPostSuccess }) => {
     };
 
     const handlePostStory = async () => {
-        if (!mediaUrl && !mediaFile) {
-            alert('Please provide an image URL or file for your story');
-            setShowUrlInput(true);
+        if (!mediaUrl && !mediaFile && !caption.trim()) {
+            alert('Please provide an image, or write some text for your story');
             return;
         }
 
@@ -60,13 +59,25 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-            } else {
+            } else if (mediaUrl) {
                 response = await axios.post(`${baseUrl}/api/moments`, {
                     media: {
                         url: mediaUrl,
                         type: 'image' 
                     },
                     caption,
+                    duration: 24,
+                    audience: 'public'
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } else {
+                response = await axios.post(`${baseUrl}/api/moments`, {
+                    media: {
+                        type: 'text',
+                        text: caption
+                    },
+                    caption: '',
                     duration: 24,
                     audience: 'public'
                 }, {
@@ -121,7 +132,8 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <textarea
                                 rows="1"
                                 value={caption}
-                                onChange={(e) => setCaption(e.target.value)}
+                                onChange={(e) => setCaption(e.target.value.slice(0, 200))}
+                                maxLength={200}
                                 placeholder={`What's on your mind, ${user?.displayName || user?.username || 'User'}?`}
                                 className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm resize-none py-1 custom-scrollbar min-h-[36px]"
                                 onInput={(e) => {

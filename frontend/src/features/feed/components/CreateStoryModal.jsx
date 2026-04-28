@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Plus, Image as ImageIcon, Video, Eye, Info, Send, Lock, Globe, Camera, Link as LinkIcon } from 'lucide-react';
+import { X, Plus, Image as ImageIcon, Video, Eye, Info, Send, Lock, Globe, Camera, Link as LinkIcon, Type, Volume2, VolumeX } from 'lucide-react';
 import axios from 'axios';
 
 const CreateStoryModal = ({ isOpen, onClose }) => {
@@ -13,6 +13,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const [uploadMode, setUploadMode] = useState('device'); // 'device' or 'link'
     const [mediaFile, setMediaFile] = useState(null);
     const [error, setError] = useState('');
+    const [isMuted, setIsMuted] = useState(false);
     
     const baseUrl = import.meta.env.VITE_API_URL;
     const user = JSON.parse(localStorage.getItem('user'));
@@ -60,8 +61,12 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     };
 
     const handlePostStory = async () => {
-        if (!mediaUrl && !mediaFile) {
+        if (uploadMode !== 'text' && !mediaUrl && !mediaFile) {
             setError('Please upload an image or video first');
+            return;
+        }
+        if (uploadMode === 'text' && !caption.trim()) {
+            setError('Please enter some text for your story');
             return;
         }
 
@@ -84,13 +89,25 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-            } else {
+            } else if (uploadMode === 'link') {
                 response = await axios.post(`${baseUrl}/api/moments`, {
                     media: {
                         url: mediaUrl,
                         type: mediaType
                     },
                     caption,
+                    duration,
+                    audience: isPublic ? 'public' : 'followers'
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } else if (uploadMode === 'text') {
+                response = await axios.post(`${baseUrl}/api/moments`, {
+                    media: {
+                        type: 'text',
+                        text: caption
+                    },
+                    caption: '',
                     duration,
                     audience: isPublic ? 'public' : 'followers'
                 }, {
@@ -152,11 +169,36 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
 
                                 {/* Content Area */}
                                 <div className="w-full h-full bg-[#160D33] rounded-[28px] overflow-hidden flex flex-col items-center justify-center relative">
-                                    {previewUrl ? (
+                                    {uploadMode === 'text' && caption ? (
+                                        <div 
+                                            className="w-full h-full flex items-center justify-center p-6 text-center relative"
+                                            style={{
+                                                backgroundImage: `url('https://i.pinimg.com/736x/d5/48/96/d54896e952622eee393eb237abb734d1.jpg')`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center'
+                                            }}
+                                        >
+                                            <div className="absolute inset-0 bg-black/40" />
+                                            <p 
+                                                className="text-white text-lg whitespace-pre-wrap leading-relaxed drop-shadow-2xl break-words w-full relative z-10"
+                                                style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 700 }}
+                                            >
+                                                {caption}
+                                            </p>
+                                        </div>
+                                    ) : previewUrl ? (
                                         mediaType === 'image' ? (
                                             <img src={previewUrl} className="w-full h-full object-cover" />
                                         ) : (
-                                            <video src={previewUrl} className="w-full h-full object-cover" autoPlay muted loop />
+                                            <>
+                                                <video src={previewUrl} className="w-full h-full object-cover" autoPlay muted={isMuted} loop playsInline />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                                                    className="absolute top-4 right-4 z-40 p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-colors"
+                                                >
+                                                    {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                                </button>
+                                            </>
                                         )
                                     ) : (
                                         <div className="flex flex-col items-center text-center px-6">
@@ -166,7 +208,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                     )}
 
                                     {/* Caption Overlay */}
-                                    {caption && (
+                                    {caption && uploadMode !== 'text' && (
                                         <div className="absolute bottom-16 left-4 right-4 bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/5">
                                             <p className="text-[10px] text-white leading-relaxed line-clamp-3 italic">{caption}</p>
                                         </div>
@@ -192,14 +234,21 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                             className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadMode === 'device' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'text-gray-500 hover:text-gray-300'}`}
                                         >
                                             <Camera size={14} />
-                                            <span>From Device</span>
+                                            <span className="hidden sm:inline">Device</span>
                                         </button>
                                         <button 
                                             onClick={() => setUploadMode('link')}
                                             className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadMode === 'link' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'text-gray-500 hover:text-gray-300'}`}
                                         >
                                             <LinkIcon size={14} />
-                                            <span>Web Link</span>
+                                            <span className="hidden sm:inline">Link</span>
+                                        </button>
+                                        <button 
+                                            onClick={() => setUploadMode('text')}
+                                            className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${uploadMode === 'text' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'text-gray-500 hover:text-gray-300'}`}
+                                        >
+                                            <Type size={14} />
+                                            <span className="hidden sm:inline">Text</span>
                                         </button>
                                     </div>
                                 </div>
@@ -222,7 +271,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                             accept="image/*,video/*"
                                         />
                                     </div>
-                                ) : (
+                                ) : uploadMode === 'link' ? (
                                     <div className="bg-[#1E1B3A]/30 border border-white/5 rounded-3xl p-8 space-y-4">
                                         <div className="bg-blue-500/10 p-4 rounded-full w-fit mx-auto mb-2">
                                             <LinkIcon size={32} className="text-blue-400" />
@@ -235,6 +284,13 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                             value={mediaUrl.startsWith('blob:') ? '' : mediaUrl} 
                                             onChange={(e) => handleUrlChange(e.target.value)}
                                         />
+                                    </div>
+                                ) : (
+                                    <div className="bg-[#1E1B3A]/30 border border-white/5 rounded-3xl p-8 space-y-4">
+                                        <div className="bg-purple-500/10 p-4 rounded-full w-fit mx-auto mb-2">
+                                            <Type size={32} className="text-purple-400" />
+                                        </div>
+                                        <p className="text-xs text-center text-gray-400">Write your text in the story caption box below. It will be displayed on a purple background.</p>
                                     </div>
                                 )}
                             </div>
@@ -267,12 +323,13 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                             {/* Story Caption */}
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-gray-400">Story Caption</label>
+                                    <label className="text-sm font-semibold text-gray-400">{uploadMode === 'text' ? 'Story Text' : 'Story Caption'}</label>
                                     <span className="text-[10px] font-medium text-gray-600">{caption.length}/200</span>
                                 </div>
                                 <textarea
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value.slice(0, 200))}
+                                    maxLength={200}
                                     placeholder="Write something captivating..."
                                     className="w-full bg-[#1E1B3A]/30 border border-white/5 rounded-3xl p-6 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors resize-none h-[100px]"
                                 ></textarea>
