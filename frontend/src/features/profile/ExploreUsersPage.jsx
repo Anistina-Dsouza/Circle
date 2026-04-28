@@ -52,7 +52,7 @@ const ExploreUsersPage = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/api/users/search?q=${query}`, {
+            const response = await axios.get(`${baseUrl}/api/users/search?q=${encodeURIComponent(query)}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

@@ -298,13 +298,13 @@ exports.searchUsers = async (req, res) => {
     const users = await User.find({
       _id: { $nin: excludeIds },
       role: { $ne: 'admin' },
-      username: { $nin: ['admin', 'Admin', 'ADMIN'], $not: /admin/i },
+      username: { $not: /admin/i },
       $or: [
         { username: { $regex: q, $options: 'i' } },
         { displayName: { $regex: q, $options: 'i' } }
       ]
     })
-      .select('username displayName profilePic stats')
+      .select('username displayName profilePic stats bio')
       .limit(20);
 
     // If logged in, check which users are already followed

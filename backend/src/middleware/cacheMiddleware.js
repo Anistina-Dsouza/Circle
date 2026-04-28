@@ -17,8 +17,8 @@ const cacheMiddleware = (duration = 3600) => {
 
       // If the user is authenticated, append their ID to the key
       // This ensures personalized feeds/data aren't leaked to other users
-      if (req.user && req.user._id) {
-        key += `_user_${req.user._id}`;
+      if ((req.user && req.user._id) || req.userId) {
+        key += `_user_${req.user?._id || req.userId}`;
       }
 
       const cachedResponse = await redisClient.get(key);
