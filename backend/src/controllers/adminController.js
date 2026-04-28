@@ -102,20 +102,32 @@ const getDashboardStats = async (req, res) => {
         });
     }
 
-    const combinedDaily = [];
-    for (let i = 6; i >= 0; i--) {
+    // Calculate cumulative growth for a proper growth trend
+    let currentCumulative = totalUsers;
+    const registrationsTrend = [];
+    
+    // We iterate backwards from today to get daily counts, then we will calculate cumulative going forward
+    const dailyCounts = [];
+    for (let i = 0; i <= 6; i++) {
         const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        d.setDate(d.getDate() - i);
+        d.setUTCHours(0, 0, 0, 0);
+        d.setUTCDate(d.getUTCDate() - i);
         const dateStr = d.toISOString().split('T')[0];
-        
-        const uCount = userDaily.find(t => t._id === dateStr)?.count || 0;
-        const cCount = circleDaily.find(t => t._id === dateStr)?.count || 0;
-        const mCount = meetingDaily.find(t => t._id === dateStr)?.count || 0;
-
-        combinedDaily.push({
-            _id: dateStr,
-            count: uCount + cCount + mCount
+        const count = userDaily.find(t => t._id === dateStr)?.count || 0;
+        dailyCounts.push({ dateStr, count });
+    }
+    
+    // Now calculate cumulative starting from 7 days ago
+    // Total users 7 days ago = totalUsers - sum of registrations in last 7 days (including today)
+    const sevenDaySum = dailyCounts.reduce((acc, curr) => acc + curr.count, 0);
+    let runningTotal = totalUsers - sevenDaySum;
+    
+    // Fill the trend from oldest to newest (index 6 to 0 of our dailyCounts is oldest to newest)
+    for (let i = 6; i >= 0; i--) {
+        runningTotal += dailyCounts[i].count;
+        registrationsTrend.push({
+            _id: dailyCounts[i].dateStr,
+            count: runningTotal
         });
     }
 
@@ -316,58 +328,7 @@ const getItemReports = async (req, res) => {
   }
 };
 
-const getDetailedResonance = async (req, res) => {
-  try {
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
-    const aggregateResonance = async (Model) => {
-      return await Model.aggregate([
-        { $match: { createdAt: { $gte: oneDayAgo } } },
-        {
-          $group: {
-            _id: {
-              hour: { $hour: "$createdAt" },
-              minute: {
-                $subtract: [
-                  { $minute: "$createdAt" },
-                  { $mod: [{ $minute: "$createdAt" }, 15] }
-                ]
-              }
-            },
-            count: { $sum: 1 }
-          }
-        },
-        { $sort: { "_id.hour": 1, "_id.minute": 1 } }
-      ]);
-    };
 
-    const [userRes, circleRes, meetingRes] = await Promise.all([
-      aggregateResonance(User),
-      aggregateResonance(Circle),
-      aggregateResonance(Meeting)
-    ]);
-
-    const timeline = [];
-    const now = new Date();
-    for (let i = 0; i < 96; i++) {
-      const time = new Date(now.getTime() - (95 - i) * 15 * 60 * 1000);
-      const hour = time.getHours();
-      const minute = Math.floor(time.getMinutes() / 15) * 15;
-      
-      const findCount = (res) => res.find(r => r._id.hour === hour && r._id.minute === minute)?.count || 0;
-      
-      timeline.push({
-        _id: `${hour}:${minute === 0 ? '00' : minute}`,
-        count: findCount(userRes) + findCount(circleRes) + findCount(meetingRes)
-      });
-    }
-
-    res.json({ success: true, data: timeline });
-  } catch (error) {
-    console.error('Detailed Resonance Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve detailed resonance map', error: error.message });
-  }
-};
 
 const getCommunityDistribution = async (req, res) => {
   try {
@@ -513,7 +474,7 @@ module.exports = {
   toggleCircleStatus,
   dismissReports,
   getItemReports,
-  getDetailedResonance,
+
   getCommunityDistribution,
   getActivityLogs,
   getConversationalVelocity

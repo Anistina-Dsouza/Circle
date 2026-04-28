@@ -8,7 +8,7 @@ const {
   toggleCircleStatus,
   dismissReports,
   getItemReports,
-  getDetailedResonance,
+
   getCommunityDistribution,
   getActivityLogs,
   getConversationalVelocity
@@ -37,8 +37,7 @@ router.get('/reports/:itemId', adminAuth, getItemReports);
 // @route   PUT /api/admin/reports/:itemId/dismiss
 router.put('/reports/:itemId/dismiss', adminAuth, dismissReports);
 
-// @route   GET /api/admin/resonance/detailed
-router.get('/resonance/detailed', adminAuth, getDetailedResonance);
+
 
 // @route   GET /api/admin/distribution
 router.get('/distribution', adminAuth, getCommunityDistribution);

@@ -37,7 +37,7 @@ async function testAdminFlow(driver, baseUrl) {
         await driver.wait(until.urlContains("/admin/reports"), 10000);
         await sleep(4000);
 
-        const intelTabs = ["Resonance", "Velocity", "Activity", "Distribution", "Lifecycle", "Safety"];
+        const intelTabs = ["Velocity", "Activity", "Distribution", "Lifecycle", "Safety"];
         for (const tab of intelTabs) {
             console.log(`Sub-Step: Testing Tab [${tab}]...`);
             const tabBtn = await driver.wait(until.elementLocated(By.xpath(`//button[.//span[text()='${tab}']]`)), 10000);
@@ -56,12 +56,12 @@ async function testAdminFlow(driver, baseUrl) {
                 console.log(`SUCCESS: Spatial Matrix populated with ${bubbles.length} engagement nodes.`);
             } else if (tab === "Activity") {
                 console.log("Verifying Activity Log Segments...");
-                const segments = await driver.findElements(By.xpath("//h3[contains(text(), 'Sync') or contains(text(), 'Expansion') or contains(text(), 'Resonance')]"));
+                const segments = await driver.findElements(By.xpath("//h3[contains(text(), 'Users') or contains(text(), 'Communities') or contains(text(), 'Meetings')]"));
                 console.log(`SUCCESS: Found ${segments.length} active log segments.`);
 
                 // Check Pagination for all three cards
                 console.log("Testing Pagination for Activity Cards...");
-                const activitySegments = ["Profile Sync", "Community Expansion", "Meeting Resonance"];
+                const activitySegments = ["Recent Users", "Recent Communities", "Recent Meetings"];
                 for (const segmentTitle of activitySegments) {
                     console.log(`Sub-Step: Checking Pagination for [${segmentTitle}]...`);
                     try {

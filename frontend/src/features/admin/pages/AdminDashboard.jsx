@@ -6,7 +6,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import KPICard from "../components/KPICard";
 import LatestRegistrations from "../components/LatestRegistrations";
 import CirclesTable from "../components/CirclesTable";
-import NetworkChart from "../components/NetworkChart";
+
 import GrowthTrends from "../components/GrowthTrends";
 
 export default function AdminDashboard() {
@@ -157,10 +157,7 @@ export default function AdminDashboard() {
 
                 {/* Full Width Visuals */}
                 <div className="space-y-12">
-                    <NetworkChart 
-                        registrationTrends={trends.registrations} 
-                        hourlyTrends={trends.hourly}
-                    />
+
                     <GrowthTrends trends={trends} />
                 </div>
             </div>
