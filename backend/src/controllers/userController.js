@@ -287,31 +287,46 @@ exports.searchUsers = async (req, res) => {
       return res.json({ success: true, users: [] });
     }
 
-    // Get IDs of users already followed to exclude them
-    const following = await Follow.find({ follower: req.userId }).select('following');
-    const excludeIds = following.map(f => f.following.toString());
-    excludeIds.push(req.userId.toString()); // Exclude self
-    excludeIds.push('admin'); // Special case for username exclusion if we mixed IDs and usernames, but better to use _id
+    const excludeIds = [];
+    if (req.userId) {
+      excludeIds.push(req.userId.toString()); // Exclude self
+    }
 
-    // Better approach: find admin's ID first or handle it by username
     const admin = await User.findOne({ username: 'admin' }).select('_id');
     if (admin) excludeIds.push(admin._id.toString());
 
     const users = await User.find({
       _id: { $nin: excludeIds },
       role: { $ne: 'admin' },
-      username: { $nin: ['admin', 'Admin', 'ADMIN'], $not: /admin/i }, // Aggressive username exclusion
+      username: { $nin: ['admin', 'Admin', 'ADMIN'], $not: /admin/i },
       $or: [
         { username: { $regex: q, $options: 'i' } },
         { displayName: { $regex: q, $options: 'i' } }
       ]
     })
       .select('username displayName profilePic stats')
-      .limit(10);
+      .limit(20);
+
+    // If logged in, check which users are already followed
+    let usersWithFollowStatus = users;
+    if (req.userId) {
+      const following = await Follow.find({ 
+        follower: req.userId,
+        following: { $in: users.map(u => u._id) }
+      }).select('following');
+      
+      const followingSet = new Set(following.map(f => f.following.toString()));
+      
+      usersWithFollowStatus = users.map(u => {
+        const uObj = u.toObject();
+        uObj.isFollowing = followingSet.has(u._id.toString());
+        return uObj;
+      });
+    }
 
     res.json({
       success: true,
-      users
+      users: usersWithFollowStatus
     });
 
   } catch (error) {

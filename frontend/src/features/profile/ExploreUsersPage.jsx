@@ -77,17 +77,20 @@ const ExploreUsersPage = () => {
 
     // Debounced search
     useEffect(() => {
-        if (searchQuery.length < 2 && searchQuery.length !== 0) return;
-
-        // Skip if query is empty because initial load handles it
-        if (searchQuery.length === 0) return;
+        // If query is too short but not empty, do nothing
+        if (searchQuery.length > 0 && searchQuery.length < 2) return;
 
         const timer = setTimeout(() => {
-            fetchUsers(searchQuery);
+            if (searchQuery.length >= 2) {
+                fetchUsers(searchQuery);
+            } else if (searchQuery.length === 0) {
+                // If cleared, go back to suggestions
+                fetchSuggestedUsers();
+            }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, fetchUsers]);
+    }, [searchQuery, fetchUsers, fetchSuggestedUsers]);
 
     const handleFollowToggle = async (userId, isFollowing) => {
         // Optimistically update local users state for immediate follower count feedback

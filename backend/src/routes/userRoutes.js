@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, optionalProtect } = require('../middleware/auth');
 const {
   getUserProfile,
   getFollowers,
@@ -19,7 +19,7 @@ router.get('/ping', (req, res) => res.json({ message: 'User router is alive' }))
 router.get('/suggestions', protect, getSuggestedUsers);
 router.get('/suggested-list', protect, getSuggestedUsers); // Alias for backward compatibility
 // Cache search results for 1 minute
-router.get('/search', cacheMiddleware(60), searchUsers);
+router.get('/search', optionalProtect, cacheMiddleware(60), searchUsers);
 // Cache profiles for 1 minute
 router.get('/:username', protect, cacheMiddleware(60), getUserProfile);
 router.get('/:username/followers', getFollowers);
