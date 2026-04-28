@@ -170,9 +170,9 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             <LinkIcon size={22} className="sm:w-6 sm:h-6" />
                         </button>
 
-                        {/* Pop-over URL Input */}
+                        {/* Pop-over URL Input — anchored right so it never overflows off-screen on mobile */}
                         {showUrlInput && (
-                            <div className="absolute right-0 top-full mt-4 w-64 sm:w-72 bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-30">
+                            <div className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] max-w-xs bg-[#1A1140] border border-purple-500/30 rounded-2xl p-4 shadow-2xl animate-in fade-in zoom-in slide-in-from-top-2 duration-200 z-30">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
                                     <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">

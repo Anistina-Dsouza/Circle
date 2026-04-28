@@ -16,7 +16,6 @@ const EditProfilePage = () => {
         displayName: '',
         bio: '',
         profilePic: '',
-        coverImage: '',
         preferences: {
             theme: 'dark',
             language: 'en'
@@ -29,22 +28,18 @@ const EditProfilePage = () => {
     });
 
     const [uploadModes, setUploadModes] = useState({
-        profilePic: 'link',
-        coverImage: 'link'
+        profilePic: 'link'
     });
 
     const [files, setFiles] = useState({
-        profilePic: null,
-        coverImage: null
+        profilePic: null
     });
 
     const [previews, setPreviews] = useState({
-        profilePic: '',
-        coverImage: ''
+        profilePic: ''
     });
 
     const profilePicInputRef = useRef(null);
-    const coverImageInputRef = useRef(null);
 
     useEffect(() => {
         const loadUserData = () => {
@@ -56,7 +51,6 @@ const EditProfilePage = () => {
                         displayName: user.displayName || '',
                         bio: user.bio || '',
                         profilePic: user.profilePic || '',
-                        coverImage: user.coverImage || '',
                         preferences: {
                             theme: user.preferences?.theme || 'dark',
                             language: user.preferences?.language || 'en'
@@ -68,8 +62,7 @@ const EditProfilePage = () => {
                         }
                     });
                     setPreviews({
-                        profilePic: user.profilePic || '',
-                        coverImage: user.coverImage || ''
+                        profilePic: user.profilePic || ''
                     });
                 }
             } catch (error) {
@@ -162,11 +155,6 @@ const EditProfilePage = () => {
                 submitData.append('profilePicUrl', formData.profilePic);
             }
 
-            if (uploadModes.coverImage === 'upload' && files.coverImage) {
-                submitData.append('coverImage', files.coverImage);
-            } else if (formData.coverImage) {
-                submitData.append('coverImageUrl', formData.coverImage);
-            }
 
             const response = await axios.put(
                 `${baseUrl}/api/users/profile`,
@@ -342,87 +330,6 @@ const EditProfilePage = () => {
                             </div>
                         </div>
 
-                        {/* Cover Image Card */}
-                        <div className="bg-[#1E1B3A]/50 border border-white/5 rounded-[2.5rem] p-8 shadow-xl">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-purple-500/10 rounded-xl">
-                                        <ImageIcon size={20} className="text-purple-400" />
-                                    </div>
-                                    <h2 className="text-lg font-bold tracking-tight">Cover Branding</h2>
-                                </div>
-                                <div className="flex bg-[#0F0529]/80 p-1 rounded-2xl border border-white/5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setUploadModes(prev => ({ ...prev, coverImage: 'upload' }))}
-                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.coverImage === 'upload' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
-                                    >
-                                        Upload
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setUploadModes(prev => ({ ...prev, coverImage: 'link' }))}
-                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadModes.coverImage === 'link' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
-                                    >
-                                        Link
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="relative w-full h-40 rounded-3xl overflow-hidden bg-[#0F0529] border border-white/5 group">
-                                    {previews.coverImage ? (
-                                        <img src={previews.coverImage} alt="Cover" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-700">
-                                            <ImageIcon size={32} className="mb-2 opacity-50" />
-                                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">No Cover Set</span>
-                                        </div>
-                                    )}
-                                    {previews.coverImage && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setPreviews(prev => ({ ...prev, coverImage: '' }));
-                                                setFormData(prev => ({ ...prev, coverImage: '' }));
-                                                setFiles(prev => ({ ...prev, coverImage: null }));
-                                            }}
-                                            className="absolute top-4 right-4 p-2 bg-black/60 text-white rounded-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    )}
-                                </div>
-
-                                {uploadModes.coverImage === 'upload' ? (
-                                    <div 
-                                        onClick={() => coverImageInputRef.current?.click()}
-                                        className="w-full border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-purple-500/5 bg-[#0F0529] rounded-3xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all group"
-                                    >
-                                        <Camera size={24} className="text-gray-600 mb-2 group-hover:text-purple-500 transition-colors" />
-                                        <span className="text-xs font-bold text-gray-500">Upload cover image</span>
-                                        <input 
-                                            type="file" 
-                                            ref={coverImageInputRef}
-                                            onChange={(e) => handleFileSelect(e, 'coverImage')}
-                                            className="hidden" 
-                                            accept="image/*" 
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="relative">
-                                        <LinkIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
-                                        <input
-                                            type="url"
-                                            value={formData.coverImage}
-                                            onChange={(e) => handleUrlChange(e.target.value, 'coverImage')}
-                                            placeholder="https://example.com/banner.jpg"
-                                            className="w-full bg-[#0F0529] border border-white/10 rounded-2xl pl-12 pr-4 py-4 focus:outline-none focus:border-purple-500 transition-all text-sm"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
                     </div>
 
                     {/* Basic Info */}
