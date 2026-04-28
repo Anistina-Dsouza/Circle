@@ -150,7 +150,7 @@ const FeedNavbar = ({ activePage = 'Home' }) => {
     }
 
     return (
-        <nav className="sticky top-0 z-50 bg-[#0F0529]/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 py-4">
+        <nav className="sticky top-0 z-[100] bg-[#0F0529]/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Left: Logo & Nav */}
                 <div className="flex items-center space-x-8">
