@@ -194,9 +194,12 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                 </div>
             </div>
 
-            {/* Pop-over URL Input — Fully opaque and centered */}
+            {/* Pop-over URL Input — FORCED OPAQUE and centered */}
             {showUrlInput && (
-                <div className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs bg-[#0F0529] border border-purple-500/50 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in slide-in-from-top-2 duration-200 z-50 backdrop-blur-2xl">
+                <div 
+                    className="absolute left-4 right-4 sm:left-auto sm:right-12 top-full mt-4 mx-auto sm:mx-0 w-[calc(100vw-3rem)] max-w-xs border border-purple-500/50 rounded-2xl p-4 shadow-[0_20px_60px_rgba(0,0,0,1)] z-[100] backdrop-blur-3xl"
+                    style={{ backgroundColor: '#0F0529', opacity: 1 }}
+                >
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Paste Image Link</span>
                         <button onClick={() => setShowUrlInput(false)} className="text-gray-500 hover:text-white">
@@ -220,8 +223,11 @@ const CreateStoryBar = ({ onPostSuccess }) => {
                             Apply Image
                         </button>
                     </div>
-                    {/* Opaque arrow */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 bg-[#0F0529] border-l border-t border-purple-500/50 rotate-45"></div>
+                    {/* Solid Opaque arrow */}
+                    <div 
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 w-4 h-4 border-l border-t border-purple-500/50 rotate-45"
+                        style={{ backgroundColor: '#0F0529', opacity: 1 }}
+                    ></div>
                 </div>
             )}
 
