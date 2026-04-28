@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Loader2, Activity, Zap, Shield, Users, BarChart3, TrendingUp, AlertTriangle, Cpu, Globe, Trophy, Medal, MessageSquare, Video, UserPlus, Plus, Calendar, Hash, ChevronLeft, ChevronRight, Clock, Info, Sparkles, Filter, List, LayoutGrid, Target, MousePointer2 } from "lucide-react";
 import AdminLayout from "../layouts/AdminLayout";
-import NetworkChart from "../components/NetworkChart";
+
 import GrowthTrends from "../components/GrowthTrends";
+import CommunityEngagementGraph from "../components/CommunityEngagementGraph";
 
 export default function AdminReports() {
-    const [activeTab, setActiveTab] = useState("Resonance");
+    const [activeTab, setActiveTab] = useState("Velocity");
     const [stats, setStats] = useState(null);
-    const [resonanceData, setResonanceData] = useState([]);
+
     const [distributionData, setDistributionData] = useState(null);
     const [velocityData, setVelocityData] = useState(null);
 
@@ -29,13 +30,9 @@ export default function AdminReports() {
             const baseUrl = import.meta.env.VITE_API_URL || "";
             const headers = { Authorization: `Bearer ${token}` };
 
-            if (tab === "Resonance") {
-                const [statsRes, resRes] = await Promise.all([
-                    axios.get(`${baseUrl}/api/admin/dashboard`, { headers }),
-                    axios.get(`${baseUrl}/api/admin/resonance/detailed`, { headers })
-                ]);
-                setStats(statsRes.data.data.stats);
-                setResonanceData(resRes.data.data);
+            if (tab === "Velocity") {
+                const res = await axios.get(`${baseUrl}/api/admin/velocity`, { headers });
+                setVelocityData(res.data.data);
             } else if (tab === "Distribution") {
                 const res = await axios.get(`${baseUrl}/api/admin/distribution`, { headers });
                 setDistributionData(res.data.data);
@@ -48,9 +45,6 @@ export default function AdminReports() {
             } else if (tab === "Activity") {
                 const res = await axios.get(`${baseUrl}/api/admin/activity?userPage=${pages.u}&circlePage=${pages.c}&meetingPage=${pages.m}&limit=5`, { headers });
                 setActivityData(res.data.data);
-            } else if (tab === "Velocity") {
-                const res = await axios.get(`${baseUrl}/api/admin/velocity`, { headers });
-                setVelocityData(res.data.data);
             }
         } catch (err) {
             console.error("Reports error:", err);
@@ -64,9 +58,7 @@ export default function AdminReports() {
         fetchReportsData(activeTab, { u: userPage, c: circlePage, m: meetingPage });
 
         let interval;
-        if (activeTab === "Resonance") {
-            interval = setInterval(() => fetchReportsData("Resonance"), 15000);
-        } else if (activeTab === "Activity") {
+        if (activeTab === "Activity") {
             interval = setInterval(() => fetchReportsData("Activity", { u: userPage, c: circlePage, m: meetingPage }), 10000);
         }
 
@@ -74,7 +66,7 @@ export default function AdminReports() {
     }, [activeTab, userPage, circlePage, meetingPage, fetchReportsData]);
 
     const tabs = [
-        { id: "Resonance", icon: <Activity size={18} />, label: "Real-time", desc: "Live Activity" },
+
         { id: "Velocity", icon: <Zap size={18} />, label: "Engagement", desc: "User Interaction" },
         { id: "Activity", icon: <MessageSquare size={18} />, label: "Audit Logs", desc: "System Logs" },
         { id: "Distribution", icon: <BarChart3 size={18} />, label: "Categories", desc: "Platform Spread" }
@@ -138,7 +130,7 @@ export default function AdminReports() {
             )}
 
             <div className="relative min-h-[600px]">
-                {loading && !resonanceData.length && !distributionData && !stats && !activityData && !velocityData ? (
+                {loading && !distributionData && !stats && !activityData && !velocityData ? (
                     <div className="flex h-[400px] w-full flex-col items-center justify-center gap-6">
                         <div className="relative">
                             <div className="w-20 h-20 rounded-full border-2 border-purple-500/10 border-t-purple-500 animate-spin" />
@@ -150,7 +142,7 @@ export default function AdminReports() {
                     </div>
                 ) : (
                     <div className="transition-all duration-1000 transform">
-                        {activeTab === "Resonance" && <ResonanceReport stats={stats} resonanceData={resonanceData} />}
+
                         {activeTab === "Velocity" && <VelocityReport data={velocityData} />}
                         {activeTab === "Activity" && (
                             <ActivityReport
@@ -169,58 +161,7 @@ export default function AdminReports() {
     );
 }
 
-function ResonanceReport({ stats, resonanceData }) {
-    return (
-        <div className="space-y-10 animate-in fade-in duration-1000">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <PremiumMetric
-                    label="Active Load"
-                    value={`${((stats?.activeUsers / (stats?.totalUsers || 1)) * 100).toFixed(1)}%`}
-                    icon={<Zap size={20} />}
-                    color="text-amber-400"
-                    glow="shadow-amber-500/10"
-                    desc="User Activity Ratio"
-                />
-                <PremiumMetric
-                    label="Total Users"
-                    value={stats?.totalUsers.toLocaleString()}
-                    icon={<Users size={20} />}
-                    color="text-purple-400"
-                    glow="shadow-purple-500/10"
-                    desc="Total Platform Scale"
-                />
-                <PremiumMetric
-                    label="Interactivity"
-                    value={resonanceData[resonanceData.length - 1]?.count || 0}
-                    icon={<Activity size={20} />}
-                    color="text-emerald-400"
-                    glow="shadow-emerald-500/10"
-                    desc="15m Interaction Delta"
-                />
-            </div>
 
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[40px] p-10 relative overflow-hidden group shadow-inner">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-                <div className="flex justify-between items-start mb-10">
-                    <div>
-                        <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Interaction Resonance</h3>
-                        <div className="flex items-center gap-2">
-                            <Globe size={12} className="text-purple-400/60" />
-                            <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Real-time activity tracking</p>
-                        </div>
-                    </div>
-                    <div className="px-4 py-1.5 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-2.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Live Updates</span>
-                    </div>
-                </div>
-                <div className="h-[400px]">
-                    <NetworkChart hourlyTrends={resonanceData} isDetailed={true} />
-                </div>
-            </div>
-        </div>
-    );
-}
 
 function VelocityReport({ data }) {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -306,152 +247,7 @@ function VelocityReport({ data }) {
                 </div>
             </div>
 
-            {/* Immersive Engagement Depth - High Precision Spatial Mapping */}
-            <div className="bg-[#0F0529]/40 border border-white/5 rounded-[32px] sm:rounded-[56px] p-5 sm:p-12 lg:p-20 flex flex-col relative overflow-hidden shadow-2xl group min-h-[450px] sm:min-h-[600px] lg:min-h-[700px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-fuchsia-600/5 pointer-events-none" />
-
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 sm:mb-20 relative z-10 gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-2xl text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                                <Target size={20} className="animate-pulse sm:w-6 sm:h-6" />
-                            </div>
-                            <h3 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter">Community Engagement</h3>
-                        </div>
-                        <p className="text-[10px] sm:text-[12px] text-gray-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] ml-1">Interaction Mapping Matrix</p>
-                    </div>
-                    <div className="flex items-center gap-6 sm:gap-14 px-6 sm:px-10 py-4 sm:py-5 bg-[#1A0C3F]/40 backdrop-blur-2xl border border-white/5 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full sm:w-auto justify-center sm:justify-start">
-                        <div className="text-center">
-                            <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">20</span>
-                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Circles Analyzed</p>
-                        </div>
-                        <div className="w-px h-10 sm:h-12 bg-white/10" />
-                        <div className="text-center">
-                            <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-lg">{data?.platformVolume.toLocaleString()}</span>
-                            <p className="text-[7px] sm:text-[8px] text-purple-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1.5">Total Activity</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex-1 relative mb-12 sm:mb-16 lg:mb-10 lg:ml-10 overflow-x-auto lg:overflow-visible no-scrollbar -mx-5 sm:mx-0">
-                    <div className="min-w-[500px] sm:min-w-[600px] lg:min-w-0 h-[300px] sm:h-[400px] lg:h-full relative">
-                        {/* Dynamic Axis Labels */}
-                        <div className="absolute -left-12 bottom-0 top-0 hidden lg:flex flex-col justify-between py-10 items-end pr-8">
-                            <div className="flex flex-col items-end gap-1.5 group/axis">
-                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Most Active</span>
-                                <span className="text-[7px] text-white/20 uppercase font-black">Engagement Peak</span>
-                            </div>
-                            <div className="w-1.5 h-32 bg-gradient-to-b from-purple-500/40 via-purple-500/10 to-transparent rounded-full shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
-                            <div className="flex flex-col items-end gap-1.5">
-                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Least Active</span>
-                                <span className="text-[7px] text-white/10 uppercase font-black">Activity Base</span>
-                            </div>
-                        </div>
-
-                        <div className="absolute left-0 right-0 -bottom-16 hidden lg:flex justify-between px-10">
-                            <div className="flex flex-col gap-1.5">
-                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Small Scale</span>
-                                <span className="text-[7px] text-white/10 uppercase font-black">Few Members</span>
-                            </div>
-                            <div className="h-1.5 w-64 bg-gradient-to-r from-transparent via-purple-500/10 to-purple-500/40 rounded-full mt-5 shadow-[0_0_10px_rgba(168,85,247,0.1)]" />
-                            <div className="flex flex-col items-end gap-1.5 group/axis">
-                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover/axis:scale-110 transition-transform">Large Scale</span>
-                                <span className="text-[7px] text-white/20 uppercase font-black">Mass Population</span>
-                            </div>
-                        </div>
-
-                        {/* Matrix Viewport */}
-                        <div className="absolute inset-0 border-l-2 border-b-2 border-white/10 rounded-bl-[20px] lg:rounded-bl-[40px]">
-                            {/* Spatial Bubbles with Precision Arrow Tooltips */}
-                            {data?.circleEngagement && (() => {
-                                const maxMsg = Math.max(...data.circleEngagement.map(c => c.stats.messageCount), 1);
-                                const maxMem = Math.max(...data.circleEngagement.map(c => c.stats.memberCount), 1);
-                                
-                                return data.circleEngagement.map((circle, i) => {
-                                    // Better distribution logic to avoid clustering
-                                    const normalizedMsg = circle.stats.messageCount / maxMsg;
-                                    const normalizedMem = circle.stats.memberCount / maxMem;
-                                
-                                // Apply a non-linear scale and jitter for better spread when values are low
-                                const bottom = Math.min(Math.max((Math.sqrt(normalizedMsg) * 75) + (i * 4) % 12 + 5, 8), 92);
-                                const left = Math.min(Math.max((Math.sqrt(normalizedMem) * 75) + (i * 7) % 15 + 5, 8), 92);
-                                
-                                const size = Math.max((normalizedMsg * 50) + 35, 32);
-                                const efficiency = (circle.stats.messageCount / (circle.stats.memberCount || 1)).toFixed(1);
-
-                                const showBelow = bottom > 70;
-                                const showLeft = left > 75;
-
-                                return (
-                                    <div
-                                        key={i}
-                                        className="absolute rounded-full transition-all duration-1000 hover:z-[100] cursor-crosshair group/bubble shadow-2xl flex items-center justify-center border-2"
-                                        style={{
-                                            bottom: `${bottom}%`,
-                                            left: `${left}%`,
-                                            width: `${size}px`,
-                                            height: `${size}px`,
-                                            background: `radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(124, 58, 237, 0.2))`,
-                                            borderColor: `rgba(192, 132, 252, 0.5)`,
-                                            boxShadow: `0 0 50px rgba(168, 85, 247, 0.2), inset 0 0 25px rgba(255,255,255,0.1)`,
-                                            animation: `pulse-slow ${5 + i % 4}s infinite alternate ease-in-out`
-                                        }}
-                                    >
-                                        <span className="text-[10px] font-black text-white group-hover/bubble:scale-125 transition-transform">{i + 1}</span>
-
-                                        {/* High-Precision Beacon Tooltip */}
-                                        <div className={`absolute ${showBelow ? 'top-full mt-4 sm:mt-8' : 'bottom-full mb-4 sm:mb-8'} ${showLeft ? 'right-0' : 'left-1/2 -translate-x-1/2'} opacity-0 group-hover/bubble:opacity-100 transition-all duration-500 pointer-events-none w-64 sm:w-80 z-[150]`}>
-                                            <div className={`relative bg-[#0A051E]/98 backdrop-blur-3xl border-2 border-purple-500/40 p-4 sm:p-8 rounded-[24px] sm:rounded-[40px] shadow-[0_40px_120px_rgba(0,0,0,1)] transform ${showBelow ? 'translate-y-4 group-hover/bubble:translate-y-0' : '-translate-y-4 group-hover/bubble:translate-y-0'}`}>
-
-                                                {/* Refined Arrow - Precision Beacon */}
-                                                <div className={`absolute ${showBelow ? '-top-3' : '-bottom-3'} left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 bg-[#0A051E] border-2 border-purple-500/40 ${showBelow ? 'border-r-0 border-b-0' : 'border-l-0 border-t-0'} shadow-[0_0_30px_rgba(168,85,247,0.3)]`} />
-
-                                                <div className="flex items-center justify-between mb-4 sm:mb-8 relative z-10">
-                                                    <div>
-                                                        <h5 className="text-lg sm:text-xl font-black text-white uppercase tracking-tighter leading-none mb-2 truncate max-w-[150px]">{circle.name}</h5>
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                                                            <span className="text-[10px] sm:text-[11px] text-purple-400 font-black uppercase tracking-[0.2em]">{circle.category}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="shrink-0 w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 rounded-[18px] sm:rounded-[24px] flex items-center justify-center border-2 border-purple-500/30 shadow-lg">
-                                                        <span className="text-base sm:text-lg font-black text-purple-400">#{i + 1}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-3 sm:gap-5 mb-4 sm:mb-8 relative z-10">
-                                                    <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Messages</span>
-                                                        <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.messageCount.toLocaleString()}</span>
-                                                    </div>
-                                                    <div className="p-3 sm:p-5 rounded-[18px] sm:rounded-[28px] bg-white/[0.03] border border-white/5 group-hover/bubble:border-purple-500/20 transition-all duration-500">
-                                                        <span className="text-[8px] sm:text-[10px] text-gray-500 font-black uppercase block mb-1 sm:mb-2 tracking-widest">Members</span>
-                                                        <span className="text-xl sm:text-2xl font-black text-white tabular-nums leading-none tracking-tighter">{circle.stats.memberCount.toLocaleString()}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border-2 border-purple-500/40 flex items-center justify-between shadow-[0_10px_30px_rgba(168,85,247,0.1)] relative z-10 overflow-hidden">
-                                                    <div className="flex items-center gap-2 sm:gap-4 relative z-10">
-                                                        <Zap size={18} className="text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)] sm:w-5 sm:h-5" />
-                                                        <span className="text-[10px] sm:text-[12px] font-black text-white uppercase tracking-widest">Efficiency</span>
-                                                    </div>
-                                                    <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 relative z-10 drop-shadow-xl">{efficiency}x</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                                });
-                            })()}
-
-                            {/* High-Fidelity Tactical Matrix */}
-                            <div className="absolute inset-0 grid grid-cols-10 grid-rows-10 opacity-[0.04] pointer-events-none">
-                                {Array.from({ length: 100 }).map((_, i) => (<div key={i} className="border border-white/80" />))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <CommunityEngagementGraph data={data?.circleEngagement} />
         </div>
     );
 }
